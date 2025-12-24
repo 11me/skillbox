@@ -17,16 +17,38 @@ Use this skill when:
 - Debugging `helm template`, `helm lint`, `helm install --dry-run`
 - Setting up multi-environment overlays (dev/prod)
 
+## Version & API Compatibility
+
+**Always use these API versions:**
+
+| Component | API Version | Notes |
+|-----------|-------------|-------|
+| Helm Chart | `apiVersion: v2` | Helm 3+ charts |
+| Flux HelmRelease | `helm.toolkit.fluxcd.io/v2` | Current stable |
+| Flux HelmRepository | `source.toolkit.fluxcd.io/v1` | Current stable |
+| Flux Kustomization | `kustomize.toolkit.fluxcd.io/v1` | Current stable |
+| ExternalSecret | `external-secrets.io/v1` | ESO v1 API |
+| ClusterSecretStore | `external-secrets.io/v1` | With `spec.conditions[].namespaceSelector` |
+
+**Target baseline:** Kubernetes 1.29+, Helm 3.14+, Flux v2.3+, ESO 0.10+
+
+**Rule:** If adding manifests, ALWAYS use these API versions.
+If CRD/apiVersion mismatch detected in repo, STOP and propose migration plan.
+
+See [VERSIONS.md](VERSIONS.md) for full compatibility matrix.
+
 ## Definition of Done (DoD)
 
 Before completing any Helm chart work:
 
 1. **Linting**: `helm lint .` passes
 2. **Template rendering**: `helm template <release> .` succeeds
-3. **Dry-run**: `helm install <release> . --dry-run --debug` works
-4. **Two secrets modes validated**:
+3. **Schema validation** (optional): `helm template . | kubeconform -strict`
+4. **Dry-run**: `helm install <release> . --dry-run --debug` works
+5. **Two secrets modes validated**:
    - GitOps mode: `--set secrets.existingSecretName=<name>`
    - Chart-managed ESO: `--set secrets.externalSecret.enabled=true`
+6. **API versions match** the compatibility table above
 
 Run `/helm-validate` to execute all checks.
 
@@ -95,6 +117,23 @@ secrets:
       creationPolicy: Owner
 ```
 
+### Secrets Determinism (ESO)
+
+**refreshPolicy options:**
+
+| Policy | Behavior | Use Case |
+|--------|----------|----------|
+| `OnChange` | Updates when ExternalSecret manifest changes | GitOps (default, recommended) |
+| `CreatedOnce` | Never updates after creation | Immutable credentials |
+| `Periodic` | Updates on interval (refreshInterval) | Legacy, auto-rotation |
+
+**Default rule:** Use `refreshPolicy: OnChange` for predictable GitOps-driven updates.
+
+**Manual refresh (debug/runbook):**
+```bash
+kubectl annotate es <name> force-sync=$(date +%s) --overwrite
+```
+
 ### 4. Flux + Kustomize Recipe
 
 **Values Composition Order** (important!):
@@ -108,6 +147,27 @@ See snippets:
 - [flux-helmrelease.base.yaml](snippets/flux-helmrelease.base.yaml)
 - [flux-helmrelease.dev.patch.yaml](snippets/flux-helmrelease.dev.patch.yaml)
 - [kustomize.configmapgenerator.yaml](snippets/kustomize.configmapgenerator.yaml)
+
+**Critical Kustomize settings:**
+```yaml
+generatorOptions:
+  disableNameSuffixHash: true  # MUST have, otherwise names change on every apply
+```
+
+### Flux Ordering
+
+Use `spec.dependsOn` in HelmRelease when app depends on:
+- CRDs (external-secrets, cert-manager)
+- ExternalSecrets/SecretStores
+- Ingress controllers, databases
+
+Example:
+```yaml
+spec:
+  dependsOn:
+    - name: external-secrets
+      namespace: external-secrets
+```
 
 ### 5. ESO Patterns
 
@@ -149,7 +209,8 @@ spec:
 
 - **CRD ordering**: ESO CRDs must exist before ExternalSecret. Use Flux Kustomization `dependsOn`.
 - **OpenAPI validation**: Use `install.disableOpenAPIValidation: true` in HelmRelease if needed.
-- **No secrets in values.yaml**: Always use ExternalSecret or existingSecretName.
+- **NEVER put secrets in values.yaml**: No passwords, tokens, API keys, credentials.
+  Only references to Secret/ExternalSecret names. This is **non-negotiable**.
 
 ## Examples
 
@@ -168,9 +229,11 @@ Prompts that should activate this skill:
 
 ## Related Files
 
+- [VERSIONS.md](VERSIONS.md) - Version compatibility matrix
 - [reference-gitops-eso.md](reference-gitops-eso.md) - Full GitOps + ESO reference
 - [snippets/](snippets/) - Ready-to-use YAML snippets
 
 ## Version History
 
+- 1.1.0 — Add version compatibility, secrets determinism, Flux ordering
 - 1.0.0 — Initial release with Flux + ESO patterns
