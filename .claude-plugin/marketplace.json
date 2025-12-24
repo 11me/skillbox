@@ -1,0 +1,15 @@
+{
+  "name": "11me-skillbox",
+  "owner": { "name": "11me" },
+  "metadata": {
+    "description": "Personal skills marketplace for Claude Code",
+    "pluginRoot": "./plugins"
+  },
+  "plugins": [
+    {
+      "name": "skillbox",
+      "source": "skillbox",
+      "description": "Personal reusable skills for Claude Code"
+    }
+  ]
+}
