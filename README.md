@@ -19,12 +19,14 @@ Personal skills marketplace for Claude Code.
 
 | Skill | Description |
 |-------|-------------|
+| [conventional-commit](plugins/skillbox/skills/conventional-commit/) | Generate beautiful git commits following Conventional Commits spec |
 | [helm-chart-developer](plugins/skillbox/skills/helm-chart-developer/) | Build production Helm charts with GitOps (Flux + Kustomize + ESO) |
 
 ## Commands
 
 | Command | Description |
 |---------|-------------|
+| `/commit` | Create git commit with Conventional Commits message |
 | `/helm-scaffold` | Scaffold complete GitOps structure for a new app |
 | `/helm-validate` | Validate Helm chart (lint, template, dry-run) |
 | `/checkpoint` | Create checkpoint summary of current work |
@@ -43,11 +45,15 @@ Personal skills marketplace for Claude Code.
 ```
 plugins/skillbox/
 ├── skills/
+│   ├── conventional-commit/
+│   │   ├── SKILL.md
+│   │   └── REFERENCE.md
 │   └── helm-chart-developer/
 │       ├── SKILL.md
 │       ├── reference-gitops-eso.md
 │       └── snippets/
 ├── commands/
+│   ├── commit.md
 │   ├── helm-scaffold.md
 │   ├── helm-validate.md
 │   └── checkpoint.md
