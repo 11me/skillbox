@@ -32,14 +32,10 @@ def main():
     transcript = data.get("transcript", [])
 
     # Check if /helm-validate was run in this session
-    validate_ran = any(
-        "/helm-validate" in str(msg.get("content", "")) for msg in transcript
-    )
+    validate_ran = any("/helm-validate" in str(msg.get("content", "")) for msg in transcript)
 
     # Check if /checkpoint was run
-    checkpoint_ran = any(
-        "/checkpoint" in str(msg.get("content", "")) for msg in transcript
-    )
+    checkpoint_ran = any("/checkpoint" in str(msg.get("content", "")) for msg in transcript)
 
     # Check for existing checkpoint files
     checkpoints = find_checkpoint_files()

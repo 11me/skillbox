@@ -4,9 +4,8 @@ PreToolUse hook: blocks writing secrets to values.yaml.
 """
 
 import json
-import sys
 import re
-
+import sys
 
 SECRET_PATTERNS = [
     r"password\s*[:=]\s*['\"][^'\"]+['\"]",

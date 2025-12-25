@@ -1,7 +1,7 @@
 repos:
   # General checks
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: check-yaml
         args: ['--unsafe']  # Allow custom YAML tags
@@ -16,7 +16,7 @@ repos:
 
   # Python linting (for hook scripts)
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.8.6
+    rev: v0.14.8
     hooks:
       - id: ruff
         args: [--fix]
@@ -24,20 +24,20 @@ repos:
 
   # Shell script linting
   - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.10.0.1
+    rev: v0.11.0.1
     hooks:
       - id: shellcheck
         args: ['-x']  # Follow source statements
 
   # Secrets detection
   - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.21.2
+    rev: v8.22.1
     hooks:
       - id: gitleaks
 
   # Conventional commits
   - repo: https://github.com/compilerla/conventional-pre-commit
-    rev: v3.6.0
+    rev: v4.3.0
     hooks:
       - id: conventional-pre-commit
         stages: [commit-msg]
@@ -45,7 +45,7 @@ repos:
 
   # YAML linting
   - repo: https://github.com/adrienverge/yamllint
-    rev: v1.35.1
+    rev: v1.37.1
     hooks:
       - id: yamllint
         args: [-c, .yamllint.yaml]
@@ -53,7 +53,7 @@ repos:
 
   # Claude Code hooks.json schema validation
   - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.30.0
+    rev: 0.35.0
     hooks:
       - id: check-jsonschema
         name: Validate hooks.json schema

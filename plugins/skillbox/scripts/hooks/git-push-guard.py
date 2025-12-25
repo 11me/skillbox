@@ -5,8 +5,8 @@ Deterministic - pure regex matching.
 """
 
 import json
-import sys
 import re
+import sys
 
 
 def main():

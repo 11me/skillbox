@@ -108,16 +108,18 @@ plugins/skillbox/
 ### Prerequisites
 
 - Python 3.12+
-- pre-commit
+- [uv](https://docs.astral.sh/uv/)
 
 ### Setup
 
 ```bash
-# Install pre-commit hooks
-pip install pre-commit
+# Install pre-commit via uv
+uv tool install pre-commit
+
+# Setup git hooks
 pre-commit install
 
-# Run all checks
+# Run all checks (same as CI)
 pre-commit run --all-files
 ```
 

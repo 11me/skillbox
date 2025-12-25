@@ -82,9 +82,7 @@ def parse_frontmatter(frontmatter: str) -> tuple[dict | None, list[str]]:
                 # Handle arrays
                 if value.startswith("[") and value.endswith("]"):
                     value = [
-                        v.strip().strip('"').strip("'")
-                        for v in value[1:-1].split(",")
-                        if v.strip()
+                        v.strip().strip('"').strip("'") for v in value[1:-1].split(",") if v.strip()
                     ]
                 data[key] = value
         return data, errors
@@ -103,9 +101,7 @@ def validate_name(name: str | None) -> list[str]:
         return errors
 
     if not NAME_PATTERN.match(name):
-        errors.append(
-            f"'name' must be kebab-case (lowercase letters, numbers, hyphens): '{name}'"
-        )
+        errors.append(f"'name' must be kebab-case (lowercase letters, numbers, hyphens): '{name}'")
 
     if len(name) > MAX_NAME_LENGTH:
         errors.append(f"'name' exceeds {MAX_NAME_LENGTH} characters: {len(name)} chars")
@@ -122,9 +118,7 @@ def validate_description(description: str | None) -> list[str]:
         return errors
 
     if not isinstance(description, str):
-        errors.append(
-            f"'description' must be a string, got {type(description).__name__}"
-        )
+        errors.append(f"'description' must be a string, got {type(description).__name__}")
         return errors
 
     if len(description) > MAX_DESCRIPTION_LENGTH:
@@ -135,9 +129,7 @@ def validate_description(description: str | None) -> list[str]:
     # Check for recommended format: "What it does. Use when..."
     desc_lower = description.lower()
     if "use when" not in desc_lower and "use for" not in desc_lower:
-        errors.append(
-            "Warning: 'description' should include trigger phrases like 'Use when...' or 'Use for...'"
-        )
+        errors.append("Warning: description should include 'Use when...' or 'Use for...' phrases")
 
     return errors
 
@@ -173,9 +165,7 @@ def validate_allowed_tools(tools: str | list | None) -> list[str]:
     elif isinstance(tools, list):
         tool_list = tools
     else:
-        errors.append(
-            f"'allowed-tools' must be a string or array, got {type(tools).__name__}"
-        )
+        errors.append(f"'allowed-tools' must be a string or array, got {type(tools).__name__}")
         return errors
 
     for tool in tool_list:
@@ -269,9 +259,9 @@ def main() -> int:
 
     # Report results
     if all_errors:
-        print(f"\n{'='*60}", file=sys.stderr)
+        print(f"\n{'=' * 60}", file=sys.stderr)
         print(f"Validation failed for {len(all_errors)} file(s):", file=sys.stderr)
-        print(f"{'='*60}", file=sys.stderr)
+        print(f"{'=' * 60}", file=sys.stderr)
 
         for filepath, errors in all_errors.items():
             print(f"\n{filepath}:", file=sys.stderr)
