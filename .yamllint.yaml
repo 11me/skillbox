@@ -1,0 +1,42 @@
+---
+extends: default
+
+rules:
+  # Allow long lines (descriptions can be verbose)
+  line-length:
+    max: 200
+    allow-non-breakable-words: true
+    allow-non-breakable-inline-mappings: true
+
+  # Don't require document start marker
+  document-start: disable
+
+  # Allow 'yes', 'no', 'on', 'off' as values
+  truthy:
+    check-keys: false
+    allowed-values: ['true', 'false', 'yes', 'no', 'on', 'off']
+
+  # Be lenient with comments
+  comments:
+    require-starting-space: true
+    ignore-shebangs: true
+    min-spaces-from-content: 1
+
+  # Allow 2 or 4 space indentation
+  indentation:
+    spaces: consistent
+    indent-sequences: consistent
+
+  # Don't require newline at end (pre-commit handles this)
+  new-line-at-end-of-file: disable
+
+  # Allow empty values
+  empty-values:
+    forbid-in-block-mappings: false
+    forbid-in-flow-mappings: false
+
+ignore: |
+  # Ignore template snippets (they may have placeholders)
+  plugins/skillbox/skills/*/snippets/
+  # Ignore node_modules if present
+  node_modules/

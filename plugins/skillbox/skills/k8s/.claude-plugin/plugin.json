@@ -1,0 +1,5 @@
+{
+  "name": "skillbox-k8s",
+  "description": "Kubernetes, Helm, Flux GitOps patterns",
+  "version": "1.0.0"
+}

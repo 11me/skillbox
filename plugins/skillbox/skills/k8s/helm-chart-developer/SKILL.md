@@ -1,6 +1,7 @@
 ---
 name: helm-chart-developer
 description: Build/refactor production Helm charts and GitOps deploy via Flux HelmRelease + Kustomize overlays. Includes External Secrets Operator patterns (ExternalSecret per app/env + ClusterSecretStore) and optional chart-managed ExternalSecret templates. Use when authoring Helm charts, converting raw manifests to Helm, designing values/schema, or debugging helm template/lint/dry-run issues.
+globs: ["**/Chart.yaml", "**/values.yaml", "**/templates/**", "**/kustomization.yaml", "**/helmrelease*.yaml"]
 allowed-tools: Read, Grep, Glob, Write, Edit, Bash
 ---
 
@@ -226,6 +227,21 @@ Prompts that should activate this skill:
 8. "Integrate AWS Secrets Manager with my chart"
 9. "Set up Kustomize overlays for dev and prod"
 10. "Fix helm lint errors in my chart"
+
+## Anti-Patterns
+
+| ❌ Avoid | ✅ Instead |
+|----------|-----------|
+| Hardcode secrets in values.yaml | Use ExternalSecret with secretStoreRef |
+| Single values.yaml for all envs | Kustomize overlays per environment |
+| HelmRelease `v2beta1` / `v2beta2` API | Use `helm.toolkit.fluxcd.io/v2` |
+| Manual Secret creation | ESO with ClusterSecretStore |
+| Inline helm values in HelmRelease | External values.yaml + patches via valuesFrom |
+| Skip `helm lint` / `helm template` | Always validate with /helm-validate |
+| `refreshPolicy: Periodic` for GitOps | Use `refreshPolicy: OnChange` for determinism |
+| Kustomize `namesSuffixHash: true` | Always `disableNameSuffixHash: true` for ConfigMaps |
+| Put ExternalSecret in Helm chart | Put ExternalSecret in GitOps overlay (Mode A) |
+| Skip `dependsOn` for CRDs | Use `spec.dependsOn` for external-secrets, cert-manager |
 
 ## Related Files
 

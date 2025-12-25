@@ -9,7 +9,12 @@
     {
       "name": "skillbox",
       "source": "./plugins/skillbox",
-      "description": "Personal reusable skills for Claude Code"
+      "description": "Core skills: skill-creator, conventional-commit, beads-workflow"
+    },
+    {
+      "name": "skillbox-k8s",
+      "source": "./plugins/skillbox/skills/k8s",
+      "description": "Kubernetes, Helm, Flux GitOps patterns"
     }
   ]
 }

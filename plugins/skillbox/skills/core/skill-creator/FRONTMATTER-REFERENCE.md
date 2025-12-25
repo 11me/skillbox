@@ -51,6 +51,45 @@ description: For Kubernetes stuff
 
 ## Optional Fields
 
+### globs
+
+**Purpose**: Auto-activate skill when working with matching files.
+
+**Format**: Array of glob patterns.
+
+**Rules**:
+- Patterns follow standard glob syntax (`**`, `*`, `?`)
+- When files match, skill context is loaded automatically
+- Multiple patterns can be specified
+
+**Examples**:
+
+Helm chart development:
+```yaml
+globs: ["**/Chart.yaml", "**/values.yaml", "**/templates/**"]
+```
+
+Go project:
+```yaml
+globs: ["**/*.go", "**/go.mod", "**/go.sum"]
+```
+
+Python project:
+```yaml
+globs: ["**/*.py", "**/pyproject.toml", "**/requirements.txt"]
+```
+
+Kubernetes manifests:
+```yaml
+globs: ["**/kustomization.yaml", "**/*.yaml"]
+```
+
+**Behavior**:
+- When matched: Skill activates automatically without explicit invocation
+- When omitted: Skill activates only through description keyword matching
+
+---
+
 ### allowed-tools
 
 **Purpose**: Restricts which tools Claude can use when the skill is active.
@@ -109,12 +148,24 @@ allowed-tools: Read, Grep, Glob
 ---
 ```
 
+### With Globs (Auto-activation)
+
+```yaml
+---
+name: go-conventions
+description: Go code review context. Use when reviewing Go code, checking conventions, or writing Go.
+globs: ["**/*.go", "**/go.mod", "**/go.sum"]
+allowed-tools: Read, Grep, Glob
+---
+```
+
 ### Full Featured
 
 ```yaml
 ---
 name: helm-chart-developer
 description: Build production Helm charts with GitOps via Flux HelmRelease + Kustomize overlays. Includes External Secrets Operator patterns. Use when authoring Helm charts, converting raw manifests to Helm, designing values/schema, or debugging helm template/lint/dry-run issues.
+globs: ["**/Chart.yaml", "**/values.yaml", "**/templates/**", "**/kustomization.yaml"]
 allowed-tools: Read, Grep, Glob, Write, Edit, Bash
 ---
 ```
