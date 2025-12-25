@@ -85,7 +85,7 @@ Rules:
 
 If changes break backward compatibility:
 
-1. Add `!` after type/scope: `feat(api)!: remove deprecated endpoint`
+1. Use pattern `feat(api)!: remove deprecated endpoint`
 2. Add footer: `BREAKING CHANGE: description of what breaks`
 
 Patterns that indicate breaking changes:

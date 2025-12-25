@@ -113,7 +113,7 @@ Show the created commit to confirm.
 1. **Subject line**: Imperative mood, max 50 chars, no period
 2. **Scope**: Derive from changed files (api, ui, config, etc.)
 3. **Body**: Explain what and why, not how
-4. **Breaking changes**: Add `!` after scope and `BREAKING CHANGE:` footer
+4. **Breaking changes**: Use `feat(scope)!:` pattern, add `BREAKING CHANGE:` footer
 5. **References**: Include issue refs in footer (Fixes #123)
 
 ## Message Format Examples
