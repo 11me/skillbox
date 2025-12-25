@@ -3,7 +3,7 @@
 > Extensible skills marketplace for Claude Code — automate Helm/GitOps workflows, semantic code navigation, conventional commits, and more.
 
 [![CI](https://github.com/11me/claude-skillbox/actions/workflows/ci.yaml/badge.svg)](https://github.com/11me/claude-skillbox/actions/workflows/ci.yaml)
-[![Version](https://img.shields.io/badge/version-0.9.0-blue?style=flat-square)](https://github.com/11me/claude-skillbox/releases)
+[![Version](https://img.shields.io/badge/version-0.10.0-blue?style=flat-square)](https://github.com/11me/claude-skillbox/releases)
 [![Python](https://img.shields.io/badge/python-3.12+-blue?style=flat-square&logo=python&logoColor=white)](https://python.org)
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-blueviolet?style=flat-square&logo=anthropic)](https://docs.anthropic.com/en/docs/claude-code)
@@ -44,6 +44,20 @@ claude --plugin-dir ./plugins/skillbox
 | [skill-creator](plugins/skillbox/skills/core/skill-creator/) | Create new Claude Code skills with proper structure |
 | [beads-workflow](plugins/skillbox/skills/core/beads-workflow/) | Task tracking with beads CLI |
 | [serena-navigation](plugins/skillbox/skills/core/serena-navigation/) | Semantic code navigation with Serena MCP |
+| [context-engineering](plugins/skillbox/skills/core/context-engineering/) | AI context window management and optimization |
+| [tdd-enforcer](plugins/skillbox/skills/core/tdd-enforcer/) | TDD Red-Green-Refactor workflow for Go, TS, Python, Rust |
+
+### TypeScript Skills
+
+| Skill | Description |
+|-------|-------------|
+| [ts-conventions](plugins/skillbox/skills/ts/conventions/) | TypeScript code conventions and best practices |
+| [ts-project-structure](plugins/skillbox/skills/ts/project-structure/) | Monorepo patterns with Turborepo + pnpm |
+| [ts-modern-tooling](plugins/skillbox/skills/ts/modern-tooling/) | pnpm, Biome, Vite, tsup (2025 stack) |
+| [ts-type-patterns](plugins/skillbox/skills/ts/type-patterns/) | Advanced generics, utility types, type guards |
+| [ts-testing-patterns](plugins/skillbox/skills/ts/testing-patterns/) | Vitest testing patterns and mocking |
+| [ts-api-patterns](plugins/skillbox/skills/ts/api-patterns/) | Type-safe APIs with Hono, tRPC, Zod |
+| [ts-database-patterns](plugins/skillbox/skills/ts/database-patterns/) | Drizzle ORM schemas, queries, migrations |
 
 ### Kubernetes Skills
 
@@ -82,7 +96,17 @@ plugins/skillbox/
 │   │   ├── conventional-commit/
 │   │   ├── skill-creator/
 │   │   ├── beads-workflow/
-│   │   └── serena-navigation/
+│   │   ├── serena-navigation/
+│   │   ├── context-engineering/
+│   │   └── tdd-enforcer/
+│   ├── ts/                      # TypeScript skills
+│   │   ├── conventions/
+│   │   ├── project-structure/
+│   │   ├── modern-tooling/
+│   │   ├── type-patterns/
+│   │   ├── testing-patterns/
+│   │   ├── api-patterns/
+│   │   └── database-patterns/
 │   └── k8s/                     # Kubernetes skills
 │       └── helm-chart-developer/
 ├── commands/                    # Slash commands (/commit, /helm-*)

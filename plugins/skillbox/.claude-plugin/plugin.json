@@ -1,5 +1,5 @@
 {
   "name": "skillbox",
-  "description": "Core skills for Claude Code: skill-creator, conventional-commit, beads-workflow, serena-navigation",
-  "version": "0.9.0"
+  "description": "Skills marketplace for Claude Code: TypeScript, TDD, context engineering, Helm/GitOps, conventional commits",
+  "version": "0.10.0"
 }
