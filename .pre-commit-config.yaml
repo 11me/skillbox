@@ -65,7 +65,7 @@ repos:
     hooks:
       - id: validate-skills
         name: Validate SKILL.md frontmatter
-        entry: python3 scripts/validate-skills.py
+        entry: uv run python scripts/validate-skills.py
         language: system
         files: 'SKILL\.md$'
         pass_filenames: true
