@@ -1,19 +1,37 @@
 # claude-skillbox
 
-[![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-blueviolet?style=flat-square&logo=anthropic)](https://claude.ai)
-[![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
+> Extensible skills marketplace for Claude Code — automate Helm/GitOps workflows, semantic code navigation, conventional commits, and more.
+
 [![CI](https://github.com/11me/claude-skillbox/actions/workflows/ci.yaml/badge.svg)](https://github.com/11me/claude-skillbox/actions/workflows/ci.yaml)
+[![Version](https://img.shields.io/badge/version-0.9.0-blue?style=flat-square)](https://github.com/11me/claude-skillbox/releases)
+[![Python](https://img.shields.io/badge/python-3.12+-blue?style=flat-square&logo=python&logoColor=white)](https://python.org)
+[![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
+[![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-blueviolet?style=flat-square&logo=anthropic)](https://docs.anthropic.com/en/docs/claude-code)
 
-Personal skills marketplace for Claude Code.
+A Claude Code plugin that extends AI-assisted development with specialized skills for Kubernetes/Helm automation, GitOps with Flux CD, semantic code navigation via Serena MCP, and structured commit workflows.
 
-## Installation
+## Features
+
+- **Smart Project Detection** — automatically suggests relevant skills based on your project type (Helm, Go, Python, Node.js, Rust)
+- **Helm/GitOps Automation** — production-ready charts with Flux CD, Kustomize overlays, and External Secrets Operator integration
+- **Semantic Code Navigation** — Serena MCP integration for intelligent symbol search and code exploration
+- **Conventional Commits** — structured commit messages following the Conventional Commits specification
+- **Safety Hooks** — prevent accidental secret exposure, require confirmation for git push, enforce validation before completion
+
+## Quick Start
 
 ```bash
-# Add marketplace
+# Add the marketplace
 /plugin marketplace add 11me/claude-skillbox
 
-# Install plugin
+# Install the plugin
 /plugin install skillbox@11me-skillbox
+```
+
+Or test locally:
+
+```bash
+claude --plugin-dir ./plugins/skillbox
 ```
 
 ## Skills
@@ -24,7 +42,7 @@ Personal skills marketplace for Claude Code.
 |-------|-------------|
 | [conventional-commit](plugins/skillbox/skills/core/conventional-commit/) | Generate git commits following Conventional Commits spec |
 | [skill-creator](plugins/skillbox/skills/core/skill-creator/) | Create new Claude Code skills with proper structure |
-| [beads-workflow](plugins/skillbox/skills/core/beads-workflow/) | Task tracking with beads (bd CLI) |
+| [beads-workflow](plugins/skillbox/skills/core/beads-workflow/) | Task tracking with beads CLI |
 | [serena-navigation](plugins/skillbox/skills/core/serena-navigation/) | Semantic code navigation with Serena MCP |
 
 ### Kubernetes Skills
@@ -45,69 +63,35 @@ Personal skills marketplace for Claude Code.
 
 ## Hooks
 
-All hooks are written in Python. See [HOOKS.md](plugins/skillbox/HOOKS.md) for development guide.
+All hooks are written in Python with shared utilities. See [HOOKS.md](plugins/skillbox/HOOKS.md) for the development guide.
 
 | Hook | Event | Description |
 |------|-------|-------------|
 | session_context | SessionStart | Inject date, project context, beads status |
 | flow_check | SessionStart | Check workflow compliance (CLAUDE.md, pre-commit) |
 | skill_suggester | SessionStart | Auto-detect project type and suggest skills |
-| git-push-guard | PreToolUse:Bash | Require confirmation before git push |
-| pretool-secret-guard | PreToolUse:Write\|Edit | Block secrets in values.yaml |
-| prompt-guard | UserPromptSubmit | Block scaffold without required params |
-| stop-done-criteria | Stop | Require validation before session end |
+| git-push-guard | PreToolUse | Require confirmation before git push |
+| pretool-secret-guard | PreToolUse | Block secrets in values.yaml |
 
-## Structure
+## Architecture
 
 ```
 plugins/skillbox/
-├── .claude-plugin/
-│   └── plugin.json
 ├── skills/
-│   ├── core/
+│   ├── core/                    # Core workflow skills
 │   │   ├── conventional-commit/
-│   │   │   ├── SKILL.md
-│   │   │   └── REFERENCE.md
 │   │   ├── skill-creator/
-│   │   │   ├── SKILL.md
-│   │   │   ├── FRONTMATTER-REFERENCE.md
-│   │   │   ├── BEST-PRACTICES.md
-│   │   │   └── templates/
 │   │   ├── beads-workflow/
-│   │   │   └── SKILL.md
 │   │   └── serena-navigation/
-│   │       └── SKILL.md
-│   └── k8s/
-│       ├── .claude-plugin/
-│       │   └── plugin.json
+│   └── k8s/                     # Kubernetes skills
 │       └── helm-chart-developer/
-│           ├── SKILL.md
-│           ├── reference-gitops-eso.md
-│           ├── VERSIONS.md
-│           └── snippets/
-├── commands/
-│   ├── commit.md
-│   ├── skill-scaffold.md
-│   ├── helm-scaffold.md
-│   ├── helm-validate.md
-│   └── helm-checkpoint.md
-├── hooks/
+├── commands/                    # Slash commands (/commit, /helm-*)
+├── hooks/                       # Event hooks configuration
 │   └── hooks.json
-├── HOOKS.md
-└── scripts/
-    ├── validate-helm.sh
-    └── hooks/
-        ├── lib/
-        │   ├── __init__.py
-        │   ├── detector.py
-        │   └── response.py
-        ├── session_context.py
-        ├── flow_check.py
-        ├── skill_suggester.py
-        ├── git-push-guard.py
-        ├── pretool-secret-guard.py
-        ├── prompt-guard.py
-        └── stop-done-criteria.py
+├── scripts/hooks/               # Python hook implementations
+│   ├── lib/                     # Shared utilities
+│   └── *.py
+└── HOOKS.md                     # Hook development guide
 ```
 
 ## Development
@@ -115,42 +99,42 @@ plugins/skillbox/
 ### Prerequisites
 
 - Python 3.12+
-- [uv](https://docs.astral.sh/uv/)
+- [uv](https://docs.astral.sh/uv/) — fast Python package manager
 
 ### Setup
 
 ```bash
-# Install pre-commit via uv
-uv tool install pre-commit
+# Clone the repository
+git clone https://github.com/11me/claude-skillbox.git
+cd claude-skillbox
 
-# Setup git hooks
+# Install pre-commit hooks
+uv tool install pre-commit
 pre-commit install
 
-# Run all checks (same as CI)
+# Run all checks
 pre-commit run --all-files
 ```
 
 ### Testing Locally
 
 ```bash
-# Test plugin locally
 claude --plugin-dir ./plugins/skillbox
 ```
 
-### Adding a New Skill
+## Contributing
 
-1. Create directory: `plugins/skillbox/skills/<domain>/<skill-name>/`
-2. Add `SKILL.md` with required frontmatter (name, description)
-3. Add supporting files (snippets, references)
-4. Update this README
-5. Test locally
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on:
+
+- Adding new skills
+- Writing hooks
+- Code style (Python: ruff, Commits: Conventional)
+- Pull request process
 
 ## Versioning
 
-This project follows [Semantic Versioning](https://semver.org/).
-
-See [CLAUDE.md](CLAUDE.md) for versioning guidelines.
+This project follows [Semantic Versioning](https://semver.org/). See [CLAUDE.md](CLAUDE.md) for versioning guidelines.
 
 ## License
 
-MIT
+[MIT](LICENSE)
