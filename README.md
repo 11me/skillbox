@@ -2,6 +2,7 @@
 
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-blueviolet?style=flat-square&logo=anthropic)](https://claude.ai)
 [![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
+[![CI](https://github.com/11me/claude-skillbox/actions/workflows/ci.yaml/badge.svg)](https://github.com/11me/claude-skillbox/actions/workflows/ci.yaml)
 
 Personal skills marketplace for Claude Code.
 
@@ -17,27 +18,39 @@ Personal skills marketplace for Claude Code.
 
 ## Skills
 
+### Core Skills
+
 | Skill | Description |
 |-------|-------------|
-| [conventional-commit](plugins/skillbox/skills/conventional-commit/) | Generate beautiful git commits following Conventional Commits spec |
-| [helm-chart-developer](plugins/skillbox/skills/helm-chart-developer/) | Build production Helm charts with GitOps (Flux + Kustomize + ESO) |
+| [conventional-commit](plugins/skillbox/skills/core/conventional-commit/) | Generate git commits following Conventional Commits spec |
+| [skill-creator](plugins/skillbox/skills/core/skill-creator/) | Create new Claude Code skills with proper structure |
+| [beads-workflow](plugins/skillbox/skills/core/beads-workflow/) | Task tracking with beads (bd CLI) |
+
+### Kubernetes Skills
+
+| Skill | Description |
+|-------|-------------|
+| [helm-chart-developer](plugins/skillbox/skills/k8s/helm-chart-developer/) | Build production Helm charts with GitOps (Flux + Kustomize + ESO) |
 
 ## Commands
 
 | Command | Description |
 |---------|-------------|
 | `/commit` | Create git commit with Conventional Commits message |
+| `/skill-scaffold` | Scaffold a new skill directory with SKILL.md template |
 | `/helm-scaffold` | Scaffold complete GitOps structure for a new app |
 | `/helm-validate` | Validate Helm chart (lint, template, dry-run) |
-| `/checkpoint` | Create checkpoint summary of current work |
+| `/helm-checkpoint` | Create checkpoint summary of current Helm work |
 
 ## Hooks
 
 | Hook | Event | Description |
 |------|-------|-------------|
-| git-push-guard | PreToolUse | Require user confirmation before git push |
-| secret-prevent | PreToolUse | Block secrets in values.yaml |
-| session-context | SessionStart | Inject GitOps layout and rules |
+| session-context | SessionStart | Inject date, project context, beads status |
+| flow-check | SessionStart | Check workflow compliance (CLAUDE.md, pre-commit) |
+| skill-suggester | SessionStart | Auto-detect project type and suggest skills |
+| git-push-guard | PreToolUse:Bash | Require confirmation before git push |
+| pretool-secret-guard | PreToolUse:Write\|Edit | Block secrets in values.yaml |
 | prompt-guard | UserPromptSubmit | Block scaffold without required params |
 | stop-done-criteria | Stop | Require validation before session end |
 
@@ -45,43 +58,86 @@ Personal skills marketplace for Claude Code.
 
 ```
 plugins/skillbox/
+├── .claude-plugin/
+│   └── plugin.json
 ├── skills/
-│   ├── conventional-commit/
-│   │   ├── SKILL.md
-│   │   └── REFERENCE.md
-│   └── helm-chart-developer/
-│       ├── SKILL.md
-│       ├── reference-gitops-eso.md
-│       └── snippets/
+│   ├── core/
+│   │   ├── conventional-commit/
+│   │   │   ├── SKILL.md
+│   │   │   └── REFERENCE.md
+│   │   ├── skill-creator/
+│   │   │   ├── SKILL.md
+│   │   │   ├── FRONTMATTER-REFERENCE.md
+│   │   │   ├── BEST-PRACTICES.md
+│   │   │   └── templates/
+│   │   └── beads-workflow/
+│   │       └── SKILL.md
+│   └── k8s/
+│       ├── .claude-plugin/
+│       │   └── plugin.json
+│       └── helm-chart-developer/
+│           ├── SKILL.md
+│           ├── reference-gitops-eso.md
+│           ├── VERSIONS.md
+│           └── snippets/
 ├── commands/
 │   ├── commit.md
+│   ├── skill-scaffold.md
 │   ├── helm-scaffold.md
 │   ├── helm-validate.md
-│   └── checkpoint.md
+│   └── helm-checkpoint.md
 ├── hooks/
 │   └── hooks.json
 └── scripts/
     ├── validate-helm.sh
     └── hooks/
-        └── git-push-guard.py
+        ├── session-context.sh
+        ├── flow-check.sh
+        ├── skill-suggester.sh
+        ├── git-push-guard.py
+        ├── pretool-secret-guard.py
+        ├── prompt-guard.py
+        └── stop-done-criteria.py
 ```
 
-## Local Development
+## Development
+
+### Prerequisites
+
+- Python 3.12+
+- pre-commit
+
+### Setup
+
+```bash
+# Install pre-commit hooks
+pip install pre-commit
+pre-commit install
+
+# Run all checks
+pre-commit run --all-files
+```
+
+### Testing Locally
 
 ```bash
 # Test plugin locally
 claude --plugin-dir ./plugins/skillbox
-
-# Validate marketplace
-/plugin validate .
 ```
 
-## Adding a New Skill
+### Adding a New Skill
 
-1. Create directory: `plugins/skillbox/skills/<skill-name>/`
-2. Add `SKILL.md` (see `templates/SKILL.template.md`)
+1. Create directory: `plugins/skillbox/skills/<domain>/<skill-name>/`
+2. Add `SKILL.md` with required frontmatter (name, description)
 3. Add supporting files (snippets, references)
-4. Test locally with `claude --plugin-dir ./plugins/skillbox`
+4. Update this README
+5. Test locally
+
+## Versioning
+
+This project follows [Semantic Versioning](https://semver.org/).
+
+See [CLAUDE.md](CLAUDE.md) for versioning guidelines.
 
 ## License
 

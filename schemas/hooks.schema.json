@@ -1,0 +1,166 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Claude Code hooks.json Schema",
+  "description": "JSON Schema for validating Claude Code plugin hooks.json files",
+  "type": "object",
+  "required": ["hooks"],
+  "properties": {
+    "description": {
+      "type": "string",
+      "description": "Optional description of the hooks configuration"
+    },
+    "hooks": {
+      "type": "object",
+      "description": "Hook event definitions",
+      "properties": {
+        "SessionStart": {
+          "$ref": "#/definitions/hookEventOptionalMatcher",
+          "description": "Triggered at session start/resume. Matcher values: startup, resume, clear, compact"
+        },
+        "SessionEnd": {
+          "$ref": "#/definitions/hookEventNoMatcher",
+          "description": "Triggered when session ends"
+        },
+        "Stop": {
+          "$ref": "#/definitions/hookEventNoMatcher",
+          "description": "Triggered when Claude Code finishes responding"
+        },
+        "SubagentStop": {
+          "$ref": "#/definitions/hookEventNoMatcher",
+          "description": "Triggered when subagent tasks complete"
+        },
+        "UserPromptSubmit": {
+          "$ref": "#/definitions/hookEventNoMatcher",
+          "description": "Triggered before processing user prompts"
+        },
+        "PreToolUse": {
+          "$ref": "#/definitions/hookEventWithMatcher",
+          "description": "Triggered before tool calls. Matcher: tool name pattern (Bash, Write, Edit, etc.)"
+        },
+        "PermissionRequest": {
+          "$ref": "#/definitions/hookEventWithMatcher",
+          "description": "Triggered during permission dialogs"
+        },
+        "PostToolUse": {
+          "$ref": "#/definitions/hookEventWithMatcher",
+          "description": "Triggered after tool calls complete"
+        },
+        "Notification": {
+          "$ref": "#/definitions/hookEventOptionalMatcher",
+          "description": "Triggered when notifications are sent"
+        },
+        "PreCompact": {
+          "$ref": "#/definitions/hookEventOptionalMatcher",
+          "description": "Triggered before compacting context. Matcher: manual, auto"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "definitions": {
+    "hookEventNoMatcher": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["hooks"],
+        "properties": {
+          "hooks": {
+            "$ref": "#/definitions/hookArray"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "hookEventWithMatcher": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["matcher", "hooks"],
+        "properties": {
+          "matcher": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Tool name pattern (regex). Examples: Bash, Write|Edit, mcp__.*"
+          },
+          "hooks": {
+            "$ref": "#/definitions/hookArray"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "hookEventOptionalMatcher": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["hooks"],
+        "properties": {
+          "matcher": {
+            "type": "string",
+            "description": "Optional matcher pattern"
+          },
+          "hooks": {
+            "$ref": "#/definitions/hookArray"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "hookArray": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "#/definitions/commandHook"
+          },
+          {
+            "$ref": "#/definitions/promptHook"
+          }
+        ]
+      }
+    },
+    "commandHook": {
+      "type": "object",
+      "required": ["type", "command"],
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "command": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Shell command to execute"
+        },
+        "timeout": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 60,
+          "description": "Timeout in seconds (default: 60)"
+        }
+      },
+      "additionalProperties": false
+    },
+    "promptHook": {
+      "type": "object",
+      "required": ["type", "prompt"],
+      "properties": {
+        "type": {
+          "const": "prompt"
+        },
+        "prompt": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Prompt text for LLM evaluation"
+        },
+        "timeout": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 30,
+          "description": "Timeout in seconds (default: 30)"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

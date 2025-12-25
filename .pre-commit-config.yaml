@@ -51,6 +51,15 @@ repos:
         args: [-c, .yamllint.yaml]
         exclude: 'snippets/.*\.yaml$'  # Exclude template snippets
 
+  # Claude Code hooks.json schema validation
+  - repo: https://github.com/python-jsonschema/check-jsonschema
+    rev: 0.30.0
+    hooks:
+      - id: check-jsonschema
+        name: Validate hooks.json schema
+        files: 'hooks\.json$'
+        args: ['--schemafile', 'schemas/hooks.schema.json']
+
   # Skill YAML frontmatter validation
   - repo: local
     hooks:

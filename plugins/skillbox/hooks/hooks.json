@@ -1,18 +1,21 @@
 {
-  "description": "Skillbox hooks for development workflow guards and context injection",
   "hooks": {
     "SessionStart": [
       {
-        "type": "command",
-        "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/hooks/session-context.sh"
-      },
-      {
-        "type": "command",
-        "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/hooks/flow-check.sh"
-      },
-      {
-        "type": "command",
-        "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/hooks/skill-suggester.sh"
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/hooks/session-context.sh"
+          },
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/hooks/flow-check.sh"
+          },
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/hooks/skill-suggester.sh"
+          }
+        ]
       }
     ],
     "PreToolUse": [
