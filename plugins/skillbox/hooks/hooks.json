@@ -1,7 +1,16 @@
 {
-  "description": "Skillbox hooks for Helm chart development workflow",
+  "description": "Skillbox hooks for development workflow guards",
   "hooks": {
     "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/scripts/hooks/git-push-guard.py"
+          }
+        ]
+      },
       {
         "matcher": "Write|Edit",
         "hooks": [
