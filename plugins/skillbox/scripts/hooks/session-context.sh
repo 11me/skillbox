@@ -41,6 +41,13 @@ elif [ -f "package.json" ]; then
     output+="**Project type:** Node.js project"$'\n\n'
 fi
 
+# Serena Detection
+if [ -d ".serena" ]; then
+    PROJECT_TYPE="${PROJECT_TYPE:-serena}"
+    output+="**Serena enabled** — semantic navigation available"$'\n'
+    output+="   Tools: find_symbol, get_symbols_overview, write_memory"$'\n\n'
+fi
+
 # 3. Check critical tools
 MISSING_TOOLS=""
 if [ "$PROJECT_TYPE" = "helm-chart" ] || [ "$PROJECT_TYPE" = "gitops" ]; then

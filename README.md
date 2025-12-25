@@ -25,6 +25,7 @@ Personal skills marketplace for Claude Code.
 | [conventional-commit](plugins/skillbox/skills/core/conventional-commit/) | Generate git commits following Conventional Commits spec |
 | [skill-creator](plugins/skillbox/skills/core/skill-creator/) | Create new Claude Code skills with proper structure |
 | [beads-workflow](plugins/skillbox/skills/core/beads-workflow/) | Task tracking with beads (bd CLI) |
+| [serena-navigation](plugins/skillbox/skills/core/serena-navigation/) | Semantic code navigation with Serena MCP |
 
 ### Kubernetes Skills
 
@@ -70,7 +71,9 @@ plugins/skillbox/
 │   │   │   ├── FRONTMATTER-REFERENCE.md
 │   │   │   ├── BEST-PRACTICES.md
 │   │   │   └── templates/
-│   │   └── beads-workflow/
+│   │   ├── beads-workflow/
+│   │   │   └── SKILL.md
+│   │   └── serena-navigation/
 │   │       └── SKILL.md
 │   └── k8s/
 │       ├── .claude-plugin/

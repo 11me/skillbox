@@ -76,6 +76,13 @@ if [ -d ".beads" ]; then
     add_skill "skillbox:beads-workflow"
 fi
 
+# Serena Detection
+if [ -d ".serena" ]; then
+    add_skill "skillbox:serena-navigation"
+    output+="**Serena project detected**"$'\n'
+    output+="   Use semantic tools: find_symbol, get_symbols_overview"$'\n'
+fi
+
 # Output suggestions
 if [ -n "$output" ]; then
     echo -e "$output"
