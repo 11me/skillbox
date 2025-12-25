@@ -3,7 +3,7 @@
 > Extensible skills marketplace for Claude Code — automate Helm/GitOps workflows, semantic code navigation, conventional commits, and more.
 
 [![CI](https://github.com/11me/claude-skillbox/actions/workflows/ci.yaml/badge.svg)](https://github.com/11me/claude-skillbox/actions/workflows/ci.yaml)
-[![Version](https://img.shields.io/badge/version-0.10.0-blue?style=flat-square)](https://github.com/11me/claude-skillbox/releases)
+[![Version](https://img.shields.io/badge/version-0.11.0-blue?style=flat-square)](https://github.com/11me/claude-skillbox/releases)
 [![Python](https://img.shields.io/badge/python-3.12+-blue?style=flat-square&logo=python&logoColor=white)](https://python.org)
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-blueviolet?style=flat-square&logo=anthropic)](https://docs.anthropic.com/en/docs/claude-code)
@@ -65,6 +65,36 @@ claude --plugin-dir ./plugins/skillbox
 |-------|-------------|
 | [helm-chart-developer](plugins/skillbox/skills/k8s/helm-chart-developer/) | Build production Helm charts with GitOps (Flux + Kustomize + ESO) |
 
+## Agents
+
+Autonomous agents for specialized multi-step tasks. See [agents/_index.md](plugins/skillbox/agents/_index.md) for full registry.
+
+### Core Agents
+
+| Agent | Model | Description |
+|-------|-------|-------------|
+| [task-tracker](plugins/skillbox/agents/core/task-tracker.md) | haiku | Manage beads task lifecycle |
+| [session-checkpoint](plugins/skillbox/agents/core/session-checkpoint.md) | haiku | Save progress to serena memory |
+| [code-navigator](plugins/skillbox/agents/core/code-navigator.md) | sonnet | Semantic code exploration |
+
+### TDD Agents
+
+| Agent | Model | Description |
+|-------|-------|-------------|
+| [test-analyzer](plugins/skillbox/agents/tdd/test-analyzer.md) | sonnet | Analyze coverage, find gaps |
+| [tdd-coach](plugins/skillbox/agents/tdd/tdd-coach.md) | sonnet | Guide Red-Green-Refactor workflow |
+
+### Language Agents
+
+| Agent | Model | Description |
+|-------|-------|-------------|
+| [ts/test-generator](plugins/skillbox/agents/ts/test-generator.md) | sonnet | Generate Vitest tests |
+| [ts/project-init](plugins/skillbox/agents/ts/project-init.md) | sonnet | Scaffold TypeScript project |
+| [go/test-generator](plugins/skillbox/agents/go/test-generator.md) | sonnet | Generate Go table-driven tests |
+| [go/project-init](plugins/skillbox/agents/go/project-init.md) | sonnet | Scaffold Go project |
+| [python/test-writer](plugins/skillbox/agents/python/test-writer.md) | opus | Generate pytest tests |
+| [rust/test-generator](plugins/skillbox/agents/rust/test-generator.md) | sonnet | Generate Rust tests |
+
 ## Commands
 
 | Command | Description |
@@ -109,6 +139,24 @@ plugins/skillbox/
 │   │   └── database-patterns/
 │   └── k8s/                     # Kubernetes skills
 │       └── helm-chart-developer/
+├── agents/                      # Autonomous agents
+│   ├── core/                    # Workflow agents
+│   │   ├── task-tracker.md
+│   │   ├── session-checkpoint.md
+│   │   └── code-navigator.md
+│   ├── tdd/                     # TDD agents
+│   │   ├── test-analyzer.md
+│   │   └── tdd-coach.md
+│   ├── ts/                      # TypeScript agents
+│   │   ├── test-generator.md
+│   │   └── project-init.md
+│   ├── go/                      # Go agents
+│   │   ├── test-generator.md
+│   │   └── project-init.md
+│   ├── python/                  # Python agents
+│   │   └── test-writer.md
+│   └── rust/                    # Rust agents
+│       └── test-generator.md
 ├── commands/                    # Slash commands (/commit, /helm-*)
 ├── hooks/                       # Event hooks configuration
 │   └── hooks.json
