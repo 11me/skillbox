@@ -35,9 +35,10 @@ Personal skills marketplace for Claude Code.
 
 | Hook | Event | Description |
 |------|-------|-------------|
+| git-push-guard | PreToolUse | Require user confirmation before git push |
+| secret-prevent | PreToolUse | Block secrets in values.yaml |
 | session-context | SessionStart | Inject GitOps layout and rules |
 | prompt-guard | UserPromptSubmit | Block scaffold without required params |
-| secret-prevent | PreToolUse | Block secrets in values.yaml |
 | stop-done-criteria | Stop | Require validation before session end |
 
 ## Structure
@@ -62,6 +63,7 @@ plugins/skillbox/
 └── scripts/
     ├── validate-helm.sh
     └── hooks/
+        └── git-push-guard.py
 ```
 
 ## Local Development
