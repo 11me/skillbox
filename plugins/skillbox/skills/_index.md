@@ -1,37 +1,52 @@
 # Skillbox Skills Registry
 
-Quick lookup for available skills, triggers, and outputs.
+Specialized workflow layer extending Claude Code with domain expertise.
 
-## Categories
+> **For project scaffolding:** Use Anthropic's `plugin-dev` plugin.
+> Skillbox focuses on workflow orchestration, platform engineering, and testing excellence.
 
-### Core (Workflow & Git)
+## Core Workflows
 
-| Skill | Description | Triggers | Outputs |
-|-------|-------------|----------|---------|
-| [conventional-commit](core/conventional-commit/) | Git commits with Conventional Commits spec | "commit", "git message", "коммит" | Commit message |
-| [beads-workflow](core/beads-workflow/) | Task tracking with beads CLI | "task", "todo", "bd", "issue" | Task state |
-| [skill-patterns](core/skill-patterns/) | Quality patterns for robust skills | "improve skill", "add guardrails" | Pattern reference |
-| [serena-navigation](core/serena-navigation/) | Semantic code navigation | "serena", "find symbol", "symbol search" | Code insights, memories |
-| [context-engineering](core/context-engineering/) | AI context window management | "context overflow", "token limits" | Optimized context |
-| [tdd-enforcer](core/tdd-enforcer/) | TDD workflow patterns | "tdd", "red-green-refactor", "test first" | Test patterns |
+Task tracking, code memory, and commit traceability.
 
-### TypeScript
+| Skill | Description | Triggers |
+|-------|-------------|----------|
+| [workflow-orchestration](core/workflow-orchestration/) | Unified beads + serena + commit workflow | "start feature", "track task" |
+| [beads-workflow](core/beads-workflow/) | Cross-session task tracking | "task", "bd", "issue" |
+| [serena-navigation](core/serena-navigation/) | Semantic code memory | "find symbol", "serena" |
+| [conventional-commit](core/conventional-commit/) | Structured commit messages | "commit", "git message" |
+| [context-engineering](core/context-engineering/) | Long-session context management | "context overflow" |
 
-| Skill | Description | Triggers | Outputs |
-|-------|-------------|----------|---------|
-| [ts-conventions](ts/conventions/) | TypeScript code conventions | auto-activate on `*.ts`, `*.tsx` | Code review context |
-| [ts-project-structure](ts/project-structure/) | Monorepo patterns | "tsconfig", "monorepo", "turborepo" | Project structure |
-| [ts-modern-tooling](ts/modern-tooling/) | pnpm, Biome, Vite, tsup | "biome", "vite", "pnpm" | Build config |
-| [ts-type-patterns](ts/type-patterns/) | Generics, utility types | "generics", "utility types" | Type patterns |
-| [ts-testing-patterns](ts/testing-patterns/) | Vitest testing | "vitest", "mocking" | Test setup |
-| [ts-api-patterns](ts/api-patterns/) | Hono, tRPC, Zod | "hono", "trpc", "zod" | API code |
-| [ts-database-patterns](ts/database-patterns/) | Drizzle ORM | "drizzle", "orm", "schema" | Database code |
+## Platform Engineering
 
-### Kubernetes (GitOps)
+Production Kubernetes and GitOps patterns.
 
-| Skill | Description | Triggers | Outputs |
-|-------|-------------|----------|---------|
-| [helm-chart-developer](k8s/helm-chart-developer/) | Helm charts with Flux + ESO | "helm", "chart", "gitops", "helmrelease" | Validated charts |
+| Skill | Description | Triggers |
+|-------|-------------|----------|
+| [helm-chart-developer](k8s/helm-chart-developer/) | Helm charts with Flux + ESO | "helm", "chart", "gitops" |
+
+## Testing Excellence
+
+TDD discipline and quality patterns.
+
+| Skill | Description | Triggers |
+|-------|-------------|----------|
+| [tdd-enforcer](core/tdd-enforcer/) | Red-Green-Refactor workflow | "tdd", "test first" |
+| [skill-patterns](core/skill-patterns/) | Do/Verify/Repair, Guardrails | "improve skill" |
+
+## Educational Reference
+
+TypeScript patterns and best practices (non-core, reference material).
+
+| Skill | Description | Triggers |
+|-------|-------------|----------|
+| [ts-conventions](ts/conventions/) | Code conventions | `*.ts`, `*.tsx` |
+| [ts-project-structure](ts/project-structure/) | Monorepo patterns | "tsconfig", "monorepo" |
+| [ts-modern-tooling](ts/modern-tooling/) | pnpm, Biome, Vite | "biome", "vite" |
+| [ts-type-patterns](ts/type-patterns/) | Generics, utility types | "generics" |
+| [ts-testing-patterns](ts/testing-patterns/) | Vitest patterns | "vitest" |
+| [ts-api-patterns](ts/api-patterns/) | Hono, tRPC, Zod | "hono", "trpc" |
+| [ts-database-patterns](ts/database-patterns/) | Drizzle ORM | "drizzle" |
 
 ## Quick Lookup
 
@@ -39,59 +54,44 @@ Quick lookup for available skills, triggers, and outputs.
 
 | Task | Skill |
 |------|-------|
+| Start new feature | workflow-orchestration |
+| Track work across sessions | beads-workflow |
+| Navigate code semantically | serena-navigation |
 | Write commit message | conventional-commit |
-| Track tasks/issues | beads-workflow |
-| Navigate codebase semantically | serena-navigation |
 | Create Helm chart | helm-chart-developer |
-| Improve existing skill | skill-patterns |
-| Manage AI context | context-engineering |
 | TDD workflow | tdd-enforcer |
-| TypeScript project setup | ts-modern-tooling, ts-project-structure |
-| TypeScript API | ts-api-patterns |
-| Database with Drizzle | ts-database-patterns |
-
-### By File Pattern
-
-| Pattern | Skill |
-|---------|-------|
-| `Chart.yaml`, `values.yaml` | helm-chart-developer |
-| `.beads/` | beads-workflow |
-| `.serena/` | serena-navigation |
-| `SKILL.md` | skill-patterns |
-| `*.ts`, `*.tsx` | ts-conventions, ts-type-patterns |
-| `tsconfig.json` | ts-project-structure |
-| `biome.json`, `vite.config.*` | ts-modern-tooling |
-| `*.test.ts`, `*.spec.ts` | ts-testing-patterns, tdd-enforcer |
-| `drizzle.config.*` | ts-database-patterns |
 
 ### By Command
 
 | Command | Skill/Action |
 |---------|--------------|
+| `/init-workflow` | Initialize beads + serena + CLAUDE.md |
 | `/commit` | conventional-commit |
-| `/skill-scaffold` | skill-patterns |
 | `/helm-scaffold` | helm-chart-developer |
 | `/helm-validate` | helm-chart-developer |
 
-## Skill Interactions
+## Workflow Integration
 
 ```
-beads-workflow ←→ conventional-commit
-     │              (task refs in commits)
-     ↓
-serena-navigation
-     │ (memories persist discoveries)
-     ↓
-helm-chart-developer
-     (validation before complete)
-
-tdd-enforcer ←→ ts-testing-patterns
-     │           (Vitest patterns)
-     ↓
-context-engineering
-     (optimize long sessions)
+                    ┌─────────────────────────────────┐
+                    │   workflow-orchestration        │
+                    │   (unified pattern)             │
+                    └─────────────────────────────────┘
+                              │
+        ┌─────────────────────┼─────────────────────┐
+        ▼                     ▼                     ▼
+┌───────────────┐    ┌───────────────┐    ┌───────────────┐
+│ beads-workflow│◄──►│serena-navigation│◄──►│conventional-  │
+│ (tasks)       │    │ (code memory) │    │ commit        │
+└───────────────┘    └───────────────┘    └───────────────┘
+        │                     │
+        └──────────┬──────────┘
+                   ▼
+           context-engineering
+           (long sessions)
 ```
 
 ## Adding New Skills
 
-Use Anthropic's `plugin-dev` plugin to create new skills. For quality patterns (Do/Verify/Repair, Guardrails), see [skill-patterns](core/skill-patterns/).
+Use Anthropic's `plugin-dev` for skill creation mechanics.
+For quality patterns (Do/Verify/Repair, Guardrails), see [skill-patterns](core/skill-patterns/).

@@ -2,7 +2,24 @@
 
 ## Project Overview
 
-This is a Claude Code plugin marketplace containing skills, commands, and hooks for Claude Code.
+This is a Claude Code plugin providing specialized workflows that complement Anthropic's official plugins.
+
+**Positioning:** Skillbox = Specialized Workflow Layer (not general-purpose)
+
+## When to Use Skillbox vs Official Plugins
+
+| Task | Use |
+|------|-----|
+| Create new plugin | `plugin-dev` (official) |
+| Scaffold TypeScript project | `plugin-dev` (official) |
+| Scaffold Go project | `plugin-dev` (official) |
+| Track tasks across sessions | `beads-workflow` (skillbox) |
+| Navigate code semantically | `serena-navigation` (skillbox) |
+| Create Helm charts | `helm-chart-developer` (skillbox) |
+| TDD workflow enforcement | `tdd-enforcer` (skillbox) |
+| Unified workflow (beads+serena+commit) | `workflow-orchestration` (skillbox) |
+
+**Key principle:** Extend, don't replace. Use official plugins for scaffolding, use Skillbox for specialized workflows.
 
 ## Versioning
 

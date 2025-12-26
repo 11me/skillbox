@@ -1,18 +1,20 @@
 ---
-description: Initialize project for production workflow (beads + serena + CLAUDE.md)
+description: Initialize workflow tools for existing project (beads + serena + CLAUDE.md)
 ---
 
-# /init-project
+# /init-workflow
 
-Initialize the current project with production workflow tools.
+Initialize workflow tools for an existing project.
+
+> **Note:** For project scaffolding (TypeScript, Go, etc.), use Anthropic's `plugin-dev` plugin.
+> This command sets up workflow tooling on top of any project.
 
 ## What This Does
 
-1. **Beads** — Task tracking with `bd` CLI
+1. **Beads** — Cross-session task tracking with `bd` CLI
 2. **Serena** — Code memory and semantic navigation
-3. **CLAUDE.md** — AI quick reference
-4. **Pre-commit** — Code quality hooks
-5. **Tests** — TDD compliance directory
+3. **CLAUDE.md** — Project-specific AI instructions
+4. **Pre-commit** — Code quality hooks (optional)
 
 ## Usage
 
@@ -22,7 +24,7 @@ Run the initialization script:
 # Full setup (recommended)
 python3 ${CLAUDE_PLUGIN_ROOT}/scripts/init-project.py
 
-# With custom name
+# With custom project name
 python3 ${CLAUDE_PLUGIN_ROOT}/scripts/init-project.py --name "My Project"
 
 # Minimal (beads + CLAUDE.md only)
@@ -37,7 +39,7 @@ python3 ${CLAUDE_PLUGIN_ROOT}/scripts/init-project.py --skip-precommit
 1. Review `CLAUDE.md` and customize for your project
 2. Update `.serena/memories/overview.md` with architecture details
 3. Create first task: `bd create --title "..." -t task`
-4. Commit: `git add -A && git commit -m "chore: init production workflow"`
+4. Commit: `git add -A && git commit -m "chore: init workflow"`
 
 ## Checklist
 
@@ -46,7 +48,11 @@ python3 ${CLAUDE_PLUGIN_ROOT}/scripts/init-project.py --skip-precommit
 [ ] .serena/project.yml exists
 [ ] .serena/memories/overview.md written
 [ ] CLAUDE.md with quick start
-[ ] .pre-commit-config.yaml configured
-[ ] pre-commit install executed
+[ ] .pre-commit-config.yaml configured (optional)
 [ ] First commit made
 ```
+
+## See Also
+
+- **Project scaffolding:** Use `plugin-dev` from Anthropic official plugins
+- **Workflow patterns:** See `workflow-orchestration` skill
