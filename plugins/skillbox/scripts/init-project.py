@@ -179,7 +179,7 @@ def init_precommit(cwd: Path) -> None:
     else:
         config.write_text("""repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v6.0.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
@@ -187,7 +187,7 @@ def init_precommit(cwd: Path) -> None:
       - id: detect-private-key
 
   - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.18.1
+    rev: v8.30.0
     hooks:
       - id: gitleaks
 

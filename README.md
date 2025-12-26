@@ -3,7 +3,7 @@
 > Extensible skills marketplace for Claude Code — automate Helm/GitOps workflows, semantic code navigation, conventional commits, and more.
 
 [![CI](https://github.com/11me/claude-skillbox/actions/workflows/ci.yaml/badge.svg)](https://github.com/11me/claude-skillbox/actions/workflows/ci.yaml)
-[![Version](https://img.shields.io/badge/version-0.12.0-blue?style=flat-square)](https://github.com/11me/claude-skillbox/releases)
+[![Version](https://img.shields.io/badge/version-0.13.0-blue?style=flat-square)](https://github.com/11me/claude-skillbox/releases)
 [![Python](https://img.shields.io/badge/python-3.12+-blue?style=flat-square&logo=python&logoColor=white)](https://python.org)
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-blueviolet?style=flat-square&logo=anthropic)](https://docs.anthropic.com/en/docs/claude-code)
@@ -100,6 +100,8 @@ Autonomous agents for specialized multi-step tasks. See [agents/_index.md](plugi
 | Command | Description |
 |---------|-------------|
 | `/init-project` | Initialize project (beads + serena + CLAUDE.md + pre-commit) |
+| `/ts-init` | Initialize TypeScript project (library, api, fullstack, monorepo) |
+| `/go-init` | Initialize Go project (cli, http, library) |
 | `/commit` | Create git commit with Conventional Commits message |
 | `/skill-scaffold` | Scaffold a new skill directory with SKILL.md template |
 | `/helm-scaffold` | Scaffold complete GitOps structure for a new app |
@@ -159,6 +161,9 @@ plugins/skillbox/
 │   └── rust/                    # Rust agents
 │       └── test-generator.md
 ├── commands/                    # Slash commands (/commit, /helm-*)
+├── templates/                   # Project scaffolding templates
+│   ├── ts/                      # TypeScript (biome.json, tsconfig.json)
+│   └── go/                      # Go (Taskfile.yml, golangci.yml)
 ├── hooks/                       # Event hooks configuration
 │   └── hooks.json
 ├── scripts/hooks/               # Python hook implementations

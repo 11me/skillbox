@@ -1,0 +1,34 @@
+version: '3'
+
+vars:
+  BINARY_NAME: '{{.PROJECT_NAME | default "app"}}'
+
+tasks:
+  default:
+    cmds:
+      - task --list
+
+  build:
+    desc: Build the binary
+    cmds:
+      - go build -o bin/{{.BINARY_NAME}} ./cmd/{{.BINARY_NAME}}
+
+  run:
+    desc: Run the application
+    cmds:
+      - go run ./cmd/{{.BINARY_NAME}}
+
+  test:
+    desc: Run tests
+    cmds:
+      - go test -v -race ./...
+
+  lint:
+    desc: Run linter
+    cmds:
+      - golangci-lint run
+
+  tidy:
+    desc: Tidy dependencies
+    cmds:
+      - go mod tidy
