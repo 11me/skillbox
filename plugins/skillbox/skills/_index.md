@@ -66,6 +66,7 @@ TypeScript patterns and best practices (non-core, reference material).
 | Command | Skill/Action |
 |---------|--------------|
 | `/init-workflow` | Initialize beads + serena + CLAUDE.md |
+| `/checkpoint` | Save session to serena memory |
 | `/commit` | conventional-commit |
 | `/helm-scaffold` | helm-chart-developer |
 | `/helm-validate` | helm-chart-developer |

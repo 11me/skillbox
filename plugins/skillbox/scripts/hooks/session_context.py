@@ -114,6 +114,15 @@ def main() -> None:
         output_lines.append("   Tools: find_symbol, get_symbols_overview, write_memory")
         output_lines.append("")
 
+        # Check for recent checkpoints
+        serena_memories = cwd / ".serena" / "memories"
+        if serena_memories.exists():
+            checkpoints = sorted(serena_memories.glob("checkpoint-*.md"), reverse=True)
+            if checkpoints:
+                latest = checkpoints[0].name
+                output_lines.append(f"**Recent checkpoint:** `read_memory('{latest}')`")
+                output_lines.append("")
+
     # 3. Check critical tools
     missing_tools: list[str] = []
     if project_type in ("helm", "gitops"):
