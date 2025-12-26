@@ -26,6 +26,8 @@ jobs:
 
       - name: Run pre-commit hooks
         run: pre-commit run --all-files --show-diff-on-failure
+        env:
+          SKIP: gitleaks  # Run via gitleaks-action in security job instead
 
   validate-skills:
     name: Validate Skills
