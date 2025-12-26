@@ -27,11 +27,34 @@ def detect_project_types(cwd: Path | None = None) -> dict[str, bool]:
     }
 
 
-def detect_flux(cwd: Path | None = None) -> bool:
-    """Detect Flux GitOps by searching for Flux CRDs."""
+def detect_flux(cwd: Path | None = None, max_depth: int = 3) -> bool:
+    """Detect Flux GitOps by searching for Flux CRDs.
+
+    Args:
+        cwd: Working directory to search in.
+        max_depth: Maximum directory depth to search (default 3 for performance).
+
+    Returns:
+        True if Flux CRDs are found.
+    """
     cwd = cwd or Path.cwd()
 
-    for yaml_file in cwd.rglob("*.yaml"):
+    def iter_yaml_files(base: Path, depth: int = 0) -> list[Path]:
+        """Iterate YAML files up to max_depth."""
+        if depth > max_depth:
+            return []
+        files: list[Path] = []
+        try:
+            for item in base.iterdir():
+                if item.is_file() and item.suffix in (".yaml", ".yml"):
+                    files.append(item)
+                elif item.is_dir() and not item.name.startswith("."):
+                    files.extend(iter_yaml_files(item, depth + 1))
+        except (OSError, PermissionError):
+            pass
+        return files
+
+    for yaml_file in iter_yaml_files(cwd):
         try:
             content = yaml_file.read_text(errors="ignore")
             if "helm.toolkit.fluxcd.io" in content:

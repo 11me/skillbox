@@ -1,16 +1,22 @@
 #!/usr/bin/env python3
-"""
-Stop hook: blocks session end until validation is complete.
+"""Stop hook: blocks session end until validation is complete.
+
+Enforces that /helm-validate and /checkpoint are run before ending session.
 """
 
 import json
 import sys
 from pathlib import Path
 
+# Add lib to path
+sys.path.insert(0, str(Path(__file__).parent))
+
+from lib.response import allow, block
+
 
 def find_checkpoint_files() -> list[str]:
     """Find CHECKPOINT.md files in apps directory."""
-    checkpoints = []
+    checkpoints: list[str] = []
     apps_dir = Path("apps")
     if apps_dir.exists():
         for checkpoint in apps_dir.rglob("CHECKPOINT.md"):
@@ -18,15 +24,12 @@ def find_checkpoint_files() -> list[str]:
     return checkpoints
 
 
-def check_validation_ran() -> bool:
-    """Check if helm-validate was likely run (heuristic)."""
-    # This is a simple heuristic - in practice you might check
-    # for specific markers or use session state
-    return True  # Allow for now, can be made stricter
-
-
-def main():
-    data = json.load(sys.stdin)
+def main() -> None:
+    try:
+        data = json.load(sys.stdin)
+    except json.JSONDecodeError:
+        allow("Stop")
+        return
 
     # Get session context
     transcript = data.get("transcript", [])
@@ -40,7 +43,7 @@ def main():
     # Check for existing checkpoint files
     checkpoints = find_checkpoint_files()
 
-    warnings = []
+    warnings: list[str] = []
 
     if not validate_ran:
         warnings.append("- /helm-validate was not run")
@@ -49,21 +52,17 @@ def main():
         warnings.append("- No checkpoint created (run /checkpoint)")
 
     if warnings:
-        out = {
-            "decision": "block",
-            "reason": "Session completion criteria not met",
-            "hookSpecificOutput": {
-                "hookEventName": "Stop",
-                "additionalContext": (
-                    "Before ending session:\n"
-                    + "\n".join(warnings)
-                    + "\n\nRun the missing commands to complete the session."
-                ),
-            },
-        }
-        print(json.dumps(out))
+        block(
+            reason="Session completion criteria not met",
+            event="Stop",
+            context=(
+                "Before ending session:\n"
+                + "\n".join(warnings)
+                + "\n\nRun the missing commands to complete the session."
+            ),
+        )
     else:
-        print(json.dumps({"hookSpecificOutput": {"hookEventName": "Stop"}}))
+        allow("Stop")
 
 
 if __name__ == "__main__":

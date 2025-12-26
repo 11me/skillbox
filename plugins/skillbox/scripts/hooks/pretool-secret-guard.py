@@ -1,11 +1,19 @@
 #!/usr/bin/env python3
-"""
-PreToolUse hook: blocks writing secrets to values.yaml.
+"""PreToolUse hook: blocks writing secrets to values.yaml.
+
+Detects hardcoded secrets in YAML values files and blocks the operation,
+guiding users to use ExternalSecret instead.
 """
 
 import json
 import re
 import sys
+from pathlib import Path
+
+# Add lib to path
+sys.path.insert(0, str(Path(__file__).parent))
+
+from lib.response import allow, block
 
 SECRET_PATTERNS = [
     r"password\s*[:=]\s*['\"][^'\"]+['\"]",
@@ -15,6 +23,13 @@ SECRET_PATTERNS = [
     r"access[_-]?key\s*[:=]\s*['\"][^'\"]+['\"]",
     r"private[_-]?key\s*[:=]\s*['\"][^'\"]+['\"]",
     r"credentials?\s*[:=]\s*['\"][^'\"]+['\"]",
+    # AWS credentials
+    r"aws_access_key_id\s*[:=]\s*['\"][^'\"]+['\"]",
+    r"aws_secret_access_key\s*[:=]\s*['\"][^'\"]+['\"]",
+    # Connection strings
+    r"connection[_-]?string\s*[:=]\s*['\"][^'\"]+['\"]",
+    # Bearer tokens
+    r"bearer\s+[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]+",
 ]
 
 
@@ -27,15 +42,19 @@ def looks_like_secret(content: str) -> bool:
     return False
 
 
-def main():
-    data = json.load(sys.stdin)
+def main() -> None:
+    try:
+        data = json.load(sys.stdin)
+    except json.JSONDecodeError:
+        allow("PreToolUse")
+        return
 
     tool_name = data.get("tool_name", "")
     tool_input = data.get("tool_input", {})
 
     # Only check Write and Edit tools
     if tool_name not in ("Write", "Edit"):
-        print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse"}}))
+        allow("PreToolUse")
         return
 
     file_path = tool_input.get("file_path", "")
@@ -43,27 +62,23 @@ def main():
 
     # Only check values.yaml files
     if "values.yaml" not in file_path and "values.yml" not in file_path:
-        print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse"}}))
+        allow("PreToolUse")
         return
 
     # Check for secrets
     if looks_like_secret(content):
-        out = {
-            "decision": "block",
-            "reason": "Detected potential secret in values.yaml",
-            "hookSpecificOutput": {
-                "hookEventName": "PreToolUse",
-                "additionalContext": (
-                    "Do not hardcode secrets in values.yaml.\n"
-                    "Use ExternalSecret to fetch secrets from AWS Secrets Manager:\n"
-                    "1. Create ExternalSecret in overlay (apps/dev/<app>/secrets/)\n"
-                    "2. Reference with secrets.existingSecretName in values.yaml"
-                ),
-            },
-        }
-        print(json.dumps(out))
+        block(
+            reason="Detected potential secret in values.yaml",
+            event="PreToolUse",
+            context=(
+                "Do not hardcode secrets in values.yaml.\n"
+                "Use ExternalSecret to fetch secrets from AWS Secrets Manager:\n"
+                "1. Create ExternalSecret in overlay (apps/dev/<app>/secrets/)\n"
+                "2. Reference with secrets.existingSecretName in values.yaml"
+            ),
+        )
     else:
-        print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse"}}))
+        allow("PreToolUse")
 
 
 if __name__ == "__main__":

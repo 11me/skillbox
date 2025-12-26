@@ -13,46 +13,52 @@ def session_output(message: str) -> None:
         print(json.dumps({"output": message}))
 
 
-def block(reason: str, event: str = "PreToolUse") -> None:
+def block(reason: str, event: str = "PreToolUse", context: str | None = None) -> None:
     """Block action with reason.
 
     Args:
         reason: The reason for blocking.
         event: The hook event name.
+        context: Additional context/guidance for the user.
     """
-    print(
-        json.dumps(
-            {
-                "hookSpecificOutput": {
-                    "hookEventName": event,
-                    "permissionDecision": "block",
-                    "permissionDecisionReason": reason,
-                }
-            }
-        )
-    )
+    output: dict = {
+        "hookSpecificOutput": {
+            "hookEventName": event,
+            "permissionDecision": "block",
+            "permissionDecisionReason": reason,
+        }
+    }
+    if context:
+        output["hookSpecificOutput"]["additionalContext"] = context
+    print(json.dumps(output))
 
 
-def ask(reason: str, event: str = "PreToolUse") -> None:
+def ask(reason: str, event: str = "PreToolUse", context: str | None = None) -> None:
     """Ask for user permission.
 
     Args:
         reason: The reason for asking.
         event: The hook event name.
+        context: Additional context/guidance for the user.
     """
-    print(
-        json.dumps(
-            {
-                "hookSpecificOutput": {
-                    "hookEventName": event,
-                    "permissionDecision": "ask",
-                    "permissionDecisionReason": reason,
-                }
-            }
-        )
-    )
+    output: dict = {
+        "hookSpecificOutput": {
+            "hookEventName": event,
+            "permissionDecision": "ask",
+            "permissionDecisionReason": reason,
+        }
+    }
+    if context:
+        output["hookSpecificOutput"]["additionalContext"] = context
+    print(json.dumps(output))
 
 
-def allow() -> None:
-    """Allow action without output (exit 0, no output)."""
-    pass
+def allow(event: str | None = None) -> None:
+    """Allow action.
+
+    Args:
+        event: Optional event name. If provided, outputs JSON with event.
+               If None, exits silently (for SessionStart hooks).
+    """
+    if event:
+        print(json.dumps({"hookSpecificOutput": {"hookEventName": event}}))
