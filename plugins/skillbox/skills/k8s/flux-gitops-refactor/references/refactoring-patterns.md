@@ -1,6 +1,6 @@
-# Migration Patterns Reference
+# Refactoring Patterns Reference
 
-Detailed transformation patterns for migrating Flux GitOps structures to the standard `flux-gitops-scaffold` pattern.
+Detailed transformation patterns for refactoring Flux GitOps structures to the standard `flux-gitops-scaffold` pattern.
 
 ## Structure Types
 
@@ -72,7 +72,7 @@ releases/
 └── charts/
 ```
 
-## Migration Pattern: Flat → Standard
+## Refactoring Pattern: Flat → Standard
 
 ### Step 1: Analyze Current Files
 
@@ -245,9 +245,9 @@ resources:
   # Add other CRDs
 ```
 
-## Migration Pattern: Partial → Standard
+## Refactoring Pattern: Partial → Standard
 
-### Differences from Flat Migration
+### Differences from Flat Refactoring
 
 1. **Preserve existing base** - May only need to add `valuesFrom`
 2. **Convert patches to ConfigMapGenerator** - Replace patch files with values.yaml
@@ -313,7 +313,7 @@ spec:
       valuesKey: values.yaml
 ```
 
-## Migration Pattern: Helm-only → Standard
+## Refactoring Pattern: Helm-only → Standard
 
 ### Key Transformation
 
@@ -345,7 +345,7 @@ infra/
     └── values.yaml
 ```
 
-## Orchestration Migration
+## Orchestration Refactoring
 
 ### Creating Flux Kustomizations
 
@@ -463,7 +463,7 @@ spec:
 
 ## Validation Commands
 
-After migration, validate each component:
+After refactoring, validate each component:
 
 ```bash
 # Validate single component overlay
@@ -478,11 +478,11 @@ kubectl kustomize infra/dev/cluster/controllers | kubectl apply --dry-run=server
 
 ## Rollback Strategy
 
-If migration causes issues:
+If refactoring causes issues:
 
 1. Keep original files in a backup branch
-2. Test migration in non-production first
-3. Use Flux's suspend feature during migration:
+2. Test refactoring in non-production first
+3. Use Flux's suspend feature during refactoring:
    ```bash
    flux suspend kustomization controllers
    ```

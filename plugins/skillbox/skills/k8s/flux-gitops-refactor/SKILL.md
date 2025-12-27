@@ -1,21 +1,21 @@
 ---
-name: flux-gitops-migrator
+name: flux-gitops-refactor
 description: >
-  This skill should be used when the user asks to "migrate Flux project",
+  This skill should be used when the user asks to "refactor Flux project",
   "convert GitOps structure", "upgrade Flux layout", "transform flux structure",
-  "migrate to standard GitOps", "analyze Flux project for migration",
-  "restructure my gitops repo", or mentions "flux migration" or "gitops restructuring".
-  Provides semi-automatic migration from any Flux structure to the standard
+  "refactor to standard GitOps", "analyze Flux project for refactoring",
+  "restructure my gitops repo", or mentions "flux refactoring" or "gitops restructuring".
+  Provides semi-automatic refactoring from any Flux structure to the standard
   flux-gitops-scaffold pattern.
 globs: ["**/clusters/**/*.yaml", "**/apps/**/*.yaml", "**/infra/**/*.yaml"]
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash
 ---
 
-# Flux GitOps Migrator
+# Flux GitOps Refactor
 
 ## Purpose
 
-Migrate existing Flux CD GitOps repositories to the standardized structure defined in `flux-gitops-scaffold`. Supports migration from:
+Refactor existing Flux CD GitOps repositories to the standardized structure defined in `flux-gitops-scaffold`. Supports refactoring from:
 
 - **Flat structures** - All manifests in one directory
 - **Partial structures** - Some base/overlay separation but non-standard
@@ -31,12 +31,12 @@ Migrate existing Flux CD GitOps repositories to the standardized structure defin
 ## When to Use
 
 Activate for:
-- Migrating legacy Flux projects to standard structure
+- Refactoring legacy Flux projects to standard structure
 - Analyzing existing GitOps repositories for compliance
 - Converting flat HelmRelease files to base/overlay pattern
 - Adding missing infrastructure (CRDs, aggregators, dependsOn)
 
-## Migration Workflow
+## Refactoring Workflow
 
 ### Phase 1: Analysis
 
@@ -50,17 +50,17 @@ The script outputs a JSON report with:
 - Structure type classification
 - Detected environments
 - Component inventory (controllers, configs, services, apps)
-- Issues requiring migration
+- Issues requiring refactoring
 - HelmRelease analysis
 
-Review the output and identify migration scope.
+Review the output and identify refactoring scope.
 
-### Phase 2: Migration Plan
+### Phase 2: Refactoring Plan
 
-Based on analysis results, generate a migration plan:
+Based on analysis results, generate a refactoring plan:
 
-| Structure Type | Migration Steps |
-|----------------|-----------------|
+| Structure Type | Refactoring Steps |
+|----------------|-------------------|
 | **Flat** | Create full directory structure, extract values, add Kustomize overlays |
 | **Partial** | Add missing base/overlay, convert patches to ConfigMapGenerator |
 | **Helm-only** | Wrap in Kustomize, add overlays per environment |
@@ -74,7 +74,7 @@ For each HelmRelease, plan:
 
 ### Phase 3: Execution
 
-Execute migration semi-automatically:
+Execute refactoring semi-automatically:
 
 1. **Create directory structure**
    ```
@@ -220,7 +220,7 @@ resources:
 
 ## Validation
 
-After migration, validate with:
+After refactoring, validate with:
 
 ```bash
 # Validate Kustomize structure
@@ -236,9 +236,9 @@ The target structure follows `flux-gitops-scaffold` pattern. Consult:
 - `../flux-gitops-scaffold/references/project-structure.md` - Full directory layout
 - `../flux-gitops-scaffold/references/infra-components.md` - Component patterns
 
-## Migration Checklist
+## Refactoring Checklist
 
-Before completing migration:
+Before completing refactoring:
 
 - [ ] All HelmRelease files have `valuesFrom: ConfigMap`
 - [ ] All overlays use `configMapGenerator` (not patches for values)
@@ -253,12 +253,12 @@ Before completing migration:
 
 ### Reference Files
 
-- **`references/migration-patterns.md`** - Detailed transformation patterns
+- **`references/refactoring-patterns.md`** - Detailed transformation patterns
 - **`../flux-gitops-scaffold/SKILL.md`** - Target structure specification
 
 ### Example Files
 
-- **`examples/migration-report.md`** - Sample analysis report
+- **`examples/refactoring-report.md`** - Sample analysis report
 
 ### Scripts
 
@@ -266,8 +266,8 @@ Before completing migration:
 
 ## Anti-Patterns to Fix
 
-| Source Anti-Pattern | Migration Target |
-|--------------------|------------------|
+| Source Anti-Pattern | Refactoring Target |
+|--------------------|-------------------|
 | Inline values in HelmRelease | Extract to values.yaml + ConfigMapGenerator |
 | Patches for Helm values | ConfigMapGenerator |
 | `installCRDs: true` | `installCRDs: false` + vendored CRDs |

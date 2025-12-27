@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Analyze Flux GitOps repository structure for migration.
+"""Analyze Flux GitOps repository structure for refactoring.
 
 Usage:
     python analyze-structure.py /path/to/gitops-repo
@@ -61,7 +61,7 @@ def parse_yaml_simple(content: str) -> list[dict]:
 
 
 def analyze_helm_release(file_path: Path, content: str) -> dict | None:
-    """Analyze HelmRelease for migration issues."""
+    """Analyze HelmRelease for refactoring issues."""
     if "kind: HelmRelease" not in content:
         return None
 
@@ -169,7 +169,7 @@ def categorize_component(name: str, path: str) -> str:
 
 
 def find_issues(repo_path: Path, helm_releases: list[dict], structure_type: str) -> list[dict]:
-    """Find migration issues."""
+    """Find refactoring issues."""
     issues = []
 
     for hr in helm_releases:
@@ -310,7 +310,7 @@ def analyze_repository(repo_path: Path) -> dict:
 def format_markdown(report: dict) -> str:
     """Format report as Markdown."""
     lines = [
-        "# Flux GitOps Migration Analysis Report",
+        "# Flux GitOps Refactoring Analysis Report",
         "",
         f"**Repository:** `{report['repository']}`",
         f"**Structure Type:** {report['structure_type']}",

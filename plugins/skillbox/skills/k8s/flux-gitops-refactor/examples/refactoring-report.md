@@ -1,4 +1,4 @@
-# Flux GitOps Migration Analysis Report
+# Flux GitOps Refactoring Analysis Report
 
 **Repository:** `/home/user/repos/my-gitops`
 **Structure Type:** partial
@@ -9,7 +9,7 @@
 - Total HelmReleases: 8
 - Total Issues: 12
 - High Severity: 5
-- Migration Required: Yes
+- Refactoring Required: Yes
 
 ## Components
 
@@ -99,7 +99,7 @@
 | api | `apps/base/api/helm.yaml` | ✅ | ✅ |
 | frontend | `apps/base/frontend/helm.yaml` | ✅ | ✅ |
 
-## Migration Plan
+## Refactoring Plan
 
 ### Phase 1: Vendor CRDs
 
