@@ -12,11 +12,84 @@
 
 ## cert-manager
 
-### Base HelmRelease
+### Base + Overlay Structure
+
+```
+infra/
+├── components/
+│   ├── base/cert-manager/       # Shared HelmRepo + HelmRelease
+│   │   ├── kustomization.yaml
+│   │   └── helm.yaml
+│   └── crds/cert-manager/       # CRD management
+│       ├── kustomization.yaml
+│       ├── gitrepository.yaml
+│       └── flux-kustomization.yaml
+└── dev/cert-manager/            # Overlay (values only)
+    ├── kustomization.yaml       # refs base + ConfigMapGenerator
+    └── values.yaml
+```
+
+### CRDs (infra/components/crds/cert-manager/)
+
+```yaml
+# infra/components/crds/cert-manager/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - gitrepository.yaml
+  - flux-kustomization.yaml
+```
+
+```yaml
+# infra/components/crds/cert-manager/gitrepository.yaml
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: cert-manager-crds
+  namespace: flux-system
+spec:
+  interval: 1h
+  url: https://github.com/cert-manager/cert-manager
+  ref:
+    tag: v1.17.0  # Use Context7 for latest
+  ignore: |
+    /*
+    !/deploy/crds
+```
+
+```yaml
+# infra/components/crds/cert-manager/flux-kustomization.yaml
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cert-manager-crds
+  namespace: flux-system
+spec:
+  interval: 1h
+  prune: false  # CRITICAL: Never delete CRDs
+  sourceRef:
+    kind: GitRepository
+    name: cert-manager-crds
+  path: ./deploy/crds
+  wait: true
+  healthChecks:
+    - apiVersion: apiextensions.k8s.io/v1
+      kind: CustomResourceDefinition
+      name: certificates.cert-manager.io
+```
+
+### Base (infra/components/base/cert-manager/)
+
+```yaml
+# infra/components/base/cert-manager/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - helm.yaml
+```
 
 ```yaml
 # infra/components/base/cert-manager/helm.yaml
----
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:
@@ -25,7 +98,6 @@ metadata:
 spec:
   interval: 1h
   url: https://charts.jetstack.io
-
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
@@ -45,7 +117,7 @@ spec:
         namespace: flux-system
   install:
     createNamespace: true
-    crds: Skip  # CRDs managed separately
+    crds: Skip  # CRDs managed in infra/components/crds/
   upgrade:
     remediation:
       retries: 3
@@ -56,7 +128,26 @@ spec:
       valuesKey: values.yaml
 ```
 
-### Environment Values
+### Overlay (infra/{env}/cert-manager/)
+
+```yaml
+# infra/dev/cert-manager/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: flux-system
+
+resources:
+  - ../../components/base/cert-manager
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+configMapGenerator:
+  - name: cert-manager-values
+    files:
+      - values.yaml
+```
 
 ```yaml
 # infra/dev/cert-manager/values.yaml
@@ -101,58 +192,36 @@ spec:
             class: nginx
 ```
 
-### CRD Management
-
-```yaml
-# infra/components/crds/cert-manager/kustomization.yaml
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-resources:
-  - source.yaml
-  - kustomization.yaml
-```
-
-```yaml
-# infra/components/crds/cert-manager/source.yaml
-apiVersion: source.toolkit.fluxcd.io/v1
-kind: GitRepository
-metadata:
-  name: cert-manager-crds
-  namespace: flux-system
-spec:
-  interval: 1h
-  url: https://github.com/cert-manager/cert-manager
-  ref:
-    tag: v1.17.0
-  ignore: |
-    /*
-    !/deploy/crds
-```
-
-```yaml
-# infra/components/crds/cert-manager/kustomization.yaml (Flux)
-apiVersion: kustomize.toolkit.fluxcd.io/v1
-kind: Kustomization
-metadata:
-  name: cert-manager-crds
-  namespace: flux-system
-spec:
-  interval: 10m
-  path: ./deploy/crds
-  prune: false
-  sourceRef:
-    kind: GitRepository
-    name: cert-manager-crds
-```
 
 ## ingress-nginx
 
-### Base HelmRelease
+### Base + Overlay Structure
+
+```
+infra/
+├── components/
+│   └── base/ingress-nginx/      # Shared HelmRepo + HelmRelease
+│       ├── kustomization.yaml
+│       └── helm.yaml
+└── dev/ingress-nginx/           # Overlay (values only)
+    ├── kustomization.yaml
+    └── values.yaml
+```
+
+Note: ingress-nginx has no CRDs, so no entry in `infra/components/crds/`.
+
+### Base (infra/components/base/ingress-nginx/)
+
+```yaml
+# infra/components/base/ingress-nginx/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - helm.yaml
+```
 
 ```yaml
 # infra/components/base/ingress-nginx/helm.yaml
----
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:
@@ -161,7 +230,6 @@ metadata:
 spec:
   interval: 1h
   url: https://kubernetes.github.io/ingress-nginx
-
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
@@ -190,7 +258,26 @@ spec:
       valuesKey: values.yaml
 ```
 
-### Environment Values
+### Overlay (infra/{env}/ingress-nginx/)
+
+```yaml
+# infra/dev/ingress-nginx/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: flux-system
+
+resources:
+  - ../../components/base/ingress-nginx
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+configMapGenerator:
+  - name: ingress-nginx-values
+    files:
+      - values.yaml
+```
 
 ```yaml
 # infra/dev/ingress-nginx/values.yaml
@@ -219,11 +306,84 @@ controller:
 
 ## external-secrets-operator
 
-### Base HelmRelease
+### Base + Overlay Structure
+
+```
+infra/
+├── components/
+│   ├── base/external-secrets-operator/  # Shared HelmRepo + HelmRelease
+│   │   ├── kustomization.yaml
+│   │   └── helm.yaml
+│   └── crds/external-secrets/           # CRD management
+│       ├── kustomization.yaml
+│       ├── gitrepository.yaml
+│       └── flux-kustomization.yaml
+└── dev/secrets-operator/                # Overlay (values only)
+    ├── kustomization.yaml
+    └── values.yaml
+```
+
+### CRDs (infra/components/crds/external-secrets/)
+
+```yaml
+# infra/components/crds/external-secrets/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - gitrepository.yaml
+  - flux-kustomization.yaml
+```
+
+```yaml
+# infra/components/crds/external-secrets/gitrepository.yaml
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: external-secrets-crds
+  namespace: flux-system
+spec:
+  interval: 1h
+  url: https://github.com/external-secrets/external-secrets
+  ref:
+    tag: v0.15.0  # Use Context7 for latest
+  ignore: |
+    /*
+    !/deploy/crds
+```
+
+```yaml
+# infra/components/crds/external-secrets/flux-kustomization.yaml
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: external-secrets-crds
+  namespace: flux-system
+spec:
+  interval: 1h
+  prune: false  # CRITICAL: Never delete CRDs
+  sourceRef:
+    kind: GitRepository
+    name: external-secrets-crds
+  path: ./deploy/crds
+  wait: true
+  healthChecks:
+    - apiVersion: apiextensions.k8s.io/v1
+      kind: CustomResourceDefinition
+      name: externalsecrets.external-secrets.io
+```
+
+### Base (infra/components/base/external-secrets-operator/)
+
+```yaml
+# infra/components/base/external-secrets-operator/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - helm.yaml
+```
 
 ```yaml
 # infra/components/base/external-secrets-operator/helm.yaml
----
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:
@@ -232,7 +392,6 @@ metadata:
 spec:
   interval: 1h
   url: https://charts.external-secrets.io
-
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
@@ -252,7 +411,7 @@ spec:
         namespace: flux-system
   install:
     createNamespace: true
-    crds: Skip
+    crds: Skip  # CRDs managed in infra/components/crds/
   upgrade:
     remediation:
       retries: 3
@@ -263,7 +422,26 @@ spec:
       valuesKey: values.yaml
 ```
 
-### Environment Values
+### Overlay (infra/{env}/secrets-operator/)
+
+```yaml
+# infra/dev/secrets-operator/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: flux-system
+
+resources:
+  - ../../components/base/external-secrets-operator
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+configMapGenerator:
+  - name: external-secrets-values
+    files:
+      - values.yaml
+```
 
 ```yaml
 # infra/dev/secrets-operator/values.yaml
@@ -368,11 +546,33 @@ spec:
 
 ## external-dns
 
-### Base HelmRelease
+### Base + Overlay Structure
+
+```
+infra/
+├── components/
+│   └── base/external-dns/      # Shared HelmRepo + HelmRelease
+│       ├── kustomization.yaml
+│       └── helm.yaml
+└── dev/external-dns/           # Overlay (values only)
+    ├── kustomization.yaml
+    └── values.yaml
+```
+
+Note: external-dns has no CRDs, so no entry in `infra/components/crds/`.
+
+### Base (infra/components/base/external-dns/)
+
+```yaml
+# infra/components/base/external-dns/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - helm.yaml
+```
 
 ```yaml
 # infra/components/base/external-dns/helm.yaml
----
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:
@@ -381,7 +581,6 @@ metadata:
 spec:
   interval: 1h
   url: https://kubernetes-sigs.github.io/external-dns
-
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
@@ -410,7 +609,26 @@ spec:
       valuesKey: values.yaml
 ```
 
-### AWS Route53 Values
+### Overlay (infra/{env}/external-dns/)
+
+```yaml
+# infra/dev/external-dns/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: flux-system
+
+resources:
+  - ../../components/base/external-dns
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+configMapGenerator:
+  - name: external-dns-values
+    files:
+      - values.yaml
+```
 
 ```yaml
 # infra/dev/external-dns/values.yaml

@@ -36,6 +36,14 @@ if echo "$content" | grep -q "source.toolkit.fluxcd.io/v1beta2"; then
     errors+=("Deprecated API: Use source.toolkit.fluxcd.io/v1 instead of v1beta2")
 fi
 
+if echo "$content" | grep -q "image.toolkit.fluxcd.io/v1beta"; then
+    errors+=("Deprecated API: Use image.toolkit.fluxcd.io/v1 instead of v1beta*")
+fi
+
+if echo "$content" | grep -q "external-secrets.io/v1beta1"; then
+    errors+=("Deprecated API: Use external-secrets.io/v1 instead of v1beta1")
+fi
+
 # Check HelmRelease patterns
 if echo "$content" | grep -q "kind: HelmRelease"; then
     # Check for missing interval
@@ -64,6 +72,11 @@ if echo "$content" | grep -q "kind: Kustomization" && echo "$content" | grep -q 
     # Check for path
     if ! echo "$content" | grep -q "path:"; then
         errors+=("Flux Kustomization missing 'path'")
+    fi
+
+    # Check CRD Kustomizations have prune: false
+    if echo "$content" | grep -q "name:.*-crds" && ! echo "$content" | grep -q "prune: false"; then
+        errors+=("CRD Kustomization should have 'prune: false' to prevent deletion")
     fi
 fi
 

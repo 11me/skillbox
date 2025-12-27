@@ -24,36 +24,36 @@ gitops/
 │
 ├── infra/                              # Infrastructure components
 │   ├── components/
-│   │   ├── base/                       # Base HelmReleases
+│   │   ├── base/                       # Shared HelmRepository + HelmRelease
 │   │   │   ├── cert-manager/
-│   │   │   │   ├── helm.yaml           # HelmRepository + HelmRelease
-│   │   │   │   └── kustomization.yaml
+│   │   │   │   ├── kustomization.yaml  # resources: [helm.yaml]
+│   │   │   │   └── helm.yaml           # HelmRepo + HelmRelease
 │   │   │   ├── external-dns/
 │   │   │   ├── external-secrets-operator/
 │   │   │   ├── ingress-nginx/
-│   │   │   └── secrets-store/          # ClusterSecretStore
-│   │   │
-│   │   └── crds/                       # CRD management
+│   │   │   └── secrets-store/
+│   │   └── crds/                       # CRD Kustomizations
 │   │       ├── cert-manager/
-│   │       │   ├── kustomization.yaml  # GitRepository + Kustomization
-│   │       │   └── kustomization.yaml
+│   │       │   ├── kustomization.yaml
+│   │       │   ├── gitrepository.yaml
+│   │       │   └── flux-kustomization.yaml
 │   │       ├── external-secrets/
-│   │       └── prometheus-operator/    # Optional
+│   │       └── kustomization.yaml      # Root for all CRDs
 │   │
-│   ├── dev/                            # Dev environment values
+│   ├── dev/                            # Environment overlays (values only)
 │   │   ├── cert-manager/
-│   │   │   ├── kustomization.yaml      # References base + values
-│   │   │   └── values.yaml
+│   │   │   ├── kustomization.yaml      # refs base + ConfigMapGenerator
+│   │   │   └── values.yaml             # Dev-specific values
 │   │   ├── cert-manager-issuer/
 │   │   │   ├── kustomization.yaml
-│   │   │   └── clusterissuer.yaml      # LetsEncrypt issuer
+│   │   │   └── cluster-issuer.yaml
 │   │   ├── external-dns/
 │   │   ├── ingress-nginx/
 │   │   ├── secrets-operator/
 │   │   └── secrets-store/
 │   │
-│   ├── staging/                        # Staging values
-│   └── prod/                           # Prod values
+│   ├── staging/                        # Same structure as dev
+│   └── prod/                           # Same structure as dev
 │
 ├── apps/                               # Application deployments
 │   ├── base/                           # Base HelmReleases
@@ -133,6 +133,109 @@ spec:
       name: external-secrets-crds
 ```
 
+### infra/components/crds/{component}/kustomization.yaml
+
+```yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - gitrepository.yaml
+  - flux-kustomization.yaml
+```
+
+### infra/components/crds/{component}/gitrepository.yaml
+
+```yaml
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: cert-manager-crds
+  namespace: flux-system
+spec:
+  interval: 1h
+  url: https://github.com/cert-manager/cert-manager
+  ref:
+    tag: v1.17.0
+  ignore: |
+    /*
+    !/deploy/crds
+```
+
+### infra/components/crds/{component}/flux-kustomization.yaml
+
+```yaml
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cert-manager-crds
+  namespace: flux-system
+spec:
+  interval: 1h
+  prune: false  # CRITICAL: Never delete CRDs
+  sourceRef:
+    kind: GitRepository
+    name: cert-manager-crds
+  path: ./deploy/crds
+  wait: true
+  healthChecks:
+    - apiVersion: apiextensions.k8s.io/v1
+      kind: CustomResourceDefinition
+      name: certificates.cert-manager.io
+    - apiVersion: apiextensions.k8s.io/v1
+      kind: CustomResourceDefinition
+      name: issuers.cert-manager.io
+```
+
+### infra/components/base/{component}/kustomization.yaml
+
+```yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - helm.yaml
+```
+
+### infra/components/base/{component}/helm.yaml
+
+```yaml
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: cert-manager
+  namespace: flux-system
+spec:
+  interval: 1h
+  url: https://charts.jetstack.io
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: cert-manager
+  namespace: flux-system
+spec:
+  interval: 30m
+  targetNamespace: cert-manager
+  chart:
+    spec:
+      chart: cert-manager
+      version: "v1.17.0"
+      sourceRef:
+        kind: HelmRepository
+        name: cert-manager
+        namespace: flux-system
+  install:
+    createNamespace: true
+    crds: Skip  # CRDs managed in infra/components/crds/
+  upgrade:
+    remediation:
+      retries: 3
+    crds: Skip
+  valuesFrom:
+    - kind: ConfigMap
+      name: cert-manager-values
+      valuesKey: values.yaml
+```
+
 ### clusters/{env}/99-apps-dev.yaml
 
 ```yaml
@@ -155,50 +258,7 @@ spec:
   wait: true
 ```
 
-### infra/components/base/{component}/helm.yaml
-
-```yaml
----
-apiVersion: source.toolkit.fluxcd.io/v1
-kind: HelmRepository
-metadata:
-  name: component-name
-  namespace: flux-system
-spec:
-  interval: 1h
-  url: https://charts.example.io
-
----
-apiVersion: helm.toolkit.fluxcd.io/v2
-kind: HelmRelease
-metadata:
-  name: component-name
-  namespace: flux-system
-spec:
-  interval: 30m
-  targetNamespace: component-namespace
-  chart:
-    spec:
-      chart: chart-name
-      version: "1.0.0"
-      sourceRef:
-        kind: HelmRepository
-        name: component-name
-        namespace: flux-system
-  install:
-    createNamespace: true
-    crds: Skip
-  upgrade:
-    remediation:
-      retries: 3
-    crds: Skip
-  valuesFrom:
-    - kind: ConfigMap
-      name: component-name-values
-      valuesKey: values.yaml
-```
-
-### infra/{env}/{component}/kustomization.yaml
+### infra/{env}/{component}/kustomization.yaml (Overlay)
 
 ```yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
@@ -207,15 +267,36 @@ kind: Kustomization
 namespace: flux-system
 
 resources:
-  - ../../components/base/component-name
+  - ../../components/base/cert-manager  # Reference shared base
 
 generatorOptions:
   disableNameSuffixHash: true
 
 configMapGenerator:
-  - name: component-name-values
+  - name: cert-manager-values
     files:
       - values.yaml
+```
+
+### infra/{env}/{component}/values.yaml
+
+```yaml
+# Environment-specific values for cert-manager
+fullnameOverride: cert-manager
+
+crds:
+  enabled: false  # Managed via GitRepository
+
+serviceAccount:
+  create: true
+  name: cert-manager
+
+resources:
+  requests:
+    cpu: 10m
+    memory: 64Mi
+  limits:
+    memory: 256Mi
 ```
 
 ### apps/{env}/{app}/kustomization.yaml

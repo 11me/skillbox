@@ -51,16 +51,20 @@ Create the following structure:
 │       └── ... (same structure)
 ├── infra/
 │   ├── components/
-│   │   ├── base/
+│   │   ├── base/                 # Shared HelmRepository + HelmRelease
 │   │   │   └── {component}/
-│   │   │       ├── helmrelease.yaml
-│   │   │       └── kustomization.yaml
-│   │   └── crds/
-│   │       └── {component}/
-│   │           └── kustomization.yaml
-│   ├── dev/
+│   │   │       ├── kustomization.yaml
+│   │   │       └── helm.yaml     # HelmRepo + HelmRelease
+│   │   └── crds/                 # CRD Kustomizations (shared)
+│   │       ├── cert-manager/
+│   │       │   ├── kustomization.yaml
+│   │       │   ├── gitrepository.yaml
+│   │       │   └── flux-kustomization.yaml
+│   │       ├── external-secrets/
+│   │       └── kustomization.yaml
+│   ├── dev/                      # Environment overlays (values only)
 │   │   └── {component}/
-│   │       ├── kustomization.yaml
+│   │       ├── kustomization.yaml  # refs ../../components/base/{component}
 │   │       └── values.yaml
 │   ├── staging/
 │   │   └── ...
@@ -87,6 +91,8 @@ Create the following structure:
             └── hpa.yaml
 ```
 
+**Structure Principle:** Base + overlay. `components/base/` has shared HelmRelease, `{env}/` overlays provide values.
+
 ### Step 4: Generate Manifests
 
 Read examples from skill directory and adapt:
@@ -99,19 +105,33 @@ Read examples from skill directory and adapt:
 
 For each selected component:
 
-1. Create `infra/components/base/{component}/` with HelmRelease
-2. Create `infra/components/crds/{component}/` if component has CRDs
-3. Create `infra/{env}/{component}/` for each environment
+1. If component has CRDs, create `infra/components/crds/{component}/`:
+   - `kustomization.yaml` - Resources reference
+   - `gitrepository.yaml` - Source for CRD manifests
+   - `flux-kustomization.yaml` - `prune: false`, healthChecks
+
+2. Create `infra/components/base/{component}/`:
+   - `kustomization.yaml` - Resources reference
+   - `helm.yaml` - HelmRepository + HelmRelease (single file)
+
+3. Create `infra/{env}/{component}/` overlay for each environment:
+   - `kustomization.yaml` - refs `../../components/base/{component}` + ConfigMapGenerator
+   - `values.yaml` - Environment-specific values
+
 4. Add component to `clusters/{env}/` orchestration
+
+**Validation:** Run `kubectl kustomize infra/{env}/{component}` to validate before commit.
 
 ### Step 6: Configure External Secrets
 
 Based on selected secrets provider, create:
 
-1. `infra/components/base/external-secrets/` with HelmRelease
-2. `infra/{env}/external-secrets/` with ClusterSecretStore for provider
+1. `infra/components/crds/external-secrets/` with GitRepository + Flux Kustomization
+2. `infra/components/base/external-secrets-operator/` with HelmRepository + HelmRelease
+3. `infra/{env}/secrets-operator/` with overlay kustomization + values
+4. `infra/{env}/secrets-store/` with ClusterSecretStore for provider
 
-Use `examples/external-secret.yaml` as reference.
+Use `examples/external-secret.yaml` and `references/infra-components.md` as reference.
 
 ### Step 7: Copy Generic Helm Chart
 

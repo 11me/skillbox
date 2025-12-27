@@ -1,0 +1,7 @@
+# infra/components/crds/{component}/kustomization.yaml
+# Kustomize configuration for CRD management
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - gitrepository.yaml
+  - flux-kustomization.yaml

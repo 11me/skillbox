@@ -49,14 +49,26 @@ gitops/
 │   └── prod/
 ├── infra/
 │   ├── components/
-│   │   ├── base/                # HelmRepository + HelmRelease
-│   │   └── crds/                # CRD management
-│   └── {env}/                   # Environment-specific values
+│   │   ├── base/                # Shared HelmRepository + HelmRelease
+│   │   │   ├── cert-manager/
+│   │   │   │   ├── kustomization.yaml
+│   │   │   │   └── helm.yaml    # HelmRepo + HelmRelease
+│   │   │   └── ingress-nginx/
+│   │   └── crds/                # CRD Kustomizations
+│   │       ├── cert-manager/
+│   │       └── external-secrets/
+│   ├── dev/                     # Environment overlays (values only)
+│   │   └── cert-manager/
+│   │       ├── kustomization.yaml  # refs ../../components/base/cert-manager
+│   │       └── values.yaml
+│   └── prod/
 ├── apps/
 │   ├── base/{app}/              # Base HelmRelease
 │   └── {env}/{app}/             # Values + patches + image automation
 └── charts/app/                  # Generic application chart
 ```
+
+**Structure Principle:** Base + overlay pattern. `components/base/` contains shared HelmRelease, `{env}/` overlays provide only values.
 
 See `references/project-structure.md` for detailed layout.
 
@@ -90,15 +102,22 @@ To add infra component (cert-manager, ingress-nginx, etc.):
    get-library-docs: topic="installation"
    ```
 
-2. Create `infra/components/base/{component}/`:
-   - `helm.yaml` - HelmRepository + HelmRelease
-   - `kustomization.yaml` - Resource reference
+2. If component has CRDs, create `infra/components/crds/{component}/`:
+   - `kustomization.yaml` - Resources reference
+   - `gitrepository.yaml` - Source for CRD manifests
+   - `flux-kustomization.yaml` - `prune: false`, healthChecks
 
-3. Create `infra/{env}/{component}/`:
-   - `kustomization.yaml` - ConfigMapGenerator
-   - `values.yaml` - Environment values
+3. Create `infra/components/base/{component}/`:
+   - `kustomization.yaml` - Resources reference
+   - `helm.yaml` - HelmRepository + HelmRelease (single file)
 
-4. Add to `clusters/{env}/` orchestration with proper numbering
+4. Create `infra/{env}/{component}/` overlay for each environment:
+   - `kustomization.yaml` - refs `../../components/base/{component}` + ConfigMapGenerator
+   - `values.yaml` - Environment-specific values only
+
+5. Add to `clusters/{env}/` orchestration with proper numbering
+
+**Validation:** Run `kubectl kustomize infra/{env}/{component}` to validate before commit.
 
 See `references/infra-components.md` for supported components.
 
@@ -181,21 +200,22 @@ spec:
 ### ConfigMap Generator (Kustomize)
 
 ```yaml
+# infra/{env}/{component}/kustomization.yaml - Overlay pattern
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 namespace: flux-system
 
 resources:
-  - ../../base/app-name
+  - ../../components/base/cert-manager  # Reference shared base
 
 generatorOptions:
   disableNameSuffixHash: true  # CRITICAL: prevents name changes
 
 configMapGenerator:
-  - name: app-name-values
+  - name: cert-manager-values
     files:
-      - values.yaml
+      - values.yaml  # Environment-specific values
 ```
 
 ### Flux Kustomization with Dependencies
@@ -281,17 +301,39 @@ get-library-docs: context7CompatibleLibraryID="/jetstack/cert-manager", topic="h
 
 See `references/version-matrix.md` for current versions.
 
+## Validation
+
+Before committing GitOps manifests, validate structure with `kubectl kustomize`:
+
+```bash
+# Validate infra component
+kubectl kustomize infra/dev/cert-manager
+
+# Validate apps
+kubectl kustomize apps/dev
+
+# Validate entire environment (from cluster kustomization)
+kubectl kustomize clusters/dev
+```
+
+This catches:
+- Missing files referenced in kustomization.yaml
+- Invalid patches
+- YAML syntax errors
+- Invalid resource references
+
 ## Definition of Done
 
 Before completing GitOps scaffolding:
 
 1. **Structure**: All directories created per pattern
-2. **Dependencies**: `dependsOn` set correctly in Kustomizations
-3. **Versions**: Latest versions fetched via Context7
-4. **API Versions**: All using current stable APIs
-5. **Values**: ConfigMapGenerator with `disableNameSuffixHash: true`
-6. **Secrets**: ExternalSecret configured (not hardcoded secrets)
-7. **Image Automation**: Markers set for automated updates
+2. **Validation**: `kubectl kustomize` passes for all directories
+3. **Dependencies**: `dependsOn` set correctly in Kustomizations
+4. **Versions**: Latest versions fetched via Context7
+5. **API Versions**: All using current stable APIs
+6. **Values**: ConfigMapGenerator with `disableNameSuffixHash: true`
+7. **Secrets**: ExternalSecret configured (not hardcoded secrets)
+8. **Image Automation**: Markers set for automated updates
 
 ## Anti-Patterns
 
@@ -331,6 +373,9 @@ Working examples in `examples/`:
 - **`cluster-kustomization.yaml`** - Flux Kustomization with dependencies
 - **`helmrelease-base.yaml`** - Base HelmRelease pattern
 - **`helmrelease-env-patch.yaml`** - Environment overlay
+- **`infra-base-helm.yaml`** - Base HelmRepo + HelmRelease (single file)
+- **`infra-overlay-kustomization.yaml`** - Environment overlay kustomization
+- **`crds-*.yaml`** - CRD management patterns
 - **`image-automation-ecr.yaml`** - ECR automation
 - **`image-automation-ghcr.yaml`** - GHCR automation
 - **`external-secret.yaml`** - ESO pattern

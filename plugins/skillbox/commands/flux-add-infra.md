@@ -35,12 +35,14 @@ Use Glob to find existing GitOps structure:
 
 ```
 **/clusters/*/kustomization.yaml
-**/infra/components/base/*/helmrelease.yaml
+**/infra/*/kustomization.yaml
+**/infra/crds/*/kustomization.yaml
 ```
 
 Identify:
 - Available environments (dev, staging, prod)
-- Existing infrastructure components
+- Existing infrastructure components in each environment
+- Existing CRDs in `infra/crds/`
 - Project root directory
 
 ### Step 3: Get Latest Version
@@ -54,44 +56,7 @@ get-library-docs: topic="helm" or "installation"
 
 Extract version or use `references/version-matrix.md` as fallback.
 
-### Step 4: Create Base Component
-
-Create `infra/components/base/{component}/`:
-
-**helmrelease.yaml:**
-```yaml
-apiVersion: helm.toolkit.fluxcd.io/v2
-kind: HelmRelease
-metadata:
-  name: {component}
-spec:
-  interval: 30m
-  chart:
-    spec:
-      chart: {chart-name}
-      version: "{version}"
-      sourceRef:
-        kind: HelmRepository
-        name: {repo-name}
-        namespace: flux-system
-  install:
-    crds: Skip  # If has CRDs
-  upgrade:
-    crds: Skip
-    remediation:
-      retries: 3
-```
-
-**kustomization.yaml:**
-```yaml
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-namespace: {namespace}
-resources:
-  - helmrelease.yaml
-```
-
-### Step 5: Create CRDs (if applicable)
+### Step 4: Create CRDs (if applicable)
 
 If component has CRDs, create `infra/components/crds/{component}/`:
 
@@ -100,7 +65,94 @@ If component has CRDs, create `infra/components/crds/{component}/`:
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - https://github.com/{org}/{repo}/releases/download/v{version}/crds.yaml
+  - gitrepository.yaml
+  - flux-kustomization.yaml
+```
+
+**gitrepository.yaml:**
+```yaml
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: {component}-crds
+  namespace: flux-system
+spec:
+  interval: 1h
+  url: https://github.com/{org}/{repo}
+  ref:
+    tag: v{version}
+  ignore: |
+    /*
+    !/deploy/crds
+```
+
+**flux-kustomization.yaml:**
+```yaml
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: {component}-crds
+  namespace: flux-system
+spec:
+  interval: 1h
+  prune: false  # CRITICAL: Never delete CRDs
+  sourceRef:
+    kind: GitRepository
+    name: {component}-crds
+  path: ./deploy/crds
+  wait: true
+```
+
+### Step 5: Create Base Component
+
+Create shared base in `infra/components/base/{component}/`:
+
+**kustomization.yaml:**
+```yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - helm.yaml
+```
+
+**helm.yaml:**
+```yaml
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: {component}
+  namespace: flux-system
+spec:
+  interval: 1h
+  url: {chart-repository-url}
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: {component}
+  namespace: flux-system
+spec:
+  interval: 30m
+  targetNamespace: {target-namespace}
+  chart:
+    spec:
+      chart: {chart-name}
+      version: "{version}"
+      sourceRef:
+        kind: HelmRepository
+        name: {component}
+        namespace: flux-system
+  install:
+    createNamespace: true
+    crds: Skip  # If has CRDs
+  upgrade:
+    crds: Skip
+    remediation:
+      retries: 3
+  valuesFrom:
+    - kind: ConfigMap
+      name: {component}-values
+      valuesKey: values.yaml
 ```
 
 ### Step 6: Create Environment Overlays
@@ -111,14 +163,19 @@ For each environment (dev, staging, prod), create `infra/{env}/{component}/`:
 ```yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+
+namespace: flux-system
+
 resources:
   - ../../components/base/{component}
+
+generatorOptions:
+  disableNameSuffixHash: true
+
 configMapGenerator:
   - name: {component}-values
     files:
       - values.yaml
-generatorOptions:
-  disableNameSuffixHash: true
 ```
 
 **values.yaml:**
@@ -126,6 +183,8 @@ generatorOptions:
 # Environment-specific values for {component}
 # Customize per environment
 ```
+
+**Validation:** Run `kubectl kustomize infra/{env}/{component}` to validate.
 
 ### Step 7: Update Cluster Orchestration
 
@@ -163,19 +222,23 @@ spec:
 
 Update `clusters/{env}/kustomization.yaml` to include new file.
 
-### Step 8: Create HelmRepository (if needed)
+### Step 8: Update CRDs Reference (if applicable)
 
-Check if HelmRepository exists in `infra/components/base/sources/`. If not, create:
+If component has CRDs, update `clusters/{env}/00-crds.yaml` to include healthCheck:
 
 ```yaml
-apiVersion: source.toolkit.fluxcd.io/v1
-kind: HelmRepository
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
 metadata:
-  name: {repo-name}
+  name: crds
   namespace: flux-system
 spec:
-  interval: 1h
-  url: {repo-url}
+  path: ./infra/components/crds
+  prune: false
+  healthChecks:
+    - apiVersion: kustomize.toolkit.fluxcd.io/v1
+      kind: Kustomization
+      name: {component}-crds  # Add new component
 ```
 
 ## Component-Specific Patterns
