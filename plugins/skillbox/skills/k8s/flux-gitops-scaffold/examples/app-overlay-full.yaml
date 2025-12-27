@@ -1,0 +1,78 @@
+# apps/{env}/{app}/kustomization.yaml
+# Application overlay with configs and secrets
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: dev
+
+resources:
+  - ../../base/myapp
+  - configs/myapp.config.yaml
+  - secrets/myapp.external.yaml
+
+patches:
+  - path: patches.yaml
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+configMapGenerator:
+  - name: myapp-values
+    files:
+      - values.yaml=values.yaml
+
+configurations:
+  - kustomizeconfig.yaml
+---
+# apps/{env}/{app}/configs/myapp.config.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: myapp-config
+data:
+  PROJECT: "MyApp"
+  HOST: "0.0.0.0"
+  PORT: "8000"
+  LOG_LEVEL: "info"
+  DB_HOST: "postgres.dev.svc"
+  REDIS_HOST: "redis-master.dev.svc"
+---
+# apps/{env}/{app}/secrets/myapp.external.yaml
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: myapp
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: secrets-store
+  target:
+    name: myapp
+    creationPolicy: Owner
+  dataFrom:
+    - extract:
+        key: dev/myapp
+---
+# apps/{env}/{app}/patches.yaml
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: myapp
+spec:
+  values:
+    image:
+      tag: dev-abc123-12345 # {"$imagepolicy": "flux-system:myapp-dev:tag"}
+---
+# apps/{env}/{app}/kustomizeconfig.yaml
+nameReference:
+  - kind: ConfigMap
+    version: v1
+    fieldSpecs:
+      - path: spec/valuesFrom/name
+        kind: HelmRelease
+  - kind: Secret
+    version: v1
+    fieldSpecs:
+      - path: spec/valuesFrom/name
+        kind: HelmRelease

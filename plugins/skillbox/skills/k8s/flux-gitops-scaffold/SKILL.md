@@ -37,38 +37,41 @@ Activate for:
 
 ```
 gitops/
-├── clusters/                    # Flux orchestration layer
-│   ├── dev/
-│   │   ├── 00-crds.yaml         # CRDs first (prune: false)
-│   │   ├── 02-secrets-operator.yaml
-│   │   ├── 05-ingress-nginx.yaml
-│   │   ├── 06-cert-manager.yaml
-│   │   ├── 99-apps.yaml         # Apps last (depends on infra)
-│   │   ├── flux-system/
-│   │   └── kustomization.yaml
-│   └── prod/
+├── clusters/{env}/              # Flux orchestration layer
+│   ├── kustomization.yaml       # Aggregates all Flux Kustomizations
+│   ├── 00-crds.yaml             # CRDs (prune: false, wait: true)
+│   ├── 01-controllers.yaml      # dependsOn: crds
+│   ├── 02-cluster-configs.yaml  # dependsOn: controllers
+│   ├── 03-services.yaml         # dependsOn: cluster-configs
+│   ├── 99-apps.yaml             # dependsOn: services, cluster-configs
+│   └── flux-system/
+│
 ├── infra/
-│   ├── components/
-│   │   ├── base/                # Shared HelmRepository + HelmRelease
-│   │   │   ├── cert-manager/
-│   │   │   │   ├── kustomization.yaml
-│   │   │   │   └── helm.yaml    # HelmRepo + HelmRelease
-│   │   │   └── ingress-nginx/
-│   │   └── crds/                # CRD Kustomizations
-│   │       ├── cert-manager/
-│   │       └── external-secrets/
-│   ├── dev/                     # Environment overlays (values only)
-│   │   └── cert-manager/
-│   │       ├── kustomization.yaml  # refs ../../components/base/cert-manager
-│   │       └── values.yaml
-│   └── prod/
+│   ├── base/
+│   │   ├── cluster/
+│   │   │   ├── controllers/     # cert-manager, ingress-nginx, ESO
+│   │   │   └── configs/         # ClusterIssuer, ClusterSecretStore
+│   │   └── services/            # redis, postgres (with configs/secrets)
+│   ├── crds/                    # Vendored CRDs (applied first)
+│   │   ├── kustomization.yaml   # Aggregates all CRD subdirs
+│   │   ├── cert-manager/
+│   │   └── external-secrets/
+│   └── {env}/
+│       ├── cluster/
+│       │   ├── controllers/     # values only (ConfigMapGenerator)
+│       │   └── configs/         # plain manifests
+│       └── services/            # values + configs + secrets
+│
 ├── apps/
 │   ├── base/{app}/              # Base HelmRelease
-│   └── {env}/{app}/             # Values + patches + image automation
+│   └── {env}/{app}/             # values + configs + secrets
+│       ├── configs/             # Plain ConfigMaps
+│       └── secrets/             # ExternalSecrets
+│
 └── charts/app/                  # Generic application chart
 ```
 
-**Structure Principle:** Base + overlay pattern. `components/base/` contains shared HelmRelease, `{env}/` overlays provide only values.
+**Structure Principle:** Base + overlay with explicit layering. Controllers → Configs → Services → Apps.
 
 See `references/project-structure.md` for detailed layout.
 
@@ -94,30 +97,47 @@ To create a new GitOps project:
 
 ### 2. Add Infrastructure Component
 
-To add infra component (cert-manager, ingress-nginx, etc.):
+Three workflows depending on component type:
 
-1. Get latest version via Context7:
-   ```
-   resolve-library-id: "cert-manager"
-   get-library-docs: topic="installation"
-   ```
+#### 2a. Add Controller (cert-manager, ingress-nginx, ESO)
 
-2. If component has CRDs, create `infra/components/crds/{component}/`:
+1. Get latest version via Context7
+2. Vendor CRDs to `infra/crds/{component}/`:
    - `kustomization.yaml` - Resources reference
-   - `gitrepository.yaml` - Source for CRD manifests
-   - `flux-kustomization.yaml` - `prune: false`, healthChecks
-
-3. Create `infra/components/base/{component}/`:
+   - `crds.yaml` - Vendored from upstream (curl from release)
+3. Create `infra/base/cluster/controllers/{component}/`:
    - `kustomization.yaml` - Resources reference
-   - `helm.yaml` - HelmRepository + HelmRelease (single file)
+   - `helm.yaml` - HelmRepository + HelmRelease (installCRDs: false)
+4. Create `infra/{env}/cluster/controllers/{component}/`:
+   - `kustomization.yaml` - refs base + ConfigMapGenerator
+   - `values.yaml` - Environment values (installCRDs: false)
+5. Update `infra/crds/kustomization.yaml` aggregator
+6. Update `infra/{env}/cluster/controllers/kustomization.yaml` aggregator
 
-4. Create `infra/{env}/{component}/` overlay for each environment:
-   - `kustomization.yaml` - refs `../../components/base/{component}` + ConfigMapGenerator
-   - `values.yaml` - Environment-specific values only
+#### 2b. Add Cluster Config (ClusterIssuer, ClusterSecretStore)
 
-5. Add to `clusters/{env}/` orchestration with proper numbering
+1. Create `infra/base/cluster/configs/{component}/`:
+   - `kustomization.yaml` - Resources reference
+   - `{component}.yaml` - Plain manifest template
+2. Create `infra/{env}/cluster/configs/{component}/`:
+   - `kustomization.yaml` - refs base
+   - `{component}.yaml` - Environment-specific manifest
+3. Update `infra/{env}/cluster/configs/kustomization.yaml` aggregator
 
-**Validation:** Run `kubectl kustomize infra/{env}/{component}` to validate before commit.
+#### 2c. Add Service (redis, postgres)
+
+1. Get latest version via Context7
+2. Create `infra/base/services/{component}/`:
+   - `kustomization.yaml` - Resources reference
+   - `helm.yaml` - HelmRepository + HelmRelease
+3. Create `infra/{env}/services/{component}/`:
+   - `kustomization.yaml` - refs base + ConfigMapGenerator + configs + secrets
+   - `values.yaml` - With envFrom injection
+   - `configs/{component}.config.yaml` - Plain ConfigMap
+   - `secrets/{component}.external.yaml` - ExternalSecret
+4. Update `infra/{env}/services/kustomization.yaml` aggregator
+
+**Validation:** Run `kubectl kustomize infra/{env}/...` to validate before commit.
 
 See `references/infra-components.md` for supported components.
 
@@ -131,18 +151,21 @@ To add application with image automation:
    - Tag pattern (dev: run_id, prod: semver)
 
 2. Create `apps/base/{app}/`:
+   - `kustomization.yaml` - Resources reference
    - `helm.yaml` - HelmRelease referencing `charts/app`
-   - `kustomization.yaml`
 
 3. Create `apps/{env}/{app}/`:
-   - `kustomization.yaml` - Patches + ConfigMapGenerator
-   - `values.yaml` - Environment values
+   - `kustomization.yaml` - refs base + ConfigMapGenerator + configs + secrets
+   - `values.yaml` - With envFrom injection
    - `patches.yaml` - Image tag with automation marker
-   - `kustomizeconfig.yaml` - ConfigMap reference
-   - `secrets/` - ExternalSecret
+   - `kustomizeconfig.yaml` - ConfigMap name replacement
+   - `configs/{app}.config.yaml` - Plain ConfigMap (non-sensitive)
+   - `secrets/{app}.external.yaml` - ExternalSecret (sensitive)
 
 4. Create image automation in `apps/{env}/`:
    - `image-automation.yaml` - ImageRepository + ImagePolicy + ImageUpdateAutomation
+
+5. Update `apps/{env}/kustomization.yaml` aggregator
 
 See `references/image-automation.md` for registry-specific patterns.
 
@@ -250,41 +273,123 @@ spec:
       tag: dev-abc123-12345 # {"$imagepolicy": "flux-system:app-dev:tag"}
 ```
 
-## Orchestration Rules
+## Configs & Secrets Pattern
 
-### Numbered Ordering
+For services and apps, use configs/ + secrets/ directories:
 
-Use numbered prefixes for deployment order:
-- `00-crds.yaml` - CRDs (always first, prune: false)
-- `02-secrets-operator.yaml` - ESO operator
-- `03-secrets-store.yaml` - ClusterSecretStore
-- `05-ingress-nginx.yaml` - Ingress controller
-- `06-cert-manager.yaml` - Certificate manager
-- `07-cert-manager-issuer.yaml` - ClusterIssuer
-- `99-apps.yaml` - Applications (always last)
+### Plain ConfigMap (Non-Sensitive)
 
-### Dependencies
-
-Always set `dependsOn` for:
-- Apps depend on ingress-nginx, secrets-store
-- cert-manager-issuer depends on cert-manager
-- secrets-store depends on secrets-operator
-
-### CRD Safety
-
-For CRD Kustomizations:
 ```yaml
-spec:
-  prune: false  # Never delete CRDs
+# configs/{name}.config.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {prefix}-{name}-config
+data:
+  HOST: "0.0.0.0"
+  PORT: "8000"
+  DB_HOST: "db.example.com"
 ```
 
-For HelmReleases with CRDs:
+### ExternalSecret (Sensitive)
+
 ```yaml
+# secrets/{name}.external.yaml
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: {prefix}-{name}
 spec:
-  install:
-    crds: Skip  # CRDs managed separately
-  upgrade:
-    crds: Skip
+  refreshInterval: 1h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: secrets-store
+  target:
+    name: {prefix}-{name}
+    creationPolicy: Owner
+  dataFrom:
+    - extract:
+        key: {secret-path}
+```
+
+### values.yaml with envFrom Injection
+
+```yaml
+envFrom:
+  - configMapRef:
+      name: {prefix}-{name}-config
+  - secretRef:
+      name: {prefix}-{name}
+```
+
+### Overlay kustomization.yaml (Full Pattern)
+
+```yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: {env}
+resources:
+  - ../../../base/services/{name}  # or ../../base/{name} for apps
+  - configs/{name}.config.yaml
+  - secrets/{name}.external.yaml
+configMapGenerator:
+  - name: {name}-values
+    files:
+      - values.yaml=values.yaml
+generatorOptions:
+  disableNameSuffixHash: true
+configurations:
+  - kustomizeconfig.yaml
+```
+
+**Naming Convention:** If env = namespace, skip {env} suffix in resource names.
+
+## Orchestration
+
+Five Flux Kustomizations with explicit `dependsOn` chain:
+
+| File | DependsOn | Path | Critical Settings |
+|------|-----------|------|-------------------|
+| `00-crds.yaml` | - | `./infra/crds` | prune: false, wait: true |
+| `01-controllers.yaml` | crds | `./infra/{env}/cluster/controllers` | wait: true, timeout: 10m |
+| `02-cluster-configs.yaml` | controllers | `./infra/{env}/cluster/configs` | wait: true, timeout: 5m |
+| `03-services.yaml` | cluster-configs | `./infra/{env}/services` | wait: true, timeout: 10m |
+| `99-apps.yaml` | services, cluster-configs | `./apps/{env}` | wait: true, timeout: 10m |
+
+**Why this order:**
+- CRDs must exist before controllers can install CRs
+- Controllers must be running before configs (ClusterIssuer needs cert-manager)
+- Cluster configs (ClusterSecretStore) needed before services can fetch secrets
+- Services provide infrastructure for apps (redis, postgres)
+
+### Aggregator Pattern
+
+Each directory Flux points to **MUST** have `kustomization.yaml`:
+
+```yaml
+# infra/{env}/cluster/controllers/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - cert-manager
+  - ingress-nginx
+  - external-secrets
+```
+
+### CRD Management
+
+**CRITICAL:** Vendor CRDs into repository. Do NOT use nested Flux Kustomizations for CRDs.
+
+```bash
+# Download vendored CRDs
+curl -sL https://github.com/cert-manager/cert-manager/releases/download/v1.17.0/cert-manager.crds.yaml \
+  > infra/crds/cert-manager/crds.yaml
+```
+
+For HelmReleases with CRDs, disable CRD installation:
+```yaml
+# values.yaml
+installCRDs: false
 ```
 
 ## Version Management
@@ -342,10 +447,14 @@ Before completing GitOps scaffolding:
 | Hardcoded secrets in values | ExternalSecret + secretRef |
 | `prune: true` for CRDs | `prune: false` to prevent deletion |
 | Missing `dependsOn` | Always set dependencies |
-| `crds: CreateReplace` | `crds: Skip` (manage separately) |
+| `crds: CreateReplace` | `crds: Skip` + vendored CRDs |
+| `installCRDs: true` in values | `installCRDs: false` (CRDs managed separately) |
+| Nested Flux Kustomization for CRDs | Vendor CRDs into repo (race condition!) |
+| Missing `wait: true` | Always use `wait: true` + `timeout` |
+| Missing aggregator kustomization.yaml | Every Flux path needs kustomization.yaml |
 | `v2beta1`/`v2beta2` APIs | Use stable `v2`/`v1` APIs |
 | Hash suffix on ConfigMaps | `disableNameSuffixHash: true` |
-| Single values.yaml for all envs | Base + overlay pattern |
+| `{name}-{env}` suffix | Skip suffix if env = namespace |
 
 ## Examples
 
@@ -370,12 +479,23 @@ For detailed patterns, consult:
 ### Example Files
 
 Working examples in `examples/`:
-- **`cluster-kustomization.yaml`** - Flux Kustomization with dependencies
-- **`helmrelease-base.yaml`** - Base HelmRelease pattern
-- **`helmrelease-env-patch.yaml`** - Environment overlay
-- **`infra-base-helm.yaml`** - Base HelmRepo + HelmRelease (single file)
-- **`infra-overlay-kustomization.yaml`** - Environment overlay kustomization
-- **`crds-*.yaml`** - CRD management patterns
+
+**Orchestration:**
+- **`orchestration-kustomizations.yaml`** - All 5 Flux Kustomizations with dependsOn chain
+
+**Controllers & Configs:**
+- **`infra-base-helm.yaml`** - Base HelmRepo + HelmRelease for controller
+- **`cluster-controller-overlay.yaml`** - Controller overlay (values only)
+- **`cluster-config-overlay.yaml`** - Cluster config overlay (ClusterIssuer)
+
+**Services & Apps (with configs/secrets):**
+- **`service-overlay-full.yaml`** - Service with configs/secrets
+- **`app-overlay-full.yaml`** - App with configs/secrets
+- **`config-configmap.yaml`** - Plain ConfigMap pattern
+- **`values-with-envfrom.yaml`** - values.yaml with envFrom injection
+
+**CRDs & Image Automation:**
+- **`crds-kustomization.yaml`** - Vendored CRDs aggregator
 - **`image-automation-ecr.yaml`** - ECR automation
 - **`image-automation-ghcr.yaml`** - GHCR automation
 - **`external-secret.yaml`** - ESO pattern

@@ -1,95 +1,60 @@
 # Infrastructure Components Reference
 
-## Supported Components
+## Component Types
 
-| Component | Chart Repository | Purpose |
-|-----------|------------------|---------|
-| cert-manager | https://charts.jetstack.io | TLS certificates |
-| ingress-nginx | https://kubernetes.github.io/ingress-nginx | Ingress controller |
-| external-secrets | https://charts.external-secrets.io | Secret management |
-| external-dns | https://kubernetes-sigs.github.io/external-dns | DNS automation |
-| prometheus-stack | https://prometheus-community.github.io/helm-charts | Monitoring |
+| Type | Location | Examples |
+|------|----------|----------|
+| Controllers | `base/cluster/controllers/` | cert-manager, ingress-nginx, ESO |
+| Cluster Configs | `base/cluster/configs/` | ClusterIssuer, ClusterSecretStore |
+| Services | `base/services/` | redis, postgres |
+| CRDs | `crds/` | Vendored from upstream releases |
 
-## cert-manager
+## Supported Controllers
 
-### Base + Overlay Structure
+| Controller | Chart Repository | Has CRDs |
+|------------|------------------|----------|
+| cert-manager | https://charts.jetstack.io | Yes |
+| ingress-nginx | https://kubernetes.github.io/ingress-nginx | No |
+| external-secrets | https://charts.external-secrets.io | Yes |
+| external-dns | https://kubernetes-sigs.github.io/external-dns | No |
+| prometheus-stack | https://prometheus-community.github.io/helm-charts | Yes |
+
+## cert-manager (Controller + CRDs)
+
+### Directory Structure
 
 ```
 infra/
-├── components/
-│   ├── base/cert-manager/       # Shared HelmRepo + HelmRelease
-│   │   ├── kustomization.yaml
-│   │   └── helm.yaml
-│   └── crds/cert-manager/       # CRD management
-│       ├── kustomization.yaml
-│       ├── gitrepository.yaml
-│       └── flux-kustomization.yaml
-└── dev/cert-manager/            # Overlay (values only)
-    ├── kustomization.yaml       # refs base + ConfigMapGenerator
-    └── values.yaml
+├── base/cluster/controllers/cert-manager/
+│   ├── kustomization.yaml
+│   └── helm.yaml
+├── crds/cert-manager/
+│   ├── kustomization.yaml
+│   └── crds.yaml              # Vendored
+└── dev/cluster/controllers/cert-manager/
+    ├── kustomization.yaml
+    └── values.yaml            # installCRDs: false
 ```
 
-### CRDs (infra/components/crds/cert-manager/)
+### Vendored CRDs
+
+```bash
+curl -sL https://github.com/cert-manager/cert-manager/releases/download/v1.17.0/cert-manager.crds.yaml \
+  > infra/crds/cert-manager/crds.yaml
+```
 
 ```yaml
-# infra/components/crds/cert-manager/kustomization.yaml
+# infra/crds/cert-manager/kustomization.yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - gitrepository.yaml
-  - flux-kustomization.yaml
+  - crds.yaml
 ```
 
-```yaml
-# infra/components/crds/cert-manager/gitrepository.yaml
-apiVersion: source.toolkit.fluxcd.io/v1
-kind: GitRepository
-metadata:
-  name: cert-manager-crds
-  namespace: flux-system
-spec:
-  interval: 1h
-  url: https://github.com/cert-manager/cert-manager
-  ref:
-    tag: v1.17.0  # Use Context7 for latest
-  ignore: |
-    /*
-    !/deploy/crds
-```
+### Base Controller
 
 ```yaml
-# infra/components/crds/cert-manager/flux-kustomization.yaml
-apiVersion: kustomize.toolkit.fluxcd.io/v1
-kind: Kustomization
-metadata:
-  name: cert-manager-crds
-  namespace: flux-system
-spec:
-  interval: 1h
-  prune: false  # CRITICAL: Never delete CRDs
-  sourceRef:
-    kind: GitRepository
-    name: cert-manager-crds
-  path: ./deploy/crds
-  wait: true
-  healthChecks:
-    - apiVersion: apiextensions.k8s.io/v1
-      kind: CustomResourceDefinition
-      name: certificates.cert-manager.io
-```
-
-### Base (infra/components/base/cert-manager/)
-
-```yaml
-# infra/components/base/cert-manager/kustomization.yaml
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-resources:
-  - helm.yaml
-```
-
-```yaml
-# infra/components/base/cert-manager/helm.yaml
+# infra/base/cluster/controllers/cert-manager/helm.yaml
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:
@@ -110,39 +75,35 @@ spec:
   chart:
     spec:
       chart: cert-manager
-      version: "v1.17.0"  # Use Context7 for latest
+      version: "v1.17.0"
       sourceRef:
         kind: HelmRepository
         name: cert-manager
         namespace: flux-system
   install:
     createNamespace: true
-    crds: Skip  # CRDs managed in infra/components/crds/
+    crds: Skip              # CRDs managed in infra/crds/
   upgrade:
+    crds: Skip
     remediation:
       retries: 3
-    crds: Skip
   valuesFrom:
     - kind: ConfigMap
       name: cert-manager-values
       valuesKey: values.yaml
 ```
 
-### Overlay (infra/{env}/cert-manager/)
+### Overlay
 
 ```yaml
-# infra/dev/cert-manager/kustomization.yaml
+# infra/dev/cluster/controllers/cert-manager/kustomization.yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-
 namespace: flux-system
-
 resources:
-  - ../../components/base/cert-manager
-
+  - ../../../../base/cluster/controllers/cert-manager
 generatorOptions:
   disableNameSuffixHash: true
-
 configMapGenerator:
   - name: cert-manager-values
     files:
@@ -150,20 +111,14 @@ configMapGenerator:
 ```
 
 ```yaml
-# infra/dev/cert-manager/values.yaml
+# infra/dev/cluster/controllers/cert-manager/values.yaml
+# CRITICAL: CRDs managed separately
+installCRDs: false
+
 fullnameOverride: cert-manager
-
-crds:
-  enabled: false  # Managed via GitRepository
-
 serviceAccount:
   create: true
   name: cert-manager
-
-global:
-  leaderElection:
-    namespace: cert-manager
-
 resources:
   requests:
     cpu: 10m
@@ -172,56 +127,84 @@ resources:
     memory: 256Mi
 ```
 
-### ClusterIssuer
+## ClusterIssuer (Cluster Config)
+
+Depends on cert-manager controller being ready.
+
+### Directory Structure
+
+```
+infra/
+├── base/cluster/configs/cluster-issuer/
+│   ├── kustomization.yaml
+│   └── cluster-issuer.yaml
+└── dev/cluster/configs/cluster-issuer/
+    ├── kustomization.yaml
+    └── cluster-issuer.yaml
+```
+
+### Base Config
 
 ```yaml
-# infra/dev/cert-manager-issuer/clusterissuer.yaml
+# infra/base/cluster/configs/cluster-issuer/cluster-issuer.yaml
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
-  name: letsencrypt-prod
+  name: letsencrypt
 spec:
   acme:
     server: https://acme-v02.api.letsencrypt.org/directory
     email: admin@example.com
     privateKeySecretRef:
-      name: letsencrypt-prod-key
+      name: letsencrypt-account-key
     solvers:
       - http01:
           ingress:
             class: nginx
 ```
 
+### Overlay
 
-## ingress-nginx
+```yaml
+# infra/dev/cluster/configs/cluster-issuer/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../../../base/cluster/configs/cluster-issuer
+patches:
+  - path: cluster-issuer.yaml
+```
 
-### Base + Overlay Structure
+```yaml
+# infra/dev/cluster/configs/cluster-issuer/cluster-issuer.yaml
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt
+spec:
+  acme:
+    server: https://acme-staging-v02.api.letsencrypt.org/directory  # Staging for dev
+    email: dev-admin@example.com
+```
+
+## ingress-nginx (Controller, No CRDs)
+
+### Directory Structure
 
 ```
 infra/
-├── components/
-│   └── base/ingress-nginx/      # Shared HelmRepo + HelmRelease
-│       ├── kustomization.yaml
-│       └── helm.yaml
-└── dev/ingress-nginx/           # Overlay (values only)
+├── base/cluster/controllers/ingress-nginx/
+│   ├── kustomization.yaml
+│   └── helm.yaml
+└── dev/cluster/controllers/ingress-nginx/
     ├── kustomization.yaml
     └── values.yaml
 ```
 
-Note: ingress-nginx has no CRDs, so no entry in `infra/components/crds/`.
-
-### Base (infra/components/base/ingress-nginx/)
+### Base Controller
 
 ```yaml
-# infra/components/base/ingress-nginx/kustomization.yaml
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-resources:
-  - helm.yaml
-```
-
-```yaml
-# infra/components/base/ingress-nginx/helm.yaml
+# infra/base/cluster/controllers/ingress-nginx/helm.yaml
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:
@@ -242,7 +225,7 @@ spec:
   chart:
     spec:
       chart: ingress-nginx
-      version: "4.12.0"  # Use Context7 for latest
+      version: "4.12.0"
       sourceRef:
         kind: HelmRepository
         name: ingress-nginx
@@ -258,132 +241,53 @@ spec:
       valuesKey: values.yaml
 ```
 
-### Overlay (infra/{env}/ingress-nginx/)
+### Overlay
 
 ```yaml
-# infra/dev/ingress-nginx/kustomization.yaml
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-namespace: flux-system
-
-resources:
-  - ../../components/base/ingress-nginx
-
-generatorOptions:
-  disableNameSuffixHash: true
-
-configMapGenerator:
-  - name: ingress-nginx-values
-    files:
-      - values.yaml
-```
-
-```yaml
-# infra/dev/ingress-nginx/values.yaml
+# infra/dev/cluster/controllers/ingress-nginx/values.yaml
 controller:
   replicaCount: 2
-
   service:
     type: LoadBalancer
     annotations:
-      # AWS NLB
       service.beta.kubernetes.io/aws-load-balancer-type: nlb
       service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
-
   resources:
     requests:
       cpu: 100m
       memory: 128Mi
     limits:
       memory: 256Mi
-
-  metrics:
-    enabled: true
-    serviceMonitor:
-      enabled: false  # Enable if using prometheus-stack
 ```
 
-## external-secrets-operator
+## external-secrets (Controller + CRDs)
 
-### Base + Overlay Structure
+### Directory Structure
 
 ```
 infra/
-├── components/
-│   ├── base/external-secrets-operator/  # Shared HelmRepo + HelmRelease
-│   │   ├── kustomization.yaml
-│   │   └── helm.yaml
-│   └── crds/external-secrets/           # CRD management
-│       ├── kustomization.yaml
-│       ├── gitrepository.yaml
-│       └── flux-kustomization.yaml
-└── dev/secrets-operator/                # Overlay (values only)
+├── base/cluster/controllers/external-secrets/
+│   ├── kustomization.yaml
+│   └── helm.yaml
+├── crds/external-secrets/
+│   ├── kustomization.yaml
+│   └── crds.yaml              # Vendored
+└── dev/cluster/controllers/external-secrets/
     ├── kustomization.yaml
-    └── values.yaml
+    └── values.yaml            # installCRDs: false
 ```
 
-### CRDs (infra/components/crds/external-secrets/)
+### Vendored CRDs
 
-```yaml
-# infra/components/crds/external-secrets/kustomization.yaml
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-resources:
-  - gitrepository.yaml
-  - flux-kustomization.yaml
+```bash
+curl -sL https://raw.githubusercontent.com/external-secrets/external-secrets/v0.15.0/deploy/crds/bundle.yaml \
+  > infra/crds/external-secrets/crds.yaml
 ```
 
-```yaml
-# infra/components/crds/external-secrets/gitrepository.yaml
-apiVersion: source.toolkit.fluxcd.io/v1
-kind: GitRepository
-metadata:
-  name: external-secrets-crds
-  namespace: flux-system
-spec:
-  interval: 1h
-  url: https://github.com/external-secrets/external-secrets
-  ref:
-    tag: v0.15.0  # Use Context7 for latest
-  ignore: |
-    /*
-    !/deploy/crds
-```
+### Base Controller
 
 ```yaml
-# infra/components/crds/external-secrets/flux-kustomization.yaml
-apiVersion: kustomize.toolkit.fluxcd.io/v1
-kind: Kustomization
-metadata:
-  name: external-secrets-crds
-  namespace: flux-system
-spec:
-  interval: 1h
-  prune: false  # CRITICAL: Never delete CRDs
-  sourceRef:
-    kind: GitRepository
-    name: external-secrets-crds
-  path: ./deploy/crds
-  wait: true
-  healthChecks:
-    - apiVersion: apiextensions.k8s.io/v1
-      kind: CustomResourceDefinition
-      name: externalsecrets.external-secrets.io
-```
-
-### Base (infra/components/base/external-secrets-operator/)
-
-```yaml
-# infra/components/base/external-secrets-operator/kustomization.yaml
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-resources:
-  - helm.yaml
-```
-
-```yaml
-# infra/components/base/external-secrets-operator/helm.yaml
+# infra/base/cluster/controllers/external-secrets/helm.yaml
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:
@@ -404,48 +308,30 @@ spec:
   chart:
     spec:
       chart: external-secrets
-      version: "0.15.0"  # Use Context7 for latest
+      version: "0.15.0"
       sourceRef:
         kind: HelmRepository
         name: external-secrets
         namespace: flux-system
   install:
     createNamespace: true
-    crds: Skip  # CRDs managed in infra/components/crds/
+    crds: Skip
   upgrade:
+    crds: Skip
     remediation:
       retries: 3
-    crds: Skip
   valuesFrom:
     - kind: ConfigMap
       name: external-secrets-values
       valuesKey: values.yaml
 ```
 
-### Overlay (infra/{env}/secrets-operator/)
+### Overlay
 
 ```yaml
-# infra/dev/secrets-operator/kustomization.yaml
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-namespace: flux-system
-
-resources:
-  - ../../components/base/external-secrets-operator
-
-generatorOptions:
-  disableNameSuffixHash: true
-
-configMapGenerator:
-  - name: external-secrets-values
-    files:
-      - values.yaml
-```
-
-```yaml
-# infra/dev/secrets-operator/values.yaml
-installCRDs: false  # Managed via GitRepository
+# infra/dev/cluster/controllers/external-secrets/values.yaml
+# CRITICAL: CRDs managed separately
+installCRDs: false
 
 serviceAccount:
   create: true
@@ -453,7 +339,6 @@ serviceAccount:
   annotations:
     # AWS IRSA
     eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/external-secrets
-
 resources:
   requests:
     cpu: 10m
@@ -462,16 +347,30 @@ resources:
     memory: 128Mi
 ```
 
-## ClusterSecretStore
+## ClusterSecretStore (Cluster Config)
+
+Depends on external-secrets controller being ready.
+
+### Directory Structure
+
+```
+infra/
+├── base/cluster/configs/secrets-store/
+│   ├── kustomization.yaml
+│   └── cluster-secret-store.yaml
+└── dev/cluster/configs/secrets-store/
+    ├── kustomization.yaml
+    └── cluster-secret-store.yaml
+```
 
 ### AWS Secrets Manager
 
 ```yaml
-# infra/components/base/secrets-store/clustersecretstore.yaml
+# infra/dev/cluster/configs/secrets-store/cluster-secret-store.yaml
 apiVersion: external-secrets.io/v1
 kind: ClusterSecretStore
 metadata:
-  name: aws-secrets-manager
+  name: secrets-store
 spec:
   conditions:
     - namespaceSelector:
@@ -481,7 +380,6 @@ spec:
     aws:
       service: SecretsManager
       region: us-east-1
-      # auth via IRSA - no explicit credentials needed
 ```
 
 ### GCP Secret Manager
@@ -490,7 +388,7 @@ spec:
 apiVersion: external-secrets.io/v1
 kind: ClusterSecretStore
 metadata:
-  name: gcp-secret-manager
+  name: secrets-store
 spec:
   conditions:
     - namespaceSelector:
@@ -499,151 +397,53 @@ spec:
   provider:
     gcpsm:
       projectID: my-gcp-project
-      # auth via Workload Identity
 ```
 
-### Azure Key Vault
+### Yandex Lockbox
 
 ```yaml
 apiVersion: external-secrets.io/v1
 kind: ClusterSecretStore
 metadata:
-  name: azure-key-vault
+  name: yandex-lockbox
 spec:
   conditions:
     - namespaceSelector:
         matchLabels:
           eso.example.com/enabled: "true"
   provider:
-    azurekv:
-      tenantId: "tenant-id"
-      vaultUrl: "https://my-vault.vault.azure.net"
-      authType: ManagedIdentity
-```
-
-### HashiCorp Vault
-
-```yaml
-apiVersion: external-secrets.io/v1
-kind: ClusterSecretStore
-metadata:
-  name: hashicorp-vault
-spec:
-  conditions:
-    - namespaceSelector:
-        matchLabels:
-          eso.example.com/enabled: "true"
-  provider:
-    vault:
-      server: "https://vault.example.com"
-      path: "secret"
-      version: "v2"
+    yandexlockbox:
       auth:
-        kubernetes:
-          mountPath: "kubernetes"
-          role: "external-secrets"
+        authorizedKeySecretRef:
+          name: yc-auth
+          key: authorized-key
 ```
 
-## external-dns
+## external-dns (Controller, No CRDs)
 
-### Base + Overlay Structure
+### Directory Structure
 
 ```
 infra/
-├── components/
-│   └── base/external-dns/      # Shared HelmRepo + HelmRelease
-│       ├── kustomization.yaml
-│       └── helm.yaml
-└── dev/external-dns/           # Overlay (values only)
+├── base/cluster/controllers/external-dns/
+│   ├── kustomization.yaml
+│   └── helm.yaml
+└── dev/cluster/controllers/external-dns/
     ├── kustomization.yaml
     └── values.yaml
 ```
 
-Note: external-dns has no CRDs, so no entry in `infra/components/crds/`.
-
-### Base (infra/components/base/external-dns/)
+### Overlay
 
 ```yaml
-# infra/components/base/external-dns/kustomization.yaml
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-resources:
-  - helm.yaml
-```
-
-```yaml
-# infra/components/base/external-dns/helm.yaml
-apiVersion: source.toolkit.fluxcd.io/v1
-kind: HelmRepository
-metadata:
-  name: external-dns
-  namespace: flux-system
-spec:
-  interval: 1h
-  url: https://kubernetes-sigs.github.io/external-dns
----
-apiVersion: helm.toolkit.fluxcd.io/v2
-kind: HelmRelease
-metadata:
-  name: external-dns
-  namespace: flux-system
-spec:
-  interval: 30m
-  targetNamespace: external-dns
-  chart:
-    spec:
-      chart: external-dns
-      version: "1.16.0"  # Use Context7 for latest
-      sourceRef:
-        kind: HelmRepository
-        name: external-dns
-        namespace: flux-system
-  install:
-    createNamespace: true
-  upgrade:
-    remediation:
-      retries: 3
-  valuesFrom:
-    - kind: ConfigMap
-      name: external-dns-values
-      valuesKey: values.yaml
-```
-
-### Overlay (infra/{env}/external-dns/)
-
-```yaml
-# infra/dev/external-dns/kustomization.yaml
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-namespace: flux-system
-
-resources:
-  - ../../components/base/external-dns
-
-generatorOptions:
-  disableNameSuffixHash: true
-
-configMapGenerator:
-  - name: external-dns-values
-    files:
-      - values.yaml
-```
-
-```yaml
-# infra/dev/external-dns/values.yaml
+# infra/dev/cluster/controllers/external-dns/values.yaml
 provider: aws
-
 aws:
   region: us-east-1
-
 domainFilters:
   - example.com
-
-policy: sync  # upsert-only for safer updates
-
+policy: sync
 txtOwnerId: "dev-cluster"
-
 serviceAccount:
   create: true
   name: external-dns
@@ -651,50 +451,90 @@ serviceAccount:
     eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/external-dns
 ```
 
-## Cluster Orchestration Example
+## Aggregator Pattern
+
+Each directory pointed to by Flux **MUST** have `kustomization.yaml`:
 
 ```yaml
-# clusters/dev/kustomization.yaml
+# infra/dev/cluster/controllers/kustomization.yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-
 resources:
-  - 00-crds.yaml
-  - 02-secrets-operator.yaml
-  - 03-secrets-store.yaml
-  - 04-external-dns.yaml
-  - 05-ingress-nginx.yaml
-  - 06-cert-manager.yaml
-  - 07-cert-manager-issuer.yaml
-  - 99-apps-dev.yaml
+  - cert-manager
+  - ingress-nginx
+  - external-secrets
+  - external-dns
 ```
+
+```yaml
+# infra/dev/cluster/configs/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - cluster-issuer
+  - secrets-store
+```
+
+```yaml
+# infra/crds/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - cert-manager
+  - external-secrets
+```
+
+## Orchestration (5 Kustomizations)
+
+```
+00-crds                    # Vendored CRDs, prune: false, wait: true
+    ↓
+01-controllers             # dependsOn: crds, wait: true, timeout: 10m
+    ↓
+02-cluster-configs         # dependsOn: controllers, wait: true, timeout: 5m
+    ↓
+03-services                # dependsOn: cluster-configs, wait: true, timeout: 10m
+    ↓
+99-apps                    # dependsOn: services, cluster-configs
+```
+
+**Why this order:**
+- CRDs must exist before controllers install CRs
+- Controllers must be running before configs (ClusterIssuer needs cert-manager)
+- Cluster configs needed before services (ClusterSecretStore for secrets)
+- Services provide infrastructure for apps (redis, postgres)
 
 ## Dependency Graph
 
 ```
-00-crds
-    ├── cert-manager-crds
-    ├── external-secrets-crds
-    └── prometheus-operator-crds (optional)
+infra/crds/
+├── cert-manager/crds.yaml          # Vendored
+└── external-secrets/crds.yaml      # Vendored
 
-02-secrets-operator
-    └── depends on: crds
+infra/base/cluster/controllers/
+├── cert-manager/                   # depends on: CRDs
+├── ingress-nginx/                  # no CRD dependency
+├── external-secrets/               # depends on: CRDs
+└── external-dns/                   # no CRD dependency
 
-03-secrets-store
-    └── depends on: secrets-operator
+infra/base/cluster/configs/
+├── cluster-issuer/                 # depends on: cert-manager controller
+└── secrets-store/                  # depends on: external-secrets controller
 
-04-external-dns
-    └── (no dependencies)
-
-05-ingress-nginx
-    └── (no dependencies)
-
-06-cert-manager
-    └── depends on: crds (cert-manager-crds)
-
-07-cert-manager-issuer
-    └── depends on: cert-manager
-
-99-apps
-    └── depends on: ingress-nginx, secrets-store
+infra/base/services/
+└── redis/                          # depends on: secrets-store (for secrets)
 ```
+
+## Version Updates
+
+Use Context7 to fetch latest versions:
+
+```
+resolve-library-id: libraryName="cert-manager"
+get-library-docs: context7CompatibleLibraryID="/jetstack/cert-manager", topic="installation"
+```
+
+After version update:
+1. Update chart version in `helm.yaml`
+2. Re-vendor CRDs from new release
+3. Test with `kubectl kustomize`

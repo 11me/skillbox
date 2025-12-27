@@ -1,7 +1,31 @@
-# infra/components/crds/{component}/kustomization.yaml
-# Kustomize configuration for CRD management
+# infra/crds/kustomization.yaml
+# Aggregator for all vendored CRDs
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - gitrepository.yaml
-  - flux-kustomization.yaml
+  - cert-manager
+  - external-secrets
+---
+# infra/crds/cert-manager/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - crds.yaml
+---
+# infra/crds/external-secrets/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - crds.yaml
+---
+# How to vendor CRDs:
+#
+# cert-manager:
+# curl -sL https://github.com/cert-manager/cert-manager/releases/download/v1.17.0/cert-manager.crds.yaml \
+#   > infra/crds/cert-manager/crds.yaml
+#
+# external-secrets:
+# curl -sL https://raw.githubusercontent.com/external-secrets/external-secrets/v0.15.0/deploy/crds/bundle.yaml \
+#   > infra/crds/external-secrets/crds.yaml
+#
+# CRITICAL: Vendor CRDs instead of using nested Flux Kustomizations to avoid race conditions

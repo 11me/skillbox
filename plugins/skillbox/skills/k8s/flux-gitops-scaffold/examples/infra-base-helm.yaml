@@ -1,6 +1,6 @@
-# infra/components/base/{component}/helm.yaml
+# infra/base/cluster/controllers/{component}/helm.yaml
 # Base HelmRepository + HelmRelease in a single file
-# Used by all environment overlays
+# Used by all environment overlays in infra/{env}/cluster/controllers/{component}/
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:
@@ -28,7 +28,7 @@ spec:
         namespace: flux-system
   install:
     createNamespace: true
-    crds: Skip  # CRDs managed in infra/components/crds/
+    crds: Skip  # CRDs managed in infra/crds/ (vendored)
   upgrade:
     remediation:
       retries: 3

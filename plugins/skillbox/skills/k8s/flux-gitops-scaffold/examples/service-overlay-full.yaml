@@ -1,0 +1,67 @@
+# infra/{env}/services/{component}/kustomization.yaml
+# Service overlay with configs and secrets
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: dev
+
+resources:
+  - ../../../base/services/redis
+  - configs/redis.config.yaml
+  - secrets/redis.external.yaml
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+configMapGenerator:
+  - name: redis-values
+    files:
+      - values.yaml=values.yaml
+
+configurations:
+  - kustomizeconfig.yaml
+---
+# infra/{env}/services/{component}/configs/redis.config.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-config
+data:
+  REDIS_HOST: "redis-master"
+  REDIS_PORT: "6379"
+  REDIS_DB: "0"
+---
+# infra/{env}/services/{component}/secrets/redis.external.yaml
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: redis
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: secrets-store
+  target:
+    name: redis
+    creationPolicy: Owner
+  dataFrom:
+    - extract:
+        key: dev/redis
+---
+# infra/{env}/services/{component}/values.yaml
+auth:
+  enabled: true
+  existingSecret: redis
+  existingSecretPasswordKey: password
+
+master:
+  persistence:
+    enabled: true
+    size: 1Gi
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+
+replica:
+  replicaCount: 0  # Dev environment

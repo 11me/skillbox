@@ -1,0 +1,26 @@
+# configs/{name}.config.yaml
+# Plain ConfigMap for non-sensitive configuration
+# Naming: {prefix}-{name}-config (skip {env} suffix if env = namespace)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: myapp-config
+data:
+  # Application settings
+  PROJECT: "MyApp"
+  HOST: "0.0.0.0"
+  PORT: "8000"
+  LOG_LEVEL: "info"
+
+  # External service endpoints
+  DB_HOST: "postgres.dev.svc"
+  DB_PORT: "5432"
+  DB_NAME: "myapp"
+
+  REDIS_HOST: "redis-master.dev.svc"
+  REDIS_PORT: "6379"
+  REDIS_DB: "0"
+
+  # Feature flags
+  FEATURE_NEW_UI: "true"
+  FEATURE_BETA_API: "false"
