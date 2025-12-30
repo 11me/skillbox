@@ -44,6 +44,12 @@ claude --plugin-dir ./plugins/skillbox
 | [conventional-commit](plugins/skillbox/skills/core/conventional-commit/) | Structured commit messages |
 | [context-engineering](plugins/skillbox/skills/core/context-engineering/) | Long-session context management |
 
+### Go Development
+
+| Skill | Description |
+|-------|-------------|
+| [go-development](plugins/skillbox/skills/go/go-development/) | Production Go patterns: pgx, squirrel, Service Registry, typed errors |
+
 ### Platform Engineering
 
 | Skill | Description |
@@ -81,6 +87,7 @@ Autonomous agents for specialized tasks. See [agents/_index.md](plugins/skillbox
 | [task-tracker](plugins/skillbox/agents/core/task-tracker.md) | haiku | Manage beads task lifecycle |
 | [session-checkpoint](plugins/skillbox/agents/core/session-checkpoint.md) | haiku | Save progress to serena memory |
 | [code-navigator](plugins/skillbox/agents/core/code-navigator.md) | sonnet | Semantic code exploration |
+| [go-project-init](plugins/skillbox/agents/go/project-init.md) | sonnet | Scaffold Go projects with production patterns |
 | [test-analyzer](plugins/skillbox/agents/tdd/test-analyzer.md) | sonnet | Analyze test coverage |
 | [tdd-coach](plugins/skillbox/agents/tdd/tdd-coach.md) | sonnet | Guide TDD workflow |
 
@@ -97,6 +104,9 @@ Autonomous agents for specialized tasks. See [agents/_index.md](plugins/skillbox
 | `/flux-init` | Initialize Flux GitOps project |
 | `/flux-add-infra` | Add infrastructure component to GitOps |
 | `/flux-add-app` | Add application with image automation |
+| `/go-add-service` | Generate Go service with factory method |
+| `/go-add-repository` | Generate Go repository with interface |
+| `/go-add-model` | Generate Go model with mapper |
 
 ## Hooks
 
@@ -114,7 +124,8 @@ Autonomous agents for specialized tasks. See [agents/_index.md](plugins/skillbox
 | Task | Use |
 |------|-----|
 | Create new plugin | `plugin-dev` (official) |
-| Scaffold TypeScript/Go project | `plugin-dev` (official) |
+| Scaffold TypeScript project | `plugin-dev` (official) |
+| Scaffold Go project with production patterns | `go-development` (skillbox) |
 | Track tasks across sessions | `beads-workflow` (skillbox) |
 | Navigate code semantically | `serena-navigation` (skillbox) |
 | Create Helm charts | `helm-chart-developer` (skillbox) |
@@ -134,6 +145,8 @@ plugins/skillbox/
 │   │   ├── context-engineering/
 │   │   ├── tdd-enforcer/
 │   │   └── skill-patterns/
+│   ├── go/                      # Go development
+│   │   └── go-development/      # Production patterns
 │   ├── ts/                      # TypeScript (educational)
 │   └── k8s/                     # Platform engineering
 │       ├── helm-chart-developer/
