@@ -7,7 +7,7 @@ description: |
   - `/go` command invoked
   - Creating/scaffolding Go services
 
-  Covers: Config, Database, Services, Repositories, Errors, Logging, Testing,
+  Covers: Entry Point, Config, Database, Services, Repositories, Errors, Logging, Testing,
   HTTP Handlers, Middleware, Validation, Pagination, Health Checks, Workers, Tracing,
   Naming, Concurrency, Pitfalls, Performance.
 triggers:
@@ -95,6 +95,7 @@ project/
 
 | Pattern | File |
 |---------|------|
+| Entry Point | [entrypoint-pattern.md](references/entrypoint-pattern.md) |
 | Configuration | [config-pattern.md](references/config-pattern.md) |
 | Database & Transactions | [database-pattern.md](references/database-pattern.md) |
 | Service Layer | [service-pattern.md](references/service-pattern.md) |
@@ -136,6 +137,8 @@ project/
 
 | Component | File |
 |-----------|------|
+| Main | [main.go](examples/main.go) |
+| Backend | [backend.go](examples/backend.go) |
 | Config | [config.go](examples/config.go) |
 | Database Client | [pg-client.go](examples/pg-client.go) |
 | Repository | [repository.go](examples/repository.go) |
@@ -143,8 +146,9 @@ project/
 | Errors | [errors.go](examples/errors.go) |
 | Logger (slog) | [logger_slog.go](examples/logger_slog.go) |
 | Logger (zap) | [logger_zap.go](examples/logger_zap.go) |
-| Tests | [service_test.go](examples/service_test.go) |
-| Main | [main.go](examples/main.go) |
+| Test Setup | [main_test.go](examples/main_test.go) |
+| Repository Tests | [repository_test.go](examples/repository_test.go) |
+| Service Tests | [service_test.go](examples/service_test.go) |
 
 ### HTTP Layer
 
@@ -186,6 +190,7 @@ Always use latest versions:
 
 ```bash
 # Core
+go get golang.org/x/sync/errgroup@latest
 go get github.com/caarlos0/env/v10@latest
 go get github.com/jackc/pgx/v5@latest
 go get github.com/Masterminds/squirrel@latest
@@ -199,6 +204,7 @@ go get github.com/go-playground/validator/v10@latest
 
 # Testing
 go get github.com/stretchr/testify@latest
+go get github.com/testcontainers/testcontainers-go@latest
 
 # Tracing (OpenTelemetry)
 go get go.opentelemetry.io/otel@latest
@@ -210,6 +216,8 @@ go get github.com/exaring/otelpgx@latest
 
 ## Version
 
+- 1.5.0 — Enhanced testing (testcontainers, testify mock, CI/Local detection)
+- 1.4.0 — Entry point pattern (backend, errgroup, graceful shutdown)
 - 1.3.0 — Best practices (naming, concurrency, pitfalls, performance)
 - 1.2.0 — Simple errors, OpenTelemetry tracing
 - 1.1.0 — HTTP Layer, Enhanced Errors, Production Patterns (pagination, health, workers)

@@ -2,109 +2,110 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"log/slog"
-	"net/http"
-	"os"
+	"log"
 	"os/signal"
 	"syscall"
 	"time"
 
-	"myapp/internal/config"
-	"myapp/internal/handler"
-	"myapp/internal/services"
-	"myapp/internal/storage"
-	"myapp/pkg/postgres"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+	"golang.org/x/sync/errgroup"
 )
 
-var ServiceVersion = "dev"
+var Version = "dev"
 
 func main() {
-	if err := run(); err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-		os.Exit(1)
-	}
-}
-
-func run() error {
-	ctx := context.Background()
-
-	// Load config
-	cfg, err := config.New()
-	if err != nil {
-		return fmt.Errorf("config: %w", err)
+	// Load configuration
+	cfg := NewConfig()
+	if err := cfg.Parse(); err != nil {
+		log.Fatalln("parse config:", err)
 	}
 
 	// Setup logger
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
-		Level: parseLogLevel(cfg.LogLevel),
-	}))
-	slog.SetDefault(logger)
+	logger := setupLogger(cfg.LogLevel)
+	defer logger.Sync()
 
-	logger.Info("starting service",
-		slog.String("version", ServiceVersion),
-		slog.String("app", cfg.AppName),
+	logger.Info("starting application",
+		zap.String("version", Version),
+		zap.String("app", cfg.AppName),
 	)
 
-	// Connect to database
-	db, err := postgres.NewClient(ctx, cfg.DB.DSN(), cfg.DB.MaxConns, cfg.DB.MinConns)
-	if err != nil {
-		return fmt.Errorf("database: %w", err)
-	}
-	defer db.Close()
+	// Create and initialize backend
+	be := newBackend(cfg, logger)
 
-	logger.Info("connected to database")
-
-	// Initialize storage and services
-	store := storage.NewStorage(db)
-	svcRegistry := services.NewRegistry(cfg, store)
-
-	// Setup HTTP server
-	h := handler.New(svcRegistry, logger)
-	srv := &http.Server{
-		Addr:         cfg.HTTP.Addr(),
-		Handler:      h,
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 10 * time.Second,
-	}
-
-	// Start server
-	go func() {
-		logger.Info("starting HTTP server", slog.String("addr", srv.Addr))
-		if err := srv.ListenAndServe(); err != http.ErrServerClosed {
-			logger.Error("server error", slog.String("error", err.Error()))
-			os.Exit(1)
-		}
-	}()
-
-	// Wait for shutdown signal
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit
-
-	logger.Info("shutting down")
-
-	// Graceful shutdown
-	shutdownCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	if err := srv.Shutdown(shutdownCtx); err != nil {
-		return fmt.Errorf("shutdown: %w", err)
+	if err := be.init(ctx); err != nil {
+		logger.Fatal("init backend", zap.Error(err))
 	}
 
-	logger.Info("shutdown complete")
-	return nil
+	// Setup signal handling
+	ctx, cancel = signal.NotifyContext(
+		context.Background(),
+		syscall.SIGINT,
+		syscall.SIGTERM,
+	)
+	defer cancel()
+
+	// Create errgroup for concurrent execution
+	eg, ctx := errgroup.WithContext(ctx)
+
+	logger.Info("starting servers")
+
+	// Start servers concurrently
+	eg.Go(be.startMonitorServer)
+	eg.Go(be.startAPIServer)
+
+	// Start background jobs
+	be.startJobs(ctx, eg)
+
+	logger.Info("application started")
+
+	// Wait for shutdown signal
+	<-ctx.Done()
+
+	logger.Info("stopping application")
+
+	// Graceful shutdown with timeout
+	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer shutdownCancel()
+
+	be.stop(shutdownCtx)
+
+	// Wait for all goroutines to finish
+	if err := eg.Wait(); err != nil {
+		logger.Error("shutdown error", zap.Error(err))
+	}
+
+	logger.Info("application stopped")
 }
 
-func parseLogLevel(level string) slog.Level {
-	switch level {
-	case "debug":
-		return slog.LevelDebug
-	case "warn":
-		return slog.LevelWarn
-	case "error":
-		return slog.LevelError
-	default:
-		return slog.LevelInfo
+// setupLogger creates a production-ready zap logger.
+func setupLogger(level string) *zap.Logger {
+	cfg := zap.NewProductionConfig()
+
+	// Parse log level
+	var lvl zapcore.Level
+	if err := lvl.UnmarshalText([]byte(level)); err != nil {
+		lvl = zapcore.InfoLevel
 	}
+	cfg.Level = zap.NewAtomicLevelAt(lvl)
+
+	// Disable stacktrace for non-error levels
+	cfg.DisableStacktrace = true
+
+	// ISO8601 time format
+	cfg.EncoderConfig.TimeKey = "time"
+	cfg.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+
+	logger, err := cfg.Build()
+	if err != nil {
+		log.Fatalln("build logger:", err)
+	}
+
+	// Replace global logger
+	zap.ReplaceGlobals(logger)
+
+	return logger
 }
