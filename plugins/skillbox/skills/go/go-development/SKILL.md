@@ -7,7 +7,7 @@ description: |
   - `/go` command invoked
   - Creating/scaffolding Go services
 
-  Covers: Entry Point, Config, Database, Services, Repositories, Errors, Logging, Testing,
+  Covers: Entry Point, Config, Database, Services, Repositories, Errors, Logging, Testing, Money,
   HTTP Handlers, Middleware, Validation, Pagination, Health Checks, Workers, Tracing,
   Naming, Concurrency, Pitfalls, Performance.
 triggers:
@@ -103,6 +103,7 @@ project/
 | Error Handling | [error-handling.md](references/error-handling.md) |
 | Logging | [logging-pattern.md](references/logging-pattern.md) |
 | Testing | [testing-pattern.md](references/testing-pattern.md) |
+| Money | [money-pattern.md](references/money-pattern.md) |
 | Build & Deploy | [build-deploy.md](references/build-deploy.md) |
 
 ### HTTP Layer
@@ -149,6 +150,8 @@ project/
 | Test Setup | [main_test.go](examples/main_test.go) |
 | Repository Tests | [repository_test.go](examples/repository_test.go) |
 | Service Tests | [service_test.go](examples/service_test.go) |
+| Money | [money.go](examples/money.go) |
+| Money Tests | [money_test.go](examples/money_test.go) |
 
 ### HTTP Layer
 
@@ -197,6 +200,7 @@ go get github.com/Masterminds/squirrel@latest
 go get github.com/pressly/goose/v3@latest
 go get github.com/avast/retry-go@latest
 go get github.com/google/uuid@latest
+go get github.com/shopspring/decimal@latest
 
 # HTTP Layer
 go get github.com/go-chi/chi/v5@latest
@@ -216,6 +220,7 @@ go get github.com/exaring/otelpgx@latest
 
 ## Version
 
+- 1.6.0 — Money pattern (decimal precision, currency conversion, exchange rates)
 - 1.5.0 — Enhanced testing (testcontainers, testify mock, CI/Local detection)
 - 1.4.0 — Entry point pattern (backend, errgroup, graceful shutdown)
 - 1.3.0 — Best practices (naming, concurrency, pitfalls, performance)

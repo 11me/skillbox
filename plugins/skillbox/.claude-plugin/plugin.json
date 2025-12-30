@@ -1,5 +1,5 @@
 {
   "name": "skillbox",
   "description": "Skills marketplace for Claude Code: Go, TypeScript, TDD, context engineering, Helm/GitOps, conventional commits, autonomous agents",
-  "version": "0.27.0"
+  "version": "0.28.0"
 }
