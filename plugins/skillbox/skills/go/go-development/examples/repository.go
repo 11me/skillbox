@@ -18,11 +18,6 @@ import (
 // ErrUserNotFound is returned when a user is not found.
 var ErrUserNotFound = errors.New("user not found")
 
-// UserColumns returns column names for the users table.
-func UserColumns() []string {
-	return []string{"id", "name", "email", "created_at", "updated_at"}
-}
-
 // Users defines the user repository interface.
 type Users interface {
 	FindByID(ctx context.Context, id string) (*models.User, error)
@@ -44,7 +39,7 @@ func NewUserStorage(client pg.Client) Users {
 // FindByID returns a user by ID.
 func (s *userStorage) FindByID(ctx context.Context, id string) (*models.User, error) {
 	sql, args, err := sq.
-		Select(UserColumns()...).
+		Select(models.UserColumns()...).
 		From("users").
 		Where(sq.Eq{"id": id}).
 		PlaceholderFormat(sq.Dollar).
@@ -72,7 +67,7 @@ func (s *userStorage) FindByID(ctx context.Context, id string) (*models.User, er
 // FindByEmail returns a user by email.
 func (s *userStorage) FindByEmail(ctx context.Context, email string) (*models.User, error) {
 	sql, args, err := sq.
-		Select(UserColumns()...).
+		Select(models.UserColumns()...).
 		From("users").
 		Where(sq.Eq{"email": email}).
 		PlaceholderFormat(sq.Dollar).
@@ -100,7 +95,7 @@ func (s *userStorage) FindByEmail(ctx context.Context, email string) (*models.Us
 // Find returns users matching the filter.
 func (s *userStorage) Find(ctx context.Context, filter *models.UserFilter) ([]*models.User, error) {
 	builder := sq.
-		Select(UserColumns()...).
+		Select(models.UserColumns()...).
 		From("users").
 		PlaceholderFormat(sq.Dollar)
 
@@ -152,7 +147,7 @@ func (s *userStorage) Save(ctx context.Context, users ...*models.User) error {
 
 	builder := sq.
 		Insert("users").
-		Columns(UserColumns()...).
+		Columns(models.UserColumns()...).
 		Suffix(`ON CONFLICT (id) DO UPDATE SET
 			name = EXCLUDED.name,
 			email = EXCLUDED.email,

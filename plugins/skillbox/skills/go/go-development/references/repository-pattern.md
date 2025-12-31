@@ -51,14 +51,12 @@ func NewUserRepository(db *postgres.Client) UserRepository {
     return &userRepository{db: db}
 }
 
-// UserColumns returns column names in consistent order.
-func UserColumns() []string {
-    return []string{"id", "name", "email", "created_at", "updated_at"}
-}
+// Note: UserColumns() is defined in models package, not here.
+// See mapper-pattern.md for Columns/Values pattern.
 
 func (r *userRepository) FindByID(ctx context.Context, id string) (*models.User, error) {
     query, args, err := psql.
-        Select(UserColumns()...).
+        Select(models.UserColumns()...).
         From("users").
         Where(sq.Eq{"id": id}).
         ToSql()
@@ -80,7 +78,7 @@ func (r *userRepository) Save(ctx context.Context, users ...*models.User) error 
 
     builder := psql.
         Insert("users").
-        Columns(UserColumns()...).
+        Columns(models.UserColumns()...).
         Suffix(`ON CONFLICT (id) DO UPDATE SET
             name = EXCLUDED.name,
             email = EXCLUDED.email,
