@@ -23,10 +23,10 @@ if name != "" {
 
 ## Solution
 
-Generic `Optional[T]` function that returns nil for "empty" values:
+Generic `optional.Of[T]` function that returns nil for "empty" values:
 
 ```go
-func Optional[T any](val T) *T {
+func Of[T any](val T) *T {
     anyVal := any(val)
     switch anyVal.(type) {
     case string:
@@ -46,13 +46,13 @@ func Optional[T any](val T) *T {
 
 | Input | Output |
 |-------|--------|
-| `Optional("")` | `nil` |
-| `Optional("John")` | `*string → "John"` |
-| `Optional(time.Time{})` | `nil` |
-| `Optional(time.Now())` | `*time.Time → now` |
-| `Optional(0)` | `*int → 0` |
-| `Optional(42)` | `*int → 42` |
-| `Optional(false)` | `*bool → false` |
+| `optional.Of("")` | `nil` |
+| `optional.Of("John")` | `*string → "John"` |
+| `optional.Of(time.Time{})` | `nil` |
+| `optional.Of(time.Now())` | `*time.Time → now` |
+| `optional.Of(0)` | `*int → 0` |
+| `optional.Of(42)` | `*int → 42` |
+| `optional.Of(false)` | `*bool → false` |
 
 **Note:** Only empty strings and zero `time.Time` are converted to nil. Other zero values (0, false) become valid pointers.
 
@@ -73,8 +73,8 @@ func NewUserFromTelegram(tgUser *TgUser) *User {
     return &User{
         ID:        uuid.NewString(),
         FirstName: tgUser.FirstName,
-        LastName:  Optional(tgUser.LastName),   // "" → nil
-        Username:  Optional(tgUser.Username),   // "" → nil
+        LastName:  optional.Of(tgUser.LastName),   // "" → nil
+        Username:  optional.Of(tgUser.Username),   // "" → nil
     }
 }
 ```
@@ -90,8 +90,8 @@ type UserFilter struct {
 
 // Build filter with optional boolean fields
 filter := UserFilter{
-    IsActive:  Optional(true),   // *bool → true
-    IsBlocked: Optional(false),  // *bool → false
+    IsActive:  optional.Of(true),   // *bool → true
+    IsBlocked: optional.Of(false),  // *bool → false
 }
 ```
 
@@ -106,9 +106,9 @@ type UpdateUserRequest struct {
 
 // Only non-empty fields will be sent
 req := UpdateUserRequest{
-    Name:      Optional(newName),      // "" → nil (omitted from JSON)
-    Email:     Optional(newEmail),     // "" → nil (omitted from JSON)
-    AvatarURL: Optional(newAvatarURL), // "" → nil (omitted from JSON)
+    Name:      optional.Of(newName),      // "" → nil (omitted from JSON)
+    Email:     optional.Of(newEmail),     // "" → nil (omitted from JSON)
+    AvatarURL: optional.Of(newAvatarURL), // "" → nil (omitted from JSON)
 }
 ```
 
@@ -116,7 +116,7 @@ req := UpdateUserRequest{
 
 ```go
 func (u *User) MarkAsDeleted() {
-    u.DeletedAt = Optional(time.Now().UTC())
+    u.DeletedAt = optional.Of(time.Now().UTC())
 }
 
 func (u *User) Restore() {
@@ -129,30 +129,30 @@ func (u *User) Restore() {
 For non-generic codebases or specific types:
 
 ```go
-func OptionalString(s string) *string {
+func String(s string) *string {
     if s == "" {
         return nil
     }
     return &s
 }
 
-func OptionalInt(n int) *int {
+func Int(n int) *int {
     return &n
 }
 
-func OptionalInt64(n int64) *int64 {
+func Int64(n int64) *int64 {
     return &n
 }
 
-func OptionalFloat64(n float64) *float64 {
+func Float64(n float64) *float64 {
     return &n
 }
 
-func OptionalBool(b bool) *bool {
+func Bool(b bool) *bool {
     return &b
 }
 
-func OptionalTime(t time.Time) *time.Time {
+func Time(t time.Time) *time.Time {
     if t.IsZero() {
         return nil
     }
@@ -171,15 +171,18 @@ func OptionalTime(t time.Time) *time.Time {
 
 ## File Location
 
-Place in `internal/common/optional.go`:
+Place in `internal/optional/optional.go`:
 
 ```
 internal/
-└── common/
-    ├── errors.go
+└── optional/
     └── optional.go   ← here
 ```
 
 ## Dependencies
 
 None — uses only standard library.
+
+## Related
+
+- [package-naming.md](package-naming.md) — Why not `common/optional.go`

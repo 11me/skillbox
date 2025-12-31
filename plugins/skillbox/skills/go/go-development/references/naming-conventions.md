@@ -11,18 +11,25 @@ Go naming follows simplicity and consistency principles from Effective Go.
 | No mixedCaps | `httputil` not `httpUtil` |
 | Singular | `user` not `users` |
 | Short, clear | `ctx` not `context` (when importing) |
+| **No grab-bag names** | `optional` not `common` |
 
 ```go
 // Good
 package user
 package storage
 package httputil
+package optional  // purpose-named
 
 // Bad
 package users         // plural
 package user_storage  // underscore
 package UserStorage   // mixedCaps
+package common        // grab-bag (see package-naming.md)
+package helpers       // grab-bag
+package utils         // grab-bag
 ```
+
+**Important:** Never create packages named `common`, `helpers`, `utils`, `shared`, `misc`, `base`, `types`, `interfaces`. See [package-naming.md](package-naming.md) for details.
 
 ## Functions and Methods
 
@@ -280,3 +287,7 @@ type User struct { ... }
 | Acronyms | ALL CAPS | `userID`, `httpURL` |
 | Constants | MixedCaps | `MaxRetries` |
 | Errors | Err prefix | `ErrNotFound` |
+
+## Related
+
+- [package-naming.md](package-naming.md) — No common/helpers/utils anti-pattern

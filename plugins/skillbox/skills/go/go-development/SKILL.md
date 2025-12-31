@@ -33,6 +33,7 @@ Production-ready patterns extracted from real projects.
 - ❌ Don't add validation for impossible scenarios
 - ❌ Don't implement interfaces "just in case"
 - ❌ Don't add logging/metrics that nobody reads
+- ❌ Don't create `common`, `helpers`, `utils`, `shared`, `misc` packages
 
 - ✅ Write only what the feature requires
 - ✅ Use few sentinel categories (ErrNotFound, ErrConflict) + wrap with context
@@ -41,6 +42,9 @@ Production-ready patterns extracted from real projects.
 - ✅ Delete unused code immediately
 - ✅ Prefer inline code over tiny functions
 - ✅ Trust the type system, don't over-validate
+- ✅ Name packages by what they provide, not what's in them
+- ✅ Keep helper functions close to usage (unexported)
+- ✅ If truly shared, create small purpose-named packages (`internal/optional/`)
 
 ### Examples:
 
@@ -80,8 +84,8 @@ project/
 │   │   └── config.go         # Config with envPrefix
 │   ├── errs/
 │   │   └── errors.go         # Sentinel errors + helpers
-│   ├── common/
-│   │   └── optional.go       # Optional[T] helper
+│   ├── optional/
+│   │   └── optional.go       # Pointer conversion helpers
 │   ├── models/
 │   │   └── {entity}.go       # Domain models + mappers
 │   ├── services/
@@ -95,7 +99,7 @@ project/
 │           ├── router.go     # Router + path constants
 │           ├── {entity}_handler.go
 │           ├── dto.go        # Request/Response types
-│           └── helpers.go    # encode/decode
+│           └── json.go       # encode/decode
 ├── pkg/
 │   ├── logger/
 │   └── postgres/
@@ -165,6 +169,7 @@ project/
 | Topic | File |
 |-------|------|
 | Naming Conventions | [naming-conventions.md](references/naming-conventions.md) |
+| Package Naming | [package-naming.md](references/package-naming.md) |
 | Control Structures | [control-structures.md](references/control-structures.md) |
 | Interface Design | [interface-design.md](references/interface-design.md) |
 | Allocation (new/make) | [allocation-patterns.md](references/allocation-patterns.md) |
@@ -271,6 +276,7 @@ go get github.com/exaring/otelpgx@latest
 
 ## Version
 
+- 1.15.0 — Package naming: no common/helpers/utils, purpose-named packages (optional/, json.go)
 - 1.14.0 — Error handling: sentinel categories + wrap (internal/errs), helpers, no re-wrap
 - 1.13.1 — golangci-lint v2 fix: typecheck is built-in, wsl (not wsl_v5), troubleshooting
 - 1.13.0 — golangci-lint v2 migration (formatters, nolintlint anti-cheat, err113)
