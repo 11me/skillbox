@@ -125,6 +125,7 @@ project/
 |---------|------|
 | Entry Point | [entrypoint-pattern.md](references/entrypoint-pattern.md) |
 | Configuration | [config-pattern.md](references/config-pattern.md) |
+| Package Structure | [package-structure-decision.md](references/package-structure-decision.md) |
 | Database & Transactions | [database-pattern.md](references/database-pattern.md) |
 | Service Layer | [service-pattern.md](references/service-pattern.md) |
 | Repository | [repository-pattern.md](references/repository-pattern.md) |
@@ -258,6 +259,7 @@ go get github.com/exaring/otelpgx@latest
 
 ## Version
 
+- 1.10.3 — Package structure decision guide (pkg/ vs internal/)
 - 1.10.2 — Config: embedded structs only (no named fields in main Config)
 - 1.10.1 — Fix: UserColumns() in models package only (not repository)
 - 1.10.0 — Repository pattern: Save as upsert, UserColumns() function, Values() method
