@@ -1,18 +1,10 @@
 // Package errors provides typed errors with HTTP status mapping.
-//
-// This example shows:
-// - Simple Error struct with Code, Message, Err
-// - ErrorCode string constants for classification
-// - HTTP status code mapping
-// - Client-safe error messages
 package errors
 
 import (
 	"errors"
 	"net/http"
 )
-
-// ---------- Error Codes ----------
 
 // ErrorCode classifies errors for HTTP mapping.
 type ErrorCode string
@@ -28,13 +20,11 @@ const (
 	CodeUnavailable  ErrorCode = "unavailable"
 )
 
-// ---------- Error Type ----------
-
 // Error is the application error type.
 type Error struct {
 	Code    ErrorCode
 	Message string
-	Err     error // wrapped error (optional)
+	Err     error
 }
 
 // Error implements the error interface.
@@ -50,8 +40,6 @@ func (e *Error) Unwrap() error {
 	return e.Err
 }
 
-// ---------- Pre-defined Errors ----------
-
 // Common errors for reuse across packages.
 var (
 	ErrNotFound     = &Error{Code: CodeNotFound, Message: "resource not found"}
@@ -59,8 +47,6 @@ var (
 	ErrForbidden    = &Error{Code: CodeForbidden, Message: "forbidden"}
 	ErrUnavailable  = &Error{Code: CodeUnavailable, Message: "service unavailable"}
 )
-
-// ---------- HTTP Status Mapping ----------
 
 // HTTPStatusCode maps error code to HTTP status.
 func HTTPStatusCode(err error) int {
@@ -88,8 +74,6 @@ func HTTPStatusCode(err error) int {
 	}
 }
 
-// ---------- Error Code Extraction ----------
-
 // GetErrorCode extracts the error code from an error.
 // Returns CodeInternal if the error is not an *Error.
 func GetErrorCode(err error) ErrorCode {
@@ -100,8 +84,6 @@ func GetErrorCode(err error) ErrorCode {
 	return CodeInternal
 }
 
-// ---------- Client-Safe Messages ----------
-
 // ErrorMessage returns client-safe message.
 // Internal errors return a generic message for security.
 func ErrorMessage(err error) string {
@@ -111,8 +93,6 @@ func ErrorMessage(err error) string {
 	}
 	return e.Message
 }
-
-// ---------- Type Checking Helpers ----------
 
 // IsNotFound checks if the error is a not found error.
 func IsNotFound(err error) bool {
@@ -144,15 +124,11 @@ func IsInternal(err error) bool {
 	return GetErrorCode(err) == CodeInternal
 }
 
-// ---------- Usage Examples ----------
-
-// Example usage:
+// Usage:
 //
-//	// Pre-defined errors
 //	var ErrUserNotFound = &errors.Error{Code: errors.CodeNotFound, Message: "user not found"}
 //	var ErrEmailTaken = &errors.Error{Code: errors.CodeConflict, Message: "email already registered"}
 //
-//	// In repository
 //	func (r *userRepo) FindByID(ctx context.Context, id string) (*User, error) {
 //	    row := r.db.QueryRow(ctx, query, id)
 //	    var user User
@@ -165,21 +141,11 @@ func IsInternal(err error) bool {
 //	    return &user, nil
 //	}
 //
-//	// In service
-//	func (s *UserService) Create(ctx context.Context, email string) (*User, error) {
-//	    if email == "" {
-//	        return nil, &errors.Error{Code: errors.CodeInvalid, Message: "email is required"}
-//	    }
-//	    // ...
-//	}
-//
-//	// In HTTP handler
 //	func (h *Handler) GetUser(w http.ResponseWriter, r *http.Request) {
 //	    user, err := h.services.Users().GetByID(ctx, id)
 //	    if err != nil {
 //	        status := errors.HTTPStatusCode(err)
 //	        message := errors.ErrorMessage(err)
-//	        // Log internal errors
 //	        if status == http.StatusInternalServerError {
 //	            h.logger.Error("internal error", slog.String("error", err.Error()))
 //	        }
@@ -187,5 +153,4 @@ func IsInternal(err error) bool {
 //	        json.NewEncoder(w).Encode(map[string]string{"error": message})
 //	        return
 //	    }
-//	    // ...
 //	}

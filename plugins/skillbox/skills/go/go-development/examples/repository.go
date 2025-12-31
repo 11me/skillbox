@@ -1,11 +1,4 @@
 // Package storage provides database repositories.
-//
-// This example shows:
-// - Repository using pg.Client interface
-// - pgx.CollectOneRow/CollectRows for row scanning
-// - Squirrel query builder with Dollar placeholders
-// - Upsert pattern with ON CONFLICT
-// - IDs as string (not uuid.UUID)
 package storage
 
 import (
@@ -22,12 +15,10 @@ import (
 	"myapp/pkg/pg"
 )
 
-// ---------- Errors ----------
-
+// ErrUserNotFound is returned when a user is not found.
 var ErrUserNotFound = errors.New("user not found")
 
-// ---------- Repository Interface ----------
-
+// Users defines the user repository interface.
 type Users interface {
 	FindByID(ctx context.Context, id string) (*models.User, error)
 	FindByEmail(ctx context.Context, email string) (*models.User, error)
@@ -35,8 +26,6 @@ type Users interface {
 	Save(ctx context.Context, users ...*models.User) error
 	Delete(ctx context.Context, id string) error
 }
-
-// ---------- Repository Implementation ----------
 
 type userStorage struct {
 	client pg.Client
@@ -47,8 +36,7 @@ func NewUserStorage(client pg.Client) Users {
 	return &userStorage{client: client}
 }
 
-// ---------- Read Operations ----------
-
+// FindByID returns a user by ID.
 func (s *userStorage) FindByID(ctx context.Context, id string) (*models.User, error) {
 	sql, args, err := sq.
 		Select("id", "name", "email", "created_at", "updated_at").
@@ -76,6 +64,7 @@ func (s *userStorage) FindByID(ctx context.Context, id string) (*models.User, er
 	return &user, nil
 }
 
+// FindByEmail returns a user by email.
 func (s *userStorage) FindByEmail(ctx context.Context, email string) (*models.User, error) {
 	sql, args, err := sq.
 		Select("id", "name", "email", "created_at", "updated_at").
@@ -103,13 +92,13 @@ func (s *userStorage) FindByEmail(ctx context.Context, email string) (*models.Us
 	return &user, nil
 }
 
+// Find returns users matching the filter.
 func (s *userStorage) Find(ctx context.Context, filter *models.UserFilter) ([]*models.User, error) {
 	builder := sq.
 		Select("id", "name", "email", "created_at", "updated_at").
 		From("users").
 		PlaceholderFormat(sq.Dollar)
 
-	// Apply filters
 	if filter != nil {
 		if filter.Name != nil {
 			builder = builder.Where(sq.ILike{"name": "%" + *filter.Name + "%"})
@@ -140,7 +129,6 @@ func (s *userStorage) Find(ctx context.Context, filter *models.UserFilter) ([]*m
 		return nil, fmt.Errorf("collect users: %w", err)
 	}
 
-	// Convert to pointers
 	result := make([]*models.User, len(users))
 	for i := range users {
 		result[i] = &users[i]
@@ -148,8 +136,6 @@ func (s *userStorage) Find(ctx context.Context, filter *models.UserFilter) ([]*m
 
 	return result, nil
 }
-
-// ---------- Write Operations ----------
 
 // Save inserts or updates users (upsert pattern).
 func (s *userStorage) Save(ctx context.Context, users ...*models.User) error {
@@ -199,6 +185,7 @@ func (s *userStorage) Save(ctx context.Context, users ...*models.User) error {
 	return nil
 }
 
+// Delete removes a user by ID.
 func (s *userStorage) Delete(ctx context.Context, id string) error {
 	sql, args, err := sq.
 		Delete("users").
@@ -217,9 +204,7 @@ func (s *userStorage) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
-// ---------- Usage Example ----------
-
-// Example usage in service:
+// Usage:
 //
 //	type UserService struct {
 //	    storage Storage
@@ -229,7 +214,6 @@ func (s *userStorage) Delete(ctx context.Context, id string) error {
 //	    var user *models.User
 //
 //	    err := svc.storage.ExecSerializable(ctx, func(ctx context.Context) error {
-//	        // Check if email exists (uses transaction automatically)
 //	        existing, err := svc.storage.Users().FindByEmail(ctx, req.Email)
 //	        if err != nil && !errors.Is(err, ErrUserNotFound) {
 //	            return fmt.Errorf("check existing: %w", err)
@@ -238,9 +222,8 @@ func (s *userStorage) Delete(ctx context.Context, id string) error {
 //	            return errors.New("email already exists")
 //	        }
 //
-//	        // Create user (uses same transaction)
 //	        user = &models.User{
-//	            ID:    uuid.NewString(),  // Generate string ID
+//	            ID:    uuid.NewString(),
 //	            Name:  req.Name,
 //	            Email: req.Email,
 //	        }

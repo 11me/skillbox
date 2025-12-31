@@ -185,6 +185,89 @@ type TUser struct { ... }       // unnecessary prefix
 | Test files | `user_test.go` |
 | Platform-specific | `file_linux.go`, `file_windows.go` |
 
+## Comments
+
+Go follows specific comment conventions for godoc generation.
+
+### Doc Comments
+
+| Rule | Example |
+|------|---------|
+| Start with name | `// User represents...` not `// This struct...` |
+| Complete sentences | End with period `.` |
+| No blank line | Comment directly above declaration |
+| Exported only | Don't document unexported items |
+
+### Package Comments
+
+Package comment immediately before `package` clause:
+
+```go
+// Package user provides user management functionality.
+package user
+```
+
+### Function Comments
+
+```go
+// CreateUser creates a new user with the given name and email.
+// Returns ErrEmailTaken if email already exists.
+func CreateUser(ctx context.Context, name, email string) (*User, error)
+```
+
+### Type Comments
+
+```go
+// User represents a registered user in the system.
+type User struct {
+    ID    string
+    Name  string
+    Email string
+}
+```
+
+### When NOT to Comment
+
+| Skip comments when... | Example |
+|-----------------------|---------|
+| Name is self-explanatory | `func (u *User) Email() string` |
+| Implementation is obvious | `return u.email` |
+| Code is self-documenting | Good variable names |
+| Inline explanation states obvious | `i++ // increment i` |
+
+### Anti-Patterns
+
+DO NOT use decorative separators:
+
+```go
+// ---------- Section ----------   // WRONG
+// ==== Some Title ====            // WRONG
+// ___ Handlers ___                // WRONG
+// ************ API ************   // WRONG
+```
+
+Instead, organize code by:
+- Separate files (`user_handler.go`, `order_handler.go`)
+- Logical grouping without markers
+- Package-level structure
+
+### Good vs Bad
+
+```go
+// Good
+// User represents a registered user in the system.
+type User struct { ... }
+
+// Bad
+// This struct represents a user    // doesn't start with name
+type User struct { ... }
+
+// Bad
+// ---------- User Model ---------- // decorative separator
+// User is the user struct.         // redundant
+type User struct { ... }
+```
+
 ## Summary
 
 | Element | Convention | Example |

@@ -1,10 +1,4 @@
 // Package middleware provides HTTP middleware using stdlib-compatible signatures.
-//
-// This example shows:
-// - Recovery middleware with stack trace logging
-// - Request logging with structured output
-// - JWT authentication middleware
-// - Context key pattern for user injection
 package middleware
 
 import (
@@ -19,14 +13,10 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 )
 
-// ---------- Context Keys ----------
-
 type ctxKey string
 
 const (
-	// UserCtxKey is the context key for authenticated user.
-	UserCtxKey ctxKey = "user"
-	// RequestCtxKey is the context key for request metadata.
+	UserCtxKey    ctxKey = "user"
 	RequestCtxKey ctxKey = "request_context"
 )
 
@@ -43,8 +33,6 @@ type RequestContext struct {
 	IP        string
 	UserAgent string
 }
-
-// ---------- Recovery Middleware ----------
 
 // Recovery recovers from panics and logs the stack trace.
 func Recovery(logger *slog.Logger) func(http.Handler) http.Handler {
@@ -74,8 +62,6 @@ func Recovery(logger *slog.Logger) func(http.Handler) http.Handler {
 	}
 }
 
-// ---------- Request Logging Middleware ----------
-
 // RequestLogger logs requests with timing.
 func RequestLogger(logger *slog.Logger) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
@@ -83,7 +69,6 @@ func RequestLogger(logger *slog.Logger) func(http.Handler) http.Handler {
 			start := time.Now()
 			reqID := middleware.GetReqID(r.Context())
 
-			// Wrap response writer to capture status
 			ww := &responseWriter{ResponseWriter: w, status: http.StatusOK}
 
 			next.ServeHTTP(ww, r)
@@ -109,8 +94,6 @@ func (w *responseWriter) WriteHeader(status int) {
 	w.status = status
 	w.ResponseWriter.WriteHeader(status)
 }
-
-// ---------- Authentication Middleware ----------
 
 // AuthService defines the interface for authentication.
 type AuthService interface {
@@ -140,13 +123,11 @@ func Auth(authSvc AuthService) func(http.Handler) http.Handler {
 }
 
 func extractToken(r *http.Request) string {
-	// Check Authorization header
 	auth := r.Header.Get("Authorization")
 	if strings.HasPrefix(auth, "Bearer ") {
 		return strings.TrimPrefix(auth, "Bearer ")
 	}
 
-	// Check cookie
 	if cookie, err := r.Cookie("token"); err == nil {
 		return cookie.Value
 	}
@@ -159,8 +140,6 @@ func unauthorized(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusUnauthorized)
 	json.NewEncoder(w).Encode(map[string]string{"error": "unauthorized"})
 }
-
-// ---------- Role-Based Access ----------
 
 // RequireRole ensures the user has one of the allowed roles.
 func RequireRole(roles ...string) func(http.Handler) http.Handler {
@@ -189,8 +168,6 @@ func RequireRole(roles ...string) func(http.Handler) http.Handler {
 	}
 }
 
-// ---------- Context Enrichment ----------
-
 // ContextEnrichment adds request metadata to context.
 func ContextEnrichment(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -204,8 +181,6 @@ func ContextEnrichment(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
-
-// ---------- Context Helpers ----------
 
 // UserFromContext returns the authenticated user from context.
 func UserFromContext(ctx context.Context) (*User, bool) {

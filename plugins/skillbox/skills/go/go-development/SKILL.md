@@ -114,6 +114,8 @@ project/
 | IDs | `string` type | `uuid.UUID` type |
 | ID generation | `uuid.NewString()` in service | In handler or repository |
 | Config nesting | Use `envPrefix` tag | Full env var names in nested structs |
+| Doc comments | `// User represents...` | `// This struct...` |
+| Section organization | Separate files | `// ----- Section -----` |
 
 ## References
 
@@ -252,6 +254,7 @@ go get github.com/exaring/otelpgx@latest
 
 ## Version
 
+- 1.7.1 — Comment conventions (stdlib-style doc comments, no decorative separators)
 - 1.7.0 — Handler-per-entity, Optional[T], JSONB types, Mapper pattern, Config envPrefix, IDs as string
 - 1.6.1 — Money pattern: NUMERIC database storage (was TEXT)
 - 1.6.0 — Money pattern (decimal precision, currency conversion, exchange rates)

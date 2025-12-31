@@ -23,53 +23,36 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-// =============================================================================
-// router.go — Router setup with path constants
-// =============================================================================
-
-// Path constants — single source of truth for URLs.
+// Path constants define API endpoints as single source of truth.
 const (
 	PathPrefix = "/api/v1"
 
-	// Users
 	UsersPath    = "/users"
 	UserByIDPath = "/users/{userID}"
 
-	// Orders (example for another entity)
 	OrdersPath    = "/orders"
 	OrderByIDPath = "/orders/{orderID}"
 )
 
 // NewRouter creates the HTTP router with all handlers.
-func NewRouter(
-	userHandler *UserHandler,
-	// orderHandler *OrderHandler,
-) http.Handler {
+func NewRouter(userHandler *UserHandler) http.Handler {
 	r := chi.NewRouter()
 
-	// Global middleware
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(60 * time.Second))
 
-	// Health (no auth)
 	r.Get("/health", healthHandler)
 	r.Get("/ready", readyHandler)
 
-	// API v1
 	r.Route(PathPrefix, func(r chi.Router) {
-		// Users
 		r.Post(UsersPath, userHandler.Create)
 		r.Get(UsersPath, userHandler.List)
 		r.Get(UserByIDPath, userHandler.GetByID)
 		r.Put(UserByIDPath, userHandler.Update)
 		r.Delete(UserByIDPath, userHandler.Delete)
-
-		// Orders would follow the same pattern
-		// r.Post(OrdersPath, orderHandler.Create)
-		// r.Get(OrderByIDPath, orderHandler.GetByID)
 	})
 
 	return r
@@ -85,11 +68,7 @@ func readyHandler(w http.ResponseWriter, _ *http.Request) {
 	w.Write([]byte("ready"))
 }
 
-// =============================================================================
-// user_handler.go — One handler per entity
-// =============================================================================
-
-// User is the domain model (normally in internal/models).
+// User represents a domain model (normally in internal/models).
 type User struct {
 	ID        string
 	Name      string
@@ -98,7 +77,6 @@ type User struct {
 }
 
 // UserService defines the interface for user business logic.
-// The handler only depends on this interface, not the implementation.
 type UserService interface {
 	Create(ctx context.Context, name, email string) (*User, error)
 	GetByID(ctx context.Context, id string) (*User, error)
@@ -108,7 +86,6 @@ type UserService interface {
 }
 
 // UserHandler handles user HTTP endpoints.
-// Each entity gets its own handler struct with only its dependencies.
 type UserHandler struct {
 	userService UserService
 	validate    *validator.Validate
@@ -145,7 +122,6 @@ func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 func (h *UserHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	// IDs are string type — use directly, no parsing needed
 	userID := chi.URLParam(r, "userID")
 	if userID == "" {
 		encodeErrorResponse(w, NewBadRequestError("user ID is required"))
@@ -225,22 +201,19 @@ func (h *UserHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-// =============================================================================
-// dto.go — Request and response types
-// =============================================================================
-
-// --- User DTOs ---
-
+// CreateUserRequest represents the request body for creating a user.
 type CreateUserRequest struct {
 	Name  string `json:"name" validate:"required,min=2,max=100"`
 	Email string `json:"email" validate:"required,email"`
 }
 
+// UpdateUserRequest represents the request body for updating a user.
 type UpdateUserRequest struct {
 	Name  *string `json:"name,omitempty" validate:"omitempty,min=2,max=100"`
 	Email *string `json:"email,omitempty" validate:"omitempty,email"`
 }
 
+// UserResponse represents the response body for a user.
 type UserResponse struct {
 	ID        string    `json:"id"`
 	Name      string    `json:"name"`
@@ -265,8 +238,7 @@ func toUserResponses(users []*User) []UserResponse {
 	return result
 }
 
-// --- Generic DTOs ---
-
+// ListResponse is a generic paginated response.
 type ListResponse[T any] struct {
 	Items      []T   `json:"items"`
 	TotalCount int64 `json:"total_count"`
@@ -274,17 +246,12 @@ type ListResponse[T any] struct {
 	Offset     int   `json:"offset"`
 }
 
+// ErrorResponse represents an API error response.
 type ErrorResponse struct {
 	Error   string `json:"error"`
 	Code    string `json:"code,omitempty"`
 	Details any    `json:"details,omitempty"`
 }
-
-// =============================================================================
-// helpers.go — Decode and encode functions
-// =============================================================================
-
-// --- Decode Functions ---
 
 func decodeCreateUserRequest(r *http.Request, v *validator.Validate) (*CreateUserRequest, error) {
 	var req CreateUserRequest
@@ -308,8 +275,6 @@ func decodeUpdateUserRequest(r *http.Request, v *validator.Validate) (*UpdateUse
 	return &req, nil
 }
 
-// --- Encode Functions ---
-
 func encodeJSONResponse(w http.ResponseWriter, status int, data any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
@@ -331,8 +296,6 @@ func encodeErrorResponse(w http.ResponseWriter, err error) {
 	})
 }
 
-// --- Query Helpers ---
-
 func getIntQuery(r *http.Request, key string, defaultVal int) int {
 	val := r.URL.Query().Get(key)
 	if val == "" {
@@ -352,10 +315,6 @@ func deref(s *string) string {
 	return *s
 }
 
-// =============================================================================
-// errors.go — Handler errors (or add to helpers.go)
-// =============================================================================
-
 // HandlerError represents HTTP layer errors.
 type HandlerError struct {
 	Status  int
@@ -367,6 +326,7 @@ func (e *HandlerError) Error() string {
 	return e.Message
 }
 
+// NewBadRequestError creates a 400 Bad Request error.
 func NewBadRequestError(msg string) error {
 	return &HandlerError{
 		Status:  http.StatusBadRequest,
@@ -375,6 +335,7 @@ func NewBadRequestError(msg string) error {
 	}
 }
 
+// NewNotFoundError creates a 404 Not Found error.
 func NewNotFoundError(msg string) error {
 	return &HandlerError{
 		Status:  http.StatusNotFound,
@@ -383,8 +344,8 @@ func NewNotFoundError(msg string) error {
 	}
 }
 
+// NewValidationError creates a validation error from validator package errors.
 func NewValidationError(err error) error {
-	// Format validation errors from validator package
 	var validationErrors validator.ValidationErrors
 	if errors.As(err, &validationErrors) {
 		return &HandlerError{
@@ -404,7 +365,6 @@ func formatValidationErrors(errs validator.ValidationErrors) string {
 	if len(errs) == 0 {
 		return "validation failed"
 	}
-	// Return first error for simplicity
 	e := errs[0]
 	switch e.Tag() {
 	case "required":
