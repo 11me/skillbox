@@ -2,6 +2,24 @@
 
 Production-ready golangci-lint v2 setup as AI quality gate.
 
+## IMPORTANT: Protected Configuration
+
+```
+❌ DON'T modify .golangci.yml directly
+❌ DON'T disable linters without explicit user approval
+❌ DON'T remove nolintlint (anti-cheat) configuration
+
+✅ DO use the template from templates/.golangci.yml
+✅ DO ask user before changing linting rules
+✅ DO document why linter changes are needed
+```
+
+**Why protected:**
+- Linting config is project-wide infrastructure
+- Changes affect CI/CD pipelines
+- Security linters (gosec, errcheck) must stay enabled
+- Anti-cheat (nolintlint) prevents `//nolint` abuse
+
 ## Installation
 
 ```bash

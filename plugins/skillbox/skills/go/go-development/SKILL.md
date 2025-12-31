@@ -46,6 +46,8 @@ Production-ready patterns extracted from real projects.
 - ✅ Keep helper functions close to usage (unexported)
 - ✅ If truly shared, create small purpose-named packages (`internal/optional/`)
 
+- ❌ Don't modify `.golangci.yml` — linting config is protected
+
 ### Examples:
 
 | Bad | Good |
@@ -276,6 +278,7 @@ go get github.com/exaring/otelpgx@latest
 
 ## Version
 
+- 1.16.0 — Protected .golangci.yml (hook + documentation)
 - 1.15.0 — Package naming: no common/helpers/utils, purpose-named packages (optional/, json.go)
 - 1.14.0 — Error handling: sentinel categories + wrap (internal/errs), helpers, no re-wrap
 - 1.13.1 — golangci-lint v2 fix: typecheck is built-in, wsl (not wsl_v5), troubleshooting
