@@ -30,7 +30,7 @@ linters:
     # Core correctness
     - govet
     - staticcheck
-    - typecheck
+    # typecheck is built-in in v2, cannot be enabled/disabled
     - errcheck
     - unused
 
@@ -64,7 +64,7 @@ linters:
     - revive
 
     # Style
-    - wsl_v5          # Whitespace (was wsl in v1)
+    - wsl             # Whitespace linter
     - whitespace      # Trailing whitespace
 
   exclusions:

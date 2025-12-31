@@ -267,7 +267,8 @@ go get github.com/exaring/otelpgx@latest
 
 ## Version
 
-- 1.13.0 — golangci-lint v2 migration (formatters, nolintlint anti-cheat, err113, wsl_v5)
+- 1.13.1 — golangci-lint v2 fix: typecheck is built-in, wsl (not wsl_v5), troubleshooting
+- 1.13.0 — golangci-lint v2 migration (formatters, nolintlint anti-cheat, err113)
 - 1.12.0 — Comprehensive linting configuration (revive, depguard, exclusion patterns)
 - 1.11.1 — Channel axioms (nil/closed behavior, WaitMany, broadcast signaling)
 - 1.11.0 — Effective Go patterns (control structures, interfaces, allocation, defer, embedding, blank identifier)

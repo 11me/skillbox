@@ -29,8 +29,10 @@ v2 config **must** start with `version: "2"`. Key differences from v1:
 | `disable-all: true` | `linters.default: none` |
 | formatters in `linters.enable` | `formatters.enable` (separate section) |
 | `goerr113` | `err113` |
-| `wsl` | `wsl_v5` |
+| `typecheck` in enable | built-in, remove from enable |
 | `issues.exclude-rules` | `linters.exclusions.rules` |
+
+**Note:** `wsl` keeps the same name in v2 (not `wsl_v5`).
 
 ## Configuration Template
 
@@ -60,7 +62,7 @@ linters:
   enable:
     - govet         # Go vet checks
     - staticcheck   # Static analysis
-    - typecheck     # Type checking
+    # typecheck is built-in in v2, cannot be enabled/disabled
     - errcheck      # Unchecked errors
     - unused        # Unused code (replaces deadcode, structcheck, varcheck)
 ```
@@ -105,7 +107,7 @@ linters:
 
 ```yaml
     - revive          # Comprehensive linter
-    - wsl_v5          # Whitespace (was wsl)
+    - wsl             # Whitespace linter
     - whitespace      # Trailing whitespace
 ```
 
@@ -221,11 +223,11 @@ These linters were **removed** from golangci-lint v2:
 | `structcheck` | `unused` |
 | `varcheck` | `unused` |
 | `goerr113` | `err113` |
-| `wsl` | `wsl_v5` |
 | `golint` | `revive` |
 | `interfacer` | removed |
 | `maligned` | `fieldalignment` |
 | `scopelint` | `exportloopref` |
+| `typecheck` | built-in (cannot enable/disable) |
 
 ## Duplicated (Don't Enable)
 
@@ -235,7 +237,7 @@ These linters were **removed** from golangci-lint v2:
 | `gocyclo` | `revive:cyclomatic` |
 | `gocognit` | `revive:cognitive-complexity` |
 | `lll` | `revive:line-length-limit` |
-| `nlreturn` | `wsl_v5` |
+| `nlreturn` | `wsl` |
 
 ## Too Strict (Optional)
 
@@ -274,6 +276,44 @@ lint: ## Run linter
 
 lint-fix: ## Run linter with auto-fix
 	golangci-lint run --fix ./...
+```
+
+## Troubleshooting
+
+| Error | Cause | Fix |
+|-------|-------|-----|
+| `typecheck is not a linter` | Built-in in v2 | Remove from enable |
+| `unknown linters: 'wsl_v5'` | Wrong name | Use `wsl` |
+| `unknown linters: 'goerr113'` | Renamed in v2 | Use `err113` |
+
+### Verify linter names
+
+```bash
+golangci-lint help linters | grep -E "^[a-z]"
+```
+
+## err113 Migration Warning
+
+`err113` requires refactoring all dynamic errors:
+
+```go
+// Before (will fail err113)
+fmt.Errorf("invalid: %s", x)
+err == SomeError
+
+// After (correct)
+fmt.Errorf("invalid: %w", ErrInvalid)
+errors.Is(err, SomeError)
+```
+
+For legacy projects, consider temporary disable:
+
+```yaml
+linters:
+  exclusions:
+    rules:
+      - linters: [err113]
+        text: "do not define dynamic errors"  # TODO: refactor
 ```
 
 ## CI Integration
