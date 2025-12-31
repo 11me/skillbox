@@ -144,6 +144,7 @@ project/
 | HTTP Handlers | [http-handler-pattern.md](references/http-handler-pattern.md) |
 | Middleware | [middleware-pattern.md](references/middleware-pattern.md) |
 | Validation | [validation-pattern.md](references/validation-pattern.md) |
+| Authentication | [auth-pattern.md](references/auth-pattern.md) |
 
 ### Production Patterns
 
@@ -195,6 +196,7 @@ project/
 | HTTP Handler | [handler.go](examples/handler.go) |
 | Middleware | [middleware.go](examples/middleware.go) |
 | HTTP Errors | [http_errors.go](examples/http_errors.go) |
+| Authentication | [auth.go](examples/auth.go) |
 
 ### Production
 
@@ -240,6 +242,7 @@ go get github.com/shopspring/decimal@latest
 # HTTP Layer
 go get github.com/go-chi/chi/v5@latest
 go get github.com/go-playground/validator/v10@latest
+go get gopkg.in/go-jose/go-jose.v2@latest
 
 # Testing
 go get github.com/stretchr/testify@latest
@@ -255,6 +258,7 @@ go get github.com/exaring/otelpgx@latest
 
 ## Version
 
+- 1.9.0 — Authentication patterns (gateway-based, full JWT validation)
 - 1.8.0 — Code quality tools (deadcode analysis, make deadcode target)
 - 1.7.1 — Comment conventions (stdlib-style doc comments, no decorative separators)
 - 1.7.0 — Handler-per-entity, Optional[T], JSONB types, Mapper pattern, Config envPrefix, IDs as string
