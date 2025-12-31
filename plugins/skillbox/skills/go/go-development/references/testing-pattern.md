@@ -147,7 +147,7 @@ func createTestUser(t *testing.T, pool *pgxpool.Pool) *models.User {
     repo := storage.NewUserRepository(pool)
     user, err := repo.Create(context.Background(), &models.User{
         Name:  "Test User",
-        Email: fmt.Sprintf("test-%s@example.com", uuid.New().String()[:8]),
+        Email: fmt.Sprintf("test-%s@example.com", uuid.NewString()[:8]),
     })
     require.NoError(t, err)
 
@@ -167,13 +167,13 @@ func TestUserRepository_Create(t *testing.T) {
     ctx := context.Background()
     user := &models.User{
         Name:  "Test User",
-        Email: fmt.Sprintf("test-%s@example.com", uuid.New().String()[:8]),
+        Email: fmt.Sprintf("test-%s@example.com", uuid.NewString()[:8]),
     }
 
     // Create user
     created, err := repo.Create(ctx, user)
     require.NoError(t, err)
-    assert.NotEqual(t, uuid.Nil, created.ID)
+    assert.NotEmpty(t, created.ID)
 
     // Verify in database
     found, err := repo.GetByID(ctx, created.ID)
@@ -192,11 +192,11 @@ func TestUserRepository_GetByID(t *testing.T) {
 
     tests := []struct {
         name    string
-        id      uuid.UUID
+        id      string
         wantErr bool
     }{
         {name: "existing", id: user.ID, wantErr: false},
-        {name: "non-existing", id: uuid.New(), wantErr: true},
+        {name: "non-existing", id: uuid.NewString(), wantErr: true},
     }
 
     for _, tt := range tests {
@@ -260,7 +260,7 @@ func TestUserService_Create(t *testing.T) {
                 m.On("GetByEmail", mock.Anything, "test@example.com").
                     Return(nil, common.EntityNotFound("not found"))
                 m.On("Create", mock.Anything, mock.AnythingOfType("*models.User")).
-                    Return(&models.User{ID: uuid.New()}, nil)
+                    Return(&models.User{ID: uuid.NewString()}, nil)
             },
             wantErr: nil,
         },
@@ -277,7 +277,7 @@ func TestUserService_Create(t *testing.T) {
             email:     "existing@example.com",
             setupMock: func(m *MockUserRepository) {
                 m.On("GetByEmail", mock.Anything, "existing@example.com").
-                    Return(&models.User{ID: uuid.New()}, nil)
+                    Return(&models.User{ID: uuid.NewString()}, nil)
             },
             wantErr: common.StateConflict("email already exists"),
         },
@@ -325,7 +325,7 @@ func TestUserHandler_Create(t *testing.T) {
             body: `{"name":"Test","email":"test@example.com"}`,
             setupMock: func(m *MockUserService) {
                 m.On("Create", mock.Anything, "Test", "test@example.com").
-                    Return(&models.User{ID: uuid.New()}, nil)
+                    Return(&models.User{ID: uuid.NewString()}, nil)
             },
             wantStatus: http.StatusCreated,
         },

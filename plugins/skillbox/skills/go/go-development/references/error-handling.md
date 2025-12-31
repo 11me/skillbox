@@ -157,7 +157,7 @@ if err != nil {
 ## Usage in Repository
 
 ```go
-func (r *userRepo) FindByID(ctx context.Context, id uuid.UUID) (*User, error) {
+func (r *userRepo) FindByID(ctx context.Context, id string) (*User, error) {
     row := r.db.QueryRow(ctx, query, id)
 
     var user User

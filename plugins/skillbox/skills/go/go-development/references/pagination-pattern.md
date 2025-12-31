@@ -42,7 +42,7 @@ type PageResponse[T any] struct {
 }
 
 // In repository
-func (r *userRepo) ListAfter(ctx context.Context, cursor uuid.UUID, limit int) ([]*User, error) {
+func (r *userRepo) ListAfter(ctx context.Context, cursor string, limit int) ([]*User, error) {
     query := squirrel.Select("*").
         From("users").
         Where(squirrel.Gt{"id": cursor}).
@@ -61,7 +61,7 @@ For sorting by multiple columns (e.g., `created_at`, `id`):
 ```go
 type Cursor struct {
     CreatedAt time.Time `json:"created_at"`
-    ID        uuid.UUID `json:"id"`
+    ID        string    `json:"id"`
 }
 
 func (r *userRepo) ListPaginated(ctx context.Context, cursor *Cursor, limit int) ([]*User, *Cursor, error) {

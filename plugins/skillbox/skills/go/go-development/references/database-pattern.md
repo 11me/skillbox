@@ -291,7 +291,7 @@ func (s *store) ExecSerializable(ctx context.Context, f pg.TxFunc) error {
 ```go
 type Users interface {
     Save(ctx context.Context, users ...*User) error
-    FindByID(ctx context.Context, id uuid.UUID) (*User, error)
+    FindByID(ctx context.Context, id string) (*User, error)
     Find(ctx context.Context, filter *UserFilter) ([]*User, error)
 }
 
@@ -299,7 +299,7 @@ type userStorage struct {
     client pg.Client
 }
 
-func (s *userStorage) FindByID(ctx context.Context, id uuid.UUID) (*User, error) {
+func (s *userStorage) FindByID(ctx context.Context, id string) (*User, error) {
     sql, args, err := sq.
         Select("id", "name", "email", "created_at").
         From("users").

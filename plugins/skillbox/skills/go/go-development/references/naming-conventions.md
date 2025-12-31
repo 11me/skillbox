@@ -60,7 +60,7 @@ type Reader interface {
 }
 
 type UserRepository interface {
-    FindByID(ctx context.Context, id uuid.UUID) (*User, error)
+    FindByID(ctx context.Context, id string) (*User, error)
     Save(ctx context.Context, user *User) error
 }
 

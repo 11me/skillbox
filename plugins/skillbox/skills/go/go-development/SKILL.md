@@ -63,21 +63,35 @@ Production-ready patterns extracted from real projects.
 | **Tracing** | OpenTelemetry (optional) — ask user |
 | **Migrations** | `goose/v3` |
 
-## Project Structure
+## Enforced Project Structure
+
+The skill MUST enforce this structure for all Go projects:
 
 ```
 project/
 ├── cmd/
 │   └── app/
-│       └── main.go
+│       └── main.go           # Entry point only
 ├── internal/
 │   ├── config/
+│   │   └── config.go         # Config with envPrefix
+│   ├── common/
+│   │   ├── errors.go         # Error types
+│   │   └── optional.go       # Optional[T] helper
 │   ├── models/
+│   │   └── {entity}.go       # Domain models + mappers
 │   ├── services/
-│   │   └── registry.go
+│   │   ├── registry.go       # Service registry
+│   │   └── {entity}.go       # Business logic
 │   ├── storage/
-│   └── common/
-│       └── errors.go
+│   │   ├── storage.go        # Storage interface
+│   │   └── {entity}.go       # Repository impl
+│   └── http/
+│       └── v1/
+│           ├── router.go     # Router + path constants
+│           ├── {entity}_handler.go
+│           ├── dto.go        # Request/Response types
+│           └── helpers.go    # encode/decode
 ├── pkg/
 │   ├── logger/
 │   └── postgres/
@@ -88,6 +102,18 @@ project/
 ├── Dockerfile
 └── docker-compose.yml
 ```
+
+### Structure Rules
+
+| Rule | Correct | Wrong |
+|------|---------|-------|
+| Handler files | `user_handler.go`, `order_handler.go` | `handlers.go` (all in one) |
+| Mappers | In `models/{entity}.go` with model | In separate `mappers/` package |
+| DTOs | In `http/v1/dto.go` | Mixed with domain models |
+| Path constants | In `router.go` | Hardcoded strings in handlers |
+| IDs | `string` type | `uuid.UUID` type |
+| ID generation | `uuid.NewString()` in service | In handler or repository |
+| Config nesting | Use `envPrefix` tag | Full env var names in nested structs |
 
 ## References
 
@@ -100,6 +126,9 @@ project/
 | Database & Transactions | [database-pattern.md](references/database-pattern.md) |
 | Service Layer | [service-pattern.md](references/service-pattern.md) |
 | Repository | [repository-pattern.md](references/repository-pattern.md) |
+| Mapper | [mapper-pattern.md](references/mapper-pattern.md) |
+| JSONB Types | [jsonb-pattern.md](references/jsonb-pattern.md) |
+| Optional Helper | [optional-pattern.md](references/optional-pattern.md) |
 | Error Handling | [error-handling.md](references/error-handling.md) |
 | Logging | [logging-pattern.md](references/logging-pattern.md) |
 | Testing | [testing-pattern.md](references/testing-pattern.md) |
@@ -144,6 +173,9 @@ project/
 | Database Client | [pg-client.go](examples/pg-client.go) |
 | Repository | [repository.go](examples/repository.go) |
 | Service | [service.go](examples/service.go) |
+| Mapper | [mapper.go](examples/mapper.go) |
+| JSONB Types | [jsonb.go](examples/jsonb.go) |
+| Optional Helper | [optional.go](examples/optional.go) |
 | Errors | [errors.go](examples/errors.go) |
 | Logger (slog) | [logger_slog.go](examples/logger_slog.go) |
 | Logger (zap) | [logger_zap.go](examples/logger_zap.go) |
@@ -220,6 +252,7 @@ go get github.com/exaring/otelpgx@latest
 
 ## Version
 
+- 1.7.0 — Handler-per-entity, Optional[T], JSONB types, Mapper pattern, Config envPrefix, IDs as string
 - 1.6.1 — Money pattern: NUMERIC database storage (was TEXT)
 - 1.6.0 — Money pattern (decimal precision, currency conversion, exchange rates)
 - 1.5.0 — Enhanced testing (testcontainers, testify mock, CI/Local detection)

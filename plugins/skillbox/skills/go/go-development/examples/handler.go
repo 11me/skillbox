@@ -1,14 +1,17 @@
-// Package handler provides HTTP handlers using chi router.
+// Package handler demonstrates the handler-per-entity pattern.
 //
-// This example shows:
-// - Handler structure with dependency injection
-// - Request parsing (path params, query params, JSON body)
-// - Response helpers
-// - Validation integration
-// - Error handling
+// File organization:
+//
+//	internal/http/v1/
+//	├── router.go              # Router setup + path constants
+//	├── user_handler.go        # User handlers (this file structure)
+//	├── order_handler.go       # Order handlers
+//	├── dto.go                 # Request/Response types
+//	└── helpers.go             # decode*, encode* helpers
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -18,30 +21,30 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-playground/validator/v10"
-	"github.com/google/uuid"
-
-	"project/internal/common"
-	"project/internal/models"
-	"project/internal/services"
 )
 
-// Handler handles HTTP requests.
-type Handler struct {
-	services *services.Registry
-	validate *validator.Validate
-}
+// =============================================================================
+// router.go — Router setup with path constants
+// =============================================================================
 
-// New creates a new Handler.
-func New(svc *services.Registry) *Handler {
-	v := validator.New(validator.WithRequiredStructEnabled())
-	return &Handler{
-		services: svc,
-		validate: v,
-	}
-}
+// Path constants — single source of truth for URLs.
+const (
+	PathPrefix = "/api/v1"
 
-// NewRouter creates a new chi router with all routes.
-func NewRouter(h *Handler) http.Handler {
+	// Users
+	UsersPath    = "/users"
+	UserByIDPath = "/users/{userID}"
+
+	// Orders (example for another entity)
+	OrdersPath    = "/orders"
+	OrderByIDPath = "/orders/{orderID}"
+)
+
+// NewRouter creates the HTTP router with all handlers.
+func NewRouter(
+	userHandler *UserHandler,
+	// orderHandler *OrderHandler,
+) http.Handler {
 	r := chi.NewRouter()
 
 	// Global middleware
@@ -51,50 +54,219 @@ func NewRouter(h *Handler) http.Handler {
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(60 * time.Second))
 
-	// Health endpoints (no auth)
-	r.Get("/health", h.Health)
-	r.Get("/ready", h.Ready)
+	// Health (no auth)
+	r.Get("/health", healthHandler)
+	r.Get("/ready", readyHandler)
 
-	// API routes
-	r.Route("/api/v1", func(r chi.Router) {
-		r.Route("/users", func(r chi.Router) {
-			r.Get("/", h.ListUsers)
-			r.Post("/", h.CreateUser)
-			r.Route("/{userID}", func(r chi.Router) {
-				r.Get("/", h.GetUser)
-				r.Put("/", h.UpdateUser)
-				r.Delete("/", h.DeleteUser)
-			})
-		})
+	// API v1
+	r.Route(PathPrefix, func(r chi.Router) {
+		// Users
+		r.Post(UsersPath, userHandler.Create)
+		r.Get(UsersPath, userHandler.List)
+		r.Get(UserByIDPath, userHandler.GetByID)
+		r.Put(UserByIDPath, userHandler.Update)
+		r.Delete(UserByIDPath, userHandler.Delete)
+
+		// Orders would follow the same pattern
+		// r.Post(OrdersPath, orderHandler.Create)
+		// r.Get(OrderByIDPath, orderHandler.GetByID)
 	})
 
 	return r
 }
 
-// ---------- Request/Response DTOs ----------
+func healthHandler(w http.ResponseWriter, _ *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("ok"))
+}
 
-// CreateUserRequest is the request body for creating a user.
+func readyHandler(w http.ResponseWriter, _ *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("ready"))
+}
+
+// =============================================================================
+// user_handler.go — One handler per entity
+// =============================================================================
+
+// User is the domain model (normally in internal/models).
+type User struct {
+	ID        string
+	Name      string
+	Email     string
+	CreatedAt time.Time
+}
+
+// UserService defines the interface for user business logic.
+// The handler only depends on this interface, not the implementation.
+type UserService interface {
+	Create(ctx context.Context, name, email string) (*User, error)
+	GetByID(ctx context.Context, id string) (*User, error)
+	List(ctx context.Context, limit, offset int) ([]*User, int64, error)
+	Update(ctx context.Context, id, name, email string) (*User, error)
+	Delete(ctx context.Context, id string) error
+}
+
+// UserHandler handles user HTTP endpoints.
+// Each entity gets its own handler struct with only its dependencies.
+type UserHandler struct {
+	userService UserService
+	validate    *validator.Validate
+}
+
+// NewUserHandler creates a new user handler.
+func NewUserHandler(svc UserService) *UserHandler {
+	return &UserHandler{
+		userService: svc,
+		validate:    validator.New(),
+	}
+}
+
+// Create handles POST /users.
+func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	req, err := decodeCreateUserRequest(r, h.validate)
+	if err != nil {
+		encodeErrorResponse(w, err)
+		return
+	}
+
+	user, err := h.userService.Create(ctx, req.Name, req.Email)
+	if err != nil {
+		encodeErrorResponse(w, err)
+		return
+	}
+
+	encodeJSONResponse(w, http.StatusCreated, toUserResponse(user))
+}
+
+// GetByID handles GET /users/{userID}.
+func (h *UserHandler) GetByID(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	// IDs are string type — use directly, no parsing needed
+	userID := chi.URLParam(r, "userID")
+	if userID == "" {
+		encodeErrorResponse(w, NewBadRequestError("user ID is required"))
+		return
+	}
+
+	user, err := h.userService.GetByID(ctx, userID)
+	if err != nil {
+		encodeErrorResponse(w, err)
+		return
+	}
+
+	encodeJSONResponse(w, http.StatusOK, toUserResponse(user))
+}
+
+// List handles GET /users.
+func (h *UserHandler) List(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	limit := getIntQuery(r, "limit", 20)
+	offset := getIntQuery(r, "offset", 0)
+
+	users, total, err := h.userService.List(ctx, limit, offset)
+	if err != nil {
+		encodeErrorResponse(w, err)
+		return
+	}
+
+	encodeJSONResponse(w, http.StatusOK, ListResponse[UserResponse]{
+		Items:      toUserResponses(users),
+		TotalCount: total,
+		Limit:      limit,
+		Offset:     offset,
+	})
+}
+
+// Update handles PUT /users/{userID}.
+func (h *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	userID := chi.URLParam(r, "userID")
+	if userID == "" {
+		encodeErrorResponse(w, NewBadRequestError("user ID is required"))
+		return
+	}
+
+	req, err := decodeUpdateUserRequest(r, h.validate)
+	if err != nil {
+		encodeErrorResponse(w, err)
+		return
+	}
+
+	user, err := h.userService.Update(ctx, userID, deref(req.Name), deref(req.Email))
+	if err != nil {
+		encodeErrorResponse(w, err)
+		return
+	}
+
+	encodeJSONResponse(w, http.StatusOK, toUserResponse(user))
+}
+
+// Delete handles DELETE /users/{userID}.
+func (h *UserHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	userID := chi.URLParam(r, "userID")
+	if userID == "" {
+		encodeErrorResponse(w, NewBadRequestError("user ID is required"))
+		return
+	}
+
+	if err := h.userService.Delete(ctx, userID); err != nil {
+		encodeErrorResponse(w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+// =============================================================================
+// dto.go — Request and response types
+// =============================================================================
+
+// --- User DTOs ---
+
 type CreateUserRequest struct {
 	Name  string `json:"name" validate:"required,min=2,max=100"`
 	Email string `json:"email" validate:"required,email"`
 }
 
-// UpdateUserRequest is the request body for updating a user.
 type UpdateUserRequest struct {
 	Name  *string `json:"name,omitempty" validate:"omitempty,min=2,max=100"`
 	Email *string `json:"email,omitempty" validate:"omitempty,email"`
 }
 
-// UserResponse is the response body for a user.
 type UserResponse struct {
-	ID        uuid.UUID `json:"id"`
+	ID        string    `json:"id"`
 	Name      string    `json:"name"`
 	Email     string    `json:"email"`
 	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
 }
 
-// ListResponse is a generic paginated response.
+func toUserResponse(u *User) UserResponse {
+	return UserResponse{
+		ID:        u.ID,
+		Name:      u.Name,
+		Email:     u.Email,
+		CreatedAt: u.CreatedAt,
+	}
+}
+
+func toUserResponses(users []*User) []UserResponse {
+	result := make([]UserResponse, len(users))
+	for i, u := range users {
+		result[i] = toUserResponse(u)
+	}
+	return result
+}
+
+// --- Generic DTOs ---
+
 type ListResponse[T any] struct {
 	Items      []T   `json:"items"`
 	TotalCount int64 `json:"total_count"`
@@ -102,128 +274,43 @@ type ListResponse[T any] struct {
 	Offset     int   `json:"offset"`
 }
 
-// ---------- Handlers ----------
-
-// Health returns 200 OK if the service is alive.
-func (h *Handler) Health(w http.ResponseWriter, r *http.Request) {
-	h.json(w, http.StatusOK, map[string]string{"status": "ok"})
+type ErrorResponse struct {
+	Error   string `json:"error"`
+	Code    string `json:"code,omitempty"`
+	Details any    `json:"details,omitempty"`
 }
 
-// Ready returns 200 OK if the service is ready to serve traffic.
-func (h *Handler) Ready(w http.ResponseWriter, r *http.Request) {
-	// Check dependencies (DB, cache, etc.)
-	if err := h.services.Health().CheckReady(r.Context()); err != nil {
-		h.error(w, http.StatusServiceUnavailable, "service not ready")
-		return
-	}
-	h.json(w, http.StatusOK, map[string]string{"status": "ready"})
-}
+// =============================================================================
+// helpers.go — Decode and encode functions
+// =============================================================================
 
-// ListUsers returns a paginated list of users.
-func (h *Handler) ListUsers(w http.ResponseWriter, r *http.Request) {
-	limit := getIntQuery(r, "limit", 20)
-	offset := getIntQuery(r, "offset", 0)
+// --- Decode Functions ---
 
-	users, total, err := h.services.Users().List(r.Context(), limit, offset)
-	if err != nil {
-		h.handleError(w, err)
-		return
-	}
-
-	h.json(w, http.StatusOK, ListResponse[UserResponse]{
-		Items:      mapUsers(users),
-		TotalCount: total,
-		Limit:      limit,
-		Offset:     offset,
-	})
-}
-
-// GetUser returns a single user by ID.
-func (h *Handler) GetUser(w http.ResponseWriter, r *http.Request) {
-	userID, err := uuid.Parse(chi.URLParam(r, "userID"))
-	if err != nil {
-		h.error(w, http.StatusBadRequest, "invalid user ID")
-		return
-	}
-
-	user, err := h.services.Users().GetByID(r.Context(), userID)
-	if err != nil {
-		h.handleError(w, err)
-		return
-	}
-
-	h.json(w, http.StatusOK, toUserResponse(user))
-}
-
-// CreateUser creates a new user.
-func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
+func decodeCreateUserRequest(r *http.Request, v *validator.Validate) (*CreateUserRequest, error) {
 	var req CreateUserRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		h.error(w, http.StatusBadRequest, "invalid JSON body")
-		return
+		return nil, NewBadRequestError("invalid JSON")
 	}
-
-	if err := h.validate.Struct(req); err != nil {
-		h.validationError(w, err)
-		return
+	if err := v.StructCtx(r.Context(), &req); err != nil {
+		return nil, NewValidationError(err)
 	}
-
-	user, err := h.services.Users().Create(r.Context(), req.Name, req.Email)
-	if err != nil {
-		h.handleError(w, err)
-		return
-	}
-
-	h.json(w, http.StatusCreated, toUserResponse(user))
+	return &req, nil
 }
 
-// UpdateUser updates an existing user.
-func (h *Handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
-	userID, err := uuid.Parse(chi.URLParam(r, "userID"))
-	if err != nil {
-		h.error(w, http.StatusBadRequest, "invalid user ID")
-		return
-	}
-
+func decodeUpdateUserRequest(r *http.Request, v *validator.Validate) (*UpdateUserRequest, error) {
 	var req UpdateUserRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		h.error(w, http.StatusBadRequest, "invalid JSON body")
-		return
+		return nil, NewBadRequestError("invalid JSON")
 	}
-
-	if err := h.validate.Struct(req); err != nil {
-		h.validationError(w, err)
-		return
+	if err := v.StructCtx(r.Context(), &req); err != nil {
+		return nil, NewValidationError(err)
 	}
-
-	user, err := h.services.Users().Update(r.Context(), userID, req.Name, req.Email)
-	if err != nil {
-		h.handleError(w, err)
-		return
-	}
-
-	h.json(w, http.StatusOK, toUserResponse(user))
+	return &req, nil
 }
 
-// DeleteUser deletes a user by ID.
-func (h *Handler) DeleteUser(w http.ResponseWriter, r *http.Request) {
-	userID, err := uuid.Parse(chi.URLParam(r, "userID"))
-	if err != nil {
-		h.error(w, http.StatusBadRequest, "invalid user ID")
-		return
-	}
+// --- Encode Functions ---
 
-	if err := h.services.Users().Delete(r.Context(), userID); err != nil {
-		h.handleError(w, err)
-		return
-	}
-
-	w.WriteHeader(http.StatusNoContent)
-}
-
-// ---------- Response Helpers ----------
-
-func (h *Handler) json(w http.ResponseWriter, status int, data any) {
+func encodeJSONResponse(w http.ResponseWriter, status int, data any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	if data != nil {
@@ -231,44 +318,20 @@ func (h *Handler) json(w http.ResponseWriter, status int, data any) {
 	}
 }
 
-func (h *Handler) error(w http.ResponseWriter, status int, message string) {
-	h.json(w, status, map[string]string{"error": message})
-}
+func encodeErrorResponse(w http.ResponseWriter, err error) {
+	status := HTTPStatusCode(err)
+	message := ErrorMessage(err)
+	code := GetErrorCode(err)
 
-func (h *Handler) validationError(w http.ResponseWriter, err error) {
-	var validationErrors validator.ValidationErrors
-	if !errors.As(err, &validationErrors) {
-		h.error(w, http.StatusBadRequest, "validation failed")
-		return
-	}
-
-	details := make(map[string]string)
-	for _, e := range validationErrors {
-		details[e.Field()] = formatValidationError(e)
-	}
-
-	h.json(w, http.StatusBadRequest, map[string]any{
-		"error":   "validation failed",
-		"details": details,
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(ErrorResponse{
+		Error: message,
+		Code:  code,
 	})
 }
 
-func (h *Handler) handleError(w http.ResponseWriter, err error) {
-	switch {
-	case common.IsNotFound(err):
-		h.error(w, http.StatusNotFound, err.Error())
-	case common.IsValidationFailed(err):
-		h.error(w, http.StatusBadRequest, err.Error())
-	case common.IsStateConflict(err):
-		h.error(w, http.StatusConflict, err.Error())
-	case common.IsUnauthorized(err):
-		h.error(w, http.StatusUnauthorized, err.Error())
-	default:
-		h.error(w, http.StatusInternalServerError, "internal server error")
-	}
-}
-
-// ---------- Helpers ----------
+// --- Query Helpers ---
 
 func getIntQuery(r *http.Request, key string, defaultVal int) int {
 	val := r.URL.Query().Get(key)
@@ -282,35 +345,104 @@ func getIntQuery(r *http.Request, key string, defaultVal int) int {
 	return i
 }
 
-func formatValidationError(e validator.FieldError) string {
+func deref(s *string) string {
+	if s == nil {
+		return ""
+	}
+	return *s
+}
+
+// =============================================================================
+// errors.go — Handler errors (or add to helpers.go)
+// =============================================================================
+
+// HandlerError represents HTTP layer errors.
+type HandlerError struct {
+	Status  int
+	Code    string
+	Message string
+}
+
+func (e *HandlerError) Error() string {
+	return e.Message
+}
+
+func NewBadRequestError(msg string) error {
+	return &HandlerError{
+		Status:  http.StatusBadRequest,
+		Code:    "bad_request",
+		Message: msg,
+	}
+}
+
+func NewNotFoundError(msg string) error {
+	return &HandlerError{
+		Status:  http.StatusNotFound,
+		Code:    "not_found",
+		Message: msg,
+	}
+}
+
+func NewValidationError(err error) error {
+	// Format validation errors from validator package
+	var validationErrors validator.ValidationErrors
+	if errors.As(err, &validationErrors) {
+		return &HandlerError{
+			Status:  http.StatusBadRequest,
+			Code:    "validation_error",
+			Message: formatValidationErrors(validationErrors),
+		}
+	}
+	return &HandlerError{
+		Status:  http.StatusBadRequest,
+		Code:    "validation_error",
+		Message: "validation failed",
+	}
+}
+
+func formatValidationErrors(errs validator.ValidationErrors) string {
+	if len(errs) == 0 {
+		return "validation failed"
+	}
+	// Return first error for simplicity
+	e := errs[0]
 	switch e.Tag() {
 	case "required":
-		return "field is required"
+		return e.Field() + " is required"
 	case "email":
 		return "invalid email format"
 	case "min":
-		return "value too small"
+		return e.Field() + " is too short"
 	case "max":
-		return "value too large"
+		return e.Field() + " is too long"
 	default:
-		return "invalid value"
+		return e.Field() + " is invalid"
 	}
 }
 
-func toUserResponse(u *models.User) UserResponse {
-	return UserResponse{
-		ID:        u.ID,
-		Name:      u.Name,
-		Email:     u.Email,
-		CreatedAt: u.CreatedAt,
-		UpdatedAt: u.UpdatedAt,
+// HTTPStatusCode extracts HTTP status from error.
+func HTTPStatusCode(err error) int {
+	var he *HandlerError
+	if errors.As(err, &he) {
+		return he.Status
 	}
+	return http.StatusInternalServerError
 }
 
-func mapUsers(users []*models.User) []UserResponse {
-	result := make([]UserResponse, len(users))
-	for i, u := range users {
-		result[i] = toUserResponse(u)
+// ErrorMessage returns client-safe error message.
+func ErrorMessage(err error) string {
+	var he *HandlerError
+	if errors.As(err, &he) {
+		return he.Message
 	}
-	return result
+	return "internal error"
+}
+
+// GetErrorCode returns error code string.
+func GetErrorCode(err error) string {
+	var he *HandlerError
+	if errors.As(err, &he) {
+		return he.Code
+	}
+	return "internal"
 }

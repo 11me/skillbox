@@ -4,10 +4,11 @@ import (
 	"context"
 	"time"
 
-	"github.com/google/uuid"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
+
+// Note: IDs are string type, not uuid.UUID.
 
 // NewZap creates a new zap logger.
 // Recommended for large projects.
@@ -33,13 +34,13 @@ func NewZap(level string) (*zap.Logger, error) {
 // Decorator wrapper pattern for service logging with timing
 
 type User struct {
-	ID    uuid.UUID
+	ID    string
 	Name  string
 	Email string
 }
 
 type UserService interface {
-	GetUser(ctx context.Context, id uuid.UUID) (*User, error)
+	GetUser(ctx context.Context, id string) (*User, error)
 	CreateUser(ctx context.Context, name, email string) (*User, error)
 }
 
@@ -55,14 +56,14 @@ func NewUserServiceLogger(svc UserService, logger *zap.Logger) *UserServiceLogge
 	}
 }
 
-func (s *UserServiceLogger) GetUser(ctx context.Context, id uuid.UUID) (*User, error) {
+func (s *UserServiceLogger) GetUser(ctx context.Context, id string) (*User, error) {
 	start := time.Now()
 
 	user, err := s.wrapped.GetUser(ctx, id)
 
 	elapsed := time.Since(start)
 	fields := []zap.Field{
-		zap.Stringer("user_id", id),
+		zap.String("user_id", id),
 		zap.Duration("elapsed", elapsed),
 		zap.Error(err),
 	}
@@ -93,7 +94,7 @@ func (s *UserServiceLogger) CreateUser(ctx context.Context, name, email string) 
 		s.logger.Error("create user failed", fields...)
 	} else {
 		s.logger.Info("user created",
-			zap.Stringer("user_id", user.ID),
+			zap.String("user_id", user.ID),
 			zap.Duration("elapsed", elapsed),
 		)
 	}

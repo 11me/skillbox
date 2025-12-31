@@ -5,6 +5,7 @@
 // - pgx.CollectOneRow/CollectRows for row scanning
 // - Squirrel query builder with Dollar placeholders
 // - Upsert pattern with ON CONFLICT
+// - IDs as string (not uuid.UUID)
 package storage
 
 import (
@@ -28,11 +29,11 @@ var ErrUserNotFound = errors.New("user not found")
 // ---------- Repository Interface ----------
 
 type Users interface {
-	FindByID(ctx context.Context, id uuid.UUID) (*models.User, error)
+	FindByID(ctx context.Context, id string) (*models.User, error)
 	FindByEmail(ctx context.Context, email string) (*models.User, error)
 	Find(ctx context.Context, filter *models.UserFilter) ([]*models.User, error)
 	Save(ctx context.Context, users ...*models.User) error
-	Delete(ctx context.Context, id uuid.UUID) error
+	Delete(ctx context.Context, id string) error
 }
 
 // ---------- Repository Implementation ----------
@@ -48,7 +49,7 @@ func NewUserStorage(client pg.Client) Users {
 
 // ---------- Read Operations ----------
 
-func (s *userStorage) FindByID(ctx context.Context, id uuid.UUID) (*models.User, error) {
+func (s *userStorage) FindByID(ctx context.Context, id string) (*models.User, error) {
 	sql, args, err := sq.
 		Select("id", "name", "email", "created_at", "updated_at").
 		From("users").
@@ -168,8 +169,8 @@ func (s *userStorage) Save(ctx context.Context, users ...*models.User) error {
 		PlaceholderFormat(sq.Dollar)
 
 	for _, user := range users {
-		if user.ID == uuid.Nil {
-			user.ID = uuid.New()
+		if user.ID == "" {
+			user.ID = uuid.NewString()
 		}
 		if user.CreatedAt.IsZero() {
 			user.CreatedAt = now
@@ -198,7 +199,7 @@ func (s *userStorage) Save(ctx context.Context, users ...*models.User) error {
 	return nil
 }
 
-func (s *userStorage) Delete(ctx context.Context, id uuid.UUID) error {
+func (s *userStorage) Delete(ctx context.Context, id string) error {
 	sql, args, err := sq.
 		Delete("users").
 		Where(sq.Eq{"id": id}).
@@ -239,7 +240,7 @@ func (s *userStorage) Delete(ctx context.Context, id uuid.UUID) error {
 //
 //	        // Create user (uses same transaction)
 //	        user = &models.User{
-//	            ID:    uuid.New(),
+//	            ID:    uuid.NewString(),  // Generate string ID
 //	            Name:  req.Name,
 //	            Email: req.Email,
 //	        }

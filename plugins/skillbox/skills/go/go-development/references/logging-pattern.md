@@ -37,7 +37,7 @@ func New(level string) *slog.Logger {
 logger := logger.New("info")
 
 logger.Info("user created",
-    slog.String("user_id", user.ID.String()),
+    slog.String("user_id", user.ID),
     slog.String("email", user.Email),
 )
 
@@ -83,7 +83,7 @@ logger, _ := logger.New("info")
 defer logger.Sync()
 
 logger.Info("user created",
-    zap.String("user_id", user.ID.String()),
+    zap.String("user_id", user.ID),
     zap.String("email", user.Email),
 )
 
@@ -109,14 +109,14 @@ func NewUserServiceLogger(svc UserService, logger *zap.Logger) *UserServiceLogge
     }
 }
 
-func (s *UserServiceLogger) GetUser(ctx context.Context, id uuid.UUID) (*User, error) {
+func (s *UserServiceLogger) GetUser(ctx context.Context, id string) (*User, error) {
     start := time.Now()
 
     user, err := s.wrapped.GetUser(ctx, id)
 
     elapsed := time.Since(start)
     fields := []zap.Field{
-        zap.Stringer("user_id", id),
+        zap.String("user_id", id),
         zap.Duration("elapsed", elapsed),
         zap.Error(err),
     }

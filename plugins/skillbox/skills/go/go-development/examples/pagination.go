@@ -12,9 +12,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"time"
-
-	"github.com/google/uuid"
 )
+
+// Note: IDs are string type, not uuid.UUID.
 
 // ---------- Generic Page Types ----------
 
@@ -44,13 +44,13 @@ func NewPageResponse[T any](items []T, nextCursor string) PageResponse[T] {
 
 // IDCursor is a simple cursor using only ID.
 type IDCursor struct {
-	ID uuid.UUID `json:"id"`
+	ID string `json:"id"`
 }
 
 // TimestampCursor is a cursor using timestamp and ID (for created_at ordering).
 type TimestampCursor struct {
 	Timestamp time.Time `json:"ts"`
-	ID        uuid.UUID `json:"id"`
+	ID        string    `json:"id"`
 }
 
 // ---------- Cursor Encoding ----------
@@ -111,7 +111,7 @@ func Paginate[T any, C any](
 // UserCursor is the cursor for user pagination.
 type UserCursor struct {
 	CreatedAt time.Time `json:"created_at"`
-	ID        uuid.UUID `json:"id"`
+	ID        string    `json:"id"`
 }
 
 // Example usage in repository:

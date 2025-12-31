@@ -11,6 +11,9 @@ import (
 	"myapp/internal/storage"
 )
 
+// Note: IDs are string type, not uuid.UUID.
+// Generate new IDs with uuid.NewString().
+
 // Registry holds all services
 type Registry struct {
 	conf    *config.Config
@@ -41,7 +44,7 @@ func NewUserService(storage storage.Storage, conf *config.Config) *UserService {
 	}
 }
 
-func (s *UserService) GetByID(ctx context.Context, id uuid.UUID) (*models.User, error) {
+func (s *UserService) GetByID(ctx context.Context, id string) (*models.User, error) {
 	return s.storage.Users().FindByID(ctx, id)
 }
 
@@ -62,7 +65,7 @@ func (s *UserService) Create(ctx context.Context, name, email string) (*models.U
 	}
 
 	user := &models.User{
-		ID:    uuid.New(),
+		ID:    uuid.NewString(),
 		Name:  name,
 		Email: email,
 	}
@@ -77,7 +80,7 @@ func (s *UserService) Create(ctx context.Context, name, email string) (*models.U
 	return user, nil
 }
 
-func (s *UserService) Update(ctx context.Context, id uuid.UUID, name, email string) (*models.User, error) {
+func (s *UserService) Update(ctx context.Context, id string, name, email string) (*models.User, error) {
 	user, err := s.storage.Users().FindByID(ctx, id)
 	if err != nil {
 		return nil, err
@@ -100,7 +103,7 @@ func (s *UserService) Update(ctx context.Context, id uuid.UUID, name, email stri
 	return user, nil
 }
 
-func (s *UserService) Delete(ctx context.Context, id uuid.UUID) error {
+func (s *UserService) Delete(ctx context.Context, id string) error {
 	return s.storage.ExecReadCommitted(ctx, func(ctx context.Context) error {
 		return s.storage.Users().Delete(ctx, id)
 	})

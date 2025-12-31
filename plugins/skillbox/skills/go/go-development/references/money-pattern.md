@@ -442,7 +442,7 @@ CREATE TABLE payments (
 
 ```go
 type orderMapper struct {
-    ID            uuid.UUID
+    ID            string
     TotalAmount   string  // scanned as string from NUMERIC
     TotalCurrency string  // scanned from VARCHAR
     CreatedAt     time.Time
@@ -466,7 +466,7 @@ func (r *OrderRepository) Create(ctx context.Context, order *Order) error {
 }
 
 // Select — NUMERIC scans to string automatically
-func (r *OrderRepository) GetByID(ctx context.Context, id uuid.UUID) (*Order, error) {
+func (r *OrderRepository) GetByID(ctx context.Context, id string) (*Order, error) {
     row := r.db.QueryRow(ctx, `
         SELECT id, total_amount, total_currency, created_at
         FROM orders WHERE id = $1
@@ -497,8 +497,8 @@ Works automatically with struct tags:
 
 ```go
 type Order struct {
-    ID    uuid.UUID `json:"id"`
-    Total *Money    `json:"total"`
+    ID    string `json:"id"`
+    Total *Money `json:"total"`
 }
 
 // Serializes to:

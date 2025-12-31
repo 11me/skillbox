@@ -239,7 +239,7 @@ func (h *Handler) GetUser(w http.ResponseWriter, r *http.Request) {
 }
 
 // Service
-func (s *UserService) GetByID(ctx context.Context, id uuid.UUID) (*User, error) {
+func (s *UserService) GetByID(ctx context.Context, id string) (*User, error) {
     ctx, span := tracer.Start(ctx, "GetByID")
     defer span.End()
 
@@ -248,7 +248,7 @@ func (s *UserService) GetByID(ctx context.Context, id uuid.UUID) (*User, error) 
 }
 
 // Repository
-func (r *userRepo) FindByID(ctx context.Context, id uuid.UUID) (*User, error) {
+func (r *userRepo) FindByID(ctx context.Context, id string) (*User, error) {
     // Context carries trace through to database
     row := r.db.QueryRow(ctx, query, id)
     // ...

@@ -280,7 +280,7 @@ type UpdateUserRequest struct {
 }
 
 // In service
-func (s *UserService) Update(ctx context.Context, id uuid.UUID, req UpdateUserRequest) (*User, error) {
+func (s *UserService) Update(ctx context.Context, id string, req UpdateUserRequest) (*User, error) {
     user, err := s.repo.GetByID(ctx, id)
     if err != nil {
         return nil, err

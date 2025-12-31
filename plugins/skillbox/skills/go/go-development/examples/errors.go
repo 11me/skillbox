@@ -153,7 +153,7 @@ func IsInternal(err error) bool {
 //	var ErrEmailTaken = &errors.Error{Code: errors.CodeConflict, Message: "email already registered"}
 //
 //	// In repository
-//	func (r *userRepo) FindByID(ctx context.Context, id uuid.UUID) (*User, error) {
+//	func (r *userRepo) FindByID(ctx context.Context, id string) (*User, error) {
 //	    row := r.db.QueryRow(ctx, query, id)
 //	    var user User
 //	    if err := row.Scan(&user.ID, &user.Name); err != nil {

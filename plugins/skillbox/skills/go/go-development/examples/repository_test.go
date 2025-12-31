@@ -32,7 +32,7 @@ func TestUserRepository_Create(t *testing.T) {
 	// Create user
 	created, err := repo.Create(ctx, user)
 	require.NoError(t, err)
-	assert.NotEqual(t, uuid.Nil, created.ID)
+	assert.NotEmpty(t, created.ID)
 	assert.Equal(t, user.Name, created.Name)
 	assert.Equal(t, user.Email, created.Email)
 	assert.False(t, created.CreatedAt.IsZero())
@@ -58,7 +58,7 @@ func TestUserRepository_GetByID(t *testing.T) {
 
 	tests := []struct {
 		name    string
-		id      uuid.UUID
+		id      string
 		wantErr bool
 	}{
 		{
@@ -68,7 +68,7 @@ func TestUserRepository_GetByID(t *testing.T) {
 		},
 		{
 			name:    "non-existing user",
-			id:      uuid.New(),
+			id:      uuid.NewString(),
 			wantErr: true,
 		},
 	}

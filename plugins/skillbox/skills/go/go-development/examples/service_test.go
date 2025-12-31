@@ -30,7 +30,7 @@ func (m *MockUserRepository) Create(ctx context.Context, user *models.User) (*mo
 	return args.Get(0).(*models.User), args.Error(1)
 }
 
-func (m *MockUserRepository) GetByID(ctx context.Context, id uuid.UUID) (*models.User, error) {
+func (m *MockUserRepository) GetByID(ctx context.Context, id string) (*models.User, error) {
 	args := m.Called(ctx, id)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
@@ -54,7 +54,7 @@ func (m *MockUserRepository) Update(ctx context.Context, user *models.User) (*mo
 	return args.Get(0).(*models.User), args.Error(1)
 }
 
-func (m *MockUserRepository) Delete(ctx context.Context, id uuid.UUID) error {
+func (m *MockUserRepository) Delete(ctx context.Context, id string) error {
 	args := m.Called(ctx, id)
 	return args.Error(0)
 }
@@ -83,7 +83,7 @@ func TestUserService_Create(t *testing.T) {
 				// Create user
 				m.On("Create", mock.Anything, mock.AnythingOfType("*models.User")).
 					Return(&models.User{
-						ID:    uuid.New(),
+						ID:    uuid.NewString(),
 						Name:  "Test User",
 						Email: "test@example.com",
 					}, nil)
@@ -116,7 +116,7 @@ func TestUserService_Create(t *testing.T) {
 				// Email already exists
 				m.On("GetByEmail", mock.Anything, "existing@example.com").
 					Return(&models.User{
-						ID:    uuid.New(),
+						ID:    uuid.NewString(),
 						Name:  "Existing User",
 						Email: "existing@example.com",
 					}, nil)
@@ -144,7 +144,7 @@ func TestUserService_Create(t *testing.T) {
 				require.NotNil(t, user)
 				assert.Equal(t, tt.inputName, user.Name)
 				assert.Equal(t, tt.email, user.Email)
-				assert.NotEqual(t, uuid.Nil, user.ID)
+				assert.NotEmpty(t, user.ID)
 			}
 
 			mockRepo.AssertExpectations(t)
@@ -156,12 +156,12 @@ func TestUserService_GetByID(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
-	existingID := uuid.New()
-	nonExistingID := uuid.New()
+	existingID := uuid.NewString()
+	nonExistingID := uuid.NewString()
 
 	tests := []struct {
 		name      string
-		id        uuid.UUID
+		id        string
 		setupMock func(*MockUserRepository)
 		wantErr   bool
 	}{
@@ -213,11 +213,11 @@ func TestUserService_Delete(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
-	userID := uuid.New()
+	userID := uuid.NewString()
 
 	tests := []struct {
 		name      string
-		id        uuid.UUID
+		id        string
 		setupMock func(*MockUserRepository)
 		wantErr   bool
 	}{

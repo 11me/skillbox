@@ -10,16 +10,17 @@ package storage
 import (
     "context"
 
-    "github.com/google/uuid"
     "myapp/internal/models"
 )
 
+// Note: IDs are string type, not uuid.UUID.
+
 type UserRepository interface {
-    FindByID(ctx context.Context, id uuid.UUID) (*models.User, error)
+    FindByID(ctx context.Context, id string) (*models.User, error)
     FindByEmail(ctx context.Context, email string) (*models.User, error)
     Create(ctx context.Context, user *models.User) error
     Update(ctx context.Context, user *models.User) error
-    Delete(ctx context.Context, id uuid.UUID) error
+    Delete(ctx context.Context, id string) error
 }
 ```
 
@@ -33,7 +34,6 @@ import (
     "errors"
     "time"
 
-    "github.com/google/uuid"
     "github.com/jackc/pgx/v5"
     sq "github.com/Masterminds/squirrel"
     "myapp/internal/common"
@@ -51,7 +51,7 @@ func NewUserRepository(db *postgres.Client) UserRepository {
     return &userRepository{db: db}
 }
 
-func (r *userRepository) FindByID(ctx context.Context, id uuid.UUID) (*models.User, error) {
+func (r *userRepository) FindByID(ctx context.Context, id string) (*models.User, error) {
     query, args, err := psql.
         Select("id", "name", "email", "created_at", "updated_at").
         From("users").
@@ -123,14 +123,13 @@ func scanUsers(rows pgx.Rows) ([]*models.User, error) {
 ```go
 package models
 
-import (
-    "time"
+import "time"
 
-    "github.com/google/uuid"
-)
+// Note: IDs are string type.
+// Generate new IDs with uuid.NewString() from github.com/google/uuid.
 
 type User struct {
-    ID        uuid.UUID
+    ID        string
     Name      string
     Email     string
     CreatedAt time.Time

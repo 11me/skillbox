@@ -43,9 +43,13 @@ import (
 
     "github.com/google/uuid"
     "myapp/internal/common"
+    "myapp/internal/config"
     "myapp/internal/models"
     "myapp/internal/storage"
 )
+
+// Note: IDs are string type, not uuid.UUID.
+// Generate new IDs with uuid.NewString().
 
 type UserService struct {
     storage storage.Storage
@@ -59,7 +63,7 @@ func NewUserService(storage storage.Storage, conf *config.Config) *UserService {
     }
 }
 
-func (s *UserService) GetByID(ctx context.Context, id uuid.UUID) (*models.User, error) {
+func (s *UserService) GetByID(ctx context.Context, id string) (*models.User, error) {
     user, err := s.storage.Users().FindByID(ctx, id)
     if err != nil {
         return nil, err
@@ -73,7 +77,7 @@ func (s *UserService) Create(ctx context.Context, name, email string) (*models.U
     }
 
     user := &models.User{
-        ID:    uuid.New(),
+        ID:    uuid.NewString(),
         Name:  name,
         Email: email,
     }
