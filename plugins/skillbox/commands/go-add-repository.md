@@ -86,6 +86,7 @@ type {{Name}}Repository interface {
     FindByFilter(ctx context.Context, filter *models.{{Name}}Filter) ([]*models.{{Name}}, error)
     Update(ctx context.Context, entity *models.{{Name}}) error
     Delete(ctx context.Context, id string) error
+    Serialize(ctx context.Context, label string) error
 }
 
 type {{name}}Repository struct {
@@ -164,6 +165,24 @@ func (r *{{name}}Repository) Delete(ctx context.Context, id uuid.UUID) error {
 
     if _, err := r.db.Exec(ctx, query, args...); err != nil {
         return fmt.Errorf("exec: %w", err)
+    }
+    return nil
+}
+
+// Serialize acquires an advisory lock for serializable transactions.
+// Use inside WithTx with pgx.Serializable to prevent serialization conflicts.
+// See: advisory-lock-pattern.md
+func (r *{{name}}Repository) Serialize(ctx context.Context, label string) error {
+    query, _, err := squirrel.
+        Select("pg_advisory_xact_lock(hashtext(?))").
+        PlaceholderFormat(squirrel.Dollar).
+        ToSql()
+    if err != nil {
+        return fmt.Errorf("build lock query: %w", err)
+    }
+
+    if _, err := r.db.Exec(ctx, query, label); err != nil {
+        return fmt.Errorf("acquire lock: %w", err)
     }
     return nil
 }

@@ -73,6 +73,15 @@
             "command": "python3 ${CLAUDE_PLUGIN_ROOT}/scripts/hooks/version-guard.py"
           }
         ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Check if this Go file contains serializable transaction code (pgx.Serializable, ExecSerializable, or WithTx with Serializable level). If found, check if there's a Serialize() call inside the transaction block. If Serializable is used WITHOUT Serialize(), return a reminder:\n\n⚠️ Serializable transaction detected without Serialize() call.\nConsider using advisory lock to prevent serialization conflicts.\nPattern: repo.Serialize(ctx, \"OperationName:resourceID\")\nSee: advisory-lock-pattern.md\n\nReturn empty response if: not a Go file, no Serializable usage, or Serialize() is already present."
+          }
+        ]
       }
     ],
     "PostToolUse": [

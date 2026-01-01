@@ -171,6 +171,7 @@ project/
 | Configuration | [config-pattern.md](references/config-pattern.md) |
 | Package Structure | [package-structure-decision.md](references/package-structure-decision.md) |
 | Database & Transactions | [database-pattern.md](references/database-pattern.md) |
+| Advisory Locks | [advisory-lock-pattern.md](references/advisory-lock-pattern.md) |
 | Service Layer | [service-pattern.md](references/service-pattern.md) |
 | Repository | [repository-pattern.md](references/repository-pattern.md) |
 | Filter Pattern | [filter-pattern.md](references/filter-pattern.md) |
@@ -234,6 +235,7 @@ project/
 | Common Models | [common_models.go](examples/common_models.go) |
 | Common Storage | [common_storage.go](examples/common_storage.go) |
 | Database Client | [pg-client.go](examples/pg-client.go) |
+| Advisory Lock | [advisory_lock.go](examples/advisory_lock.go) |
 | Repository | [repository.go](examples/repository.go) |
 | Service | [service.go](examples/service.go) |
 | Mapper | [mapper.go](examples/mapper.go) |
@@ -326,6 +328,7 @@ go get github.com/exaring/otelpgx@latest
 
 ## Version
 
+- 1.20.0 — Advisory lock pattern for serializable transactions: Serialize() method, enforcement hook, /go-add-repository includes Serialize() by default
 - 1.19.0 — Filter pattern for database queries: XxxFilter, getXxxCondition(), /go-add-repository generates filter scaffold
 - 1.18.0 — Dependency version enforcement: PreToolUse hook for `go get @latest`
 - 1.17.0 — Testcontainers integration: typed closer, testmigration/ fixtures, goose with sql.Open

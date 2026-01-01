@@ -393,8 +393,29 @@ for _, m := range mappers {
 - ❌ Use `QueryRow().Scan()` — prefer `pgx.CollectOneRow`
 - ❌ Mix transaction and non-transaction calls in same function
 
+## Advisory Locks with Serializable
+
+When using `ExecSerializable` for operations with high concurrency (wallet transfers, counters, bidding), consider using **advisory locks** to prevent serialization conflicts.
+
+See [advisory-lock-pattern.md](advisory-lock-pattern.md) for details.
+
+```go
+// Example: Lock before reading in serializable transaction
+err := svc.storage.ExecSerializable(ctx, func(ctx context.Context) error {
+    // 1. Acquire lock FIRST
+    if err := svc.storage.Users().Serialize(ctx, fmt.Sprintf("Transfer:%s", userID)); err != nil {
+        return err
+    }
+
+    // 2. Read and modify (AFTER lock)
+    user, err := svc.storage.Users().FindByID(ctx, userID)
+    // ...
+})
+```
+
 ## Related
 
 - [repository-pattern.md](repository-pattern.md) — Repository pattern
 - [service-pattern.md](service-pattern.md) — Service layer
 - [tracing-pattern.md](tracing-pattern.md) — Database tracing with otelpgx
+- [advisory-lock-pattern.md](advisory-lock-pattern.md) — Advisory locks for serializable transactions
