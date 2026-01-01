@@ -95,7 +95,11 @@ project/
 │   │   └── {entity}.go       # Business logic
 │   ├── storage/
 │   │   ├── storage.go        # Storage interface
-│   │   └── {entity}.go       # Repository impl
+│   │   ├── {entity}.go       # Repository impl
+│   │   ├── main_test.go      # TestMain with testcontainers
+│   │   └── testmigration/    # Test data fixtures (SQL)
+│   │       ├── 100001_users.up.sql
+│   │       └── 100001_users.down.sql
 │   └── http/
 │       └── v1/
 │           ├── router.go     # Router + path constants
@@ -145,6 +149,7 @@ project/
 | Error Handling | [error-handling.md](references/error-handling.md) |
 | Logging | [logging-pattern.md](references/logging-pattern.md) |
 | Testing | [testing-pattern.md](references/testing-pattern.md) |
+| Test Fixtures | [test-fixtures-pattern.md](references/test-fixtures-pattern.md) |
 | Money | [money-pattern.md](references/money-pattern.md) |
 | Build & Deploy | [build-deploy.md](references/build-deploy.md) |
 
@@ -204,6 +209,7 @@ project/
 | Logger (slog) | [logger_slog.go](examples/logger_slog.go) |
 | Logger (zap) | [logger_zap.go](examples/logger_zap.go) |
 | Test Setup | [main_test.go](examples/main_test.go) |
+| Test Fixtures (SQL) | [testmigration_example.sql](examples/testmigration_example.sql) |
 | Repository Tests | [repository_test.go](examples/repository_test.go) |
 | Service Tests | [service_test.go](examples/service_test.go) |
 | Money | [money.go](examples/money.go) |
@@ -278,6 +284,7 @@ go get github.com/exaring/otelpgx@latest
 
 ## Version
 
+- 1.17.0 — Testcontainers integration: typed closer, testmigration/ fixtures, goose with sql.Open
 - 1.16.1 — Fix golangci-lint v2 schema: imports-blocklist, remove deprecated options
 - 1.16.0 — Protected .golangci.yml (hook + documentation)
 - 1.15.0 — Package naming: no common/helpers/utils, purpose-named packages (optional/, json.go)
