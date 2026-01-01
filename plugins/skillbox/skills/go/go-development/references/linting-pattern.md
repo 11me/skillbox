@@ -187,7 +187,7 @@ linters:
             - ["VM"]  # DenyList
 
         # Security
-        - name: imports-blacklist
+        - name: imports-blocklist
           arguments:
             - "crypto/md5"
             - "crypto/sha1"

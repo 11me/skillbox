@@ -278,6 +278,7 @@ go get github.com/exaring/otelpgx@latest
 
 ## Version
 
+- 1.16.1 — Fix golangci-lint v2 schema: imports-blocklist, remove deprecated options
 - 1.16.0 — Protected .golangci.yml (hook + documentation)
 - 1.15.0 — Package naming: no common/helpers/utils, purpose-named packages (optional/, json.go)
 - 1.14.0 — Error handling: sentinel categories + wrap (internal/errs), helpers, no re-wrap
