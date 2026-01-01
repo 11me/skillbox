@@ -334,6 +334,17 @@ go test -cover ./path/to/package/...
 ~[X]% of target file covered
 ```
 
+## Final Validation (REQUIRED)
+
+After generating tests, you MUST run:
+
+```bash
+golangci-lint run --fast <generated-test-files>
+go test -v ./path/to/package/...
+```
+
+Fix any lint issues before reporting completion. **Never consider the task complete until lint passes and tests run.**
+
 ## Important Rules
 
 - **Always use `t.Helper()`** in helper functions
@@ -344,6 +355,7 @@ go test -cover ./path/to/package/...
 - **Use `t.TempDir()`** for temp directories
 - **Use `t.Cleanup()`** for teardown
 - **Test behavior, not implementation**
+- **ALWAYS run golangci-lint** as final step
 
 ## Version History
 

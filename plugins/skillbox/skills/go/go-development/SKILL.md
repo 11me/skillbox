@@ -72,6 +72,36 @@ Production-ready patterns extracted from real projects.
 | **Tracing** | OpenTelemetry (optional) — ask user |
 | **Migrations** | `goose/v3` |
 
+## Linter Enforcement
+
+All rules are enforced via `golangci-lint` (revive rules) in `.golangci.yml`:
+
+| Rule | Linter | Description |
+|------|--------|-------------|
+| `userID` not `userId` | `var-naming` | Go idiom: acronyms in caps |
+| `any` not `interface{}` | `use-any` | Go 1.18+ alias |
+| No `common/helpers/utils` packages | `var-naming` | `extraBadPackageNames` |
+| Error wrapping | `err113`, `errorlint` | Sentinel errors + wrap |
+| Test helpers | `thelper` | Must use `t.Helper()` |
+| Test parallelism | `tparallel` | Suggests `t.Parallel()` |
+| Test env vars | `tenv` | Detects `os.Setenv` in tests |
+
+### Enforcement Layers
+
+1. **SessionStart** — Context injection with linter rules reminder
+2. **Agents/Commands** — Self-enforce by running `golangci-lint` after code generation
+3. **Stop hook** — Blocks session end if Go files modified but lint not run
+
+### Required Validation
+
+After generating/modifying Go code:
+
+```bash
+golangci-lint run ./...
+```
+
+**Do not modify `.golangci.yml`** — linting config is protected by `golangci-guard` hook.
+
 ## Enforced Project Structure
 
 The skill MUST enforce this structure for all Go projects:

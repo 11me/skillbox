@@ -180,6 +180,16 @@ Creates only the model file without database mapper.
 | `time` | `time.Time` | `"2024-01-01T00:00:00Z"` |
 | `uuid` | `uuid.UUID` | `"550e8400-..."` |
 
+## Final Validation (REQUIRED)
+
+After generating files, run:
+
+```bash
+golangci-lint run --fast internal/models/
+```
+
+Fix any issues before reporting completion.
+
 ## Next Steps After Generation
 
 1. Add business methods to the model if needed

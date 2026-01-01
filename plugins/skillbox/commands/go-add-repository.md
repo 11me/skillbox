@@ -211,6 +211,16 @@ func (s *storage) Products() ProductRepository {
 }
 ```
 
+## Final Validation (REQUIRED)
+
+After generating files, run:
+
+```bash
+golangci-lint run --fast internal/storage/
+```
+
+Fix any issues before reporting completion.
+
 ## Next Steps After Generation
 
 1. Add entity-specific fields to model

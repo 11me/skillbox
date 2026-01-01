@@ -118,6 +118,16 @@ func (r *Registry) OrderService() *OrderService {
 }
 ```
 
+## Final Validation (REQUIRED)
+
+After generating files, run:
+
+```bash
+golangci-lint run --fast internal/services/
+```
+
+Fix any issues before reporting completion.
+
 ## Next Steps After Generation
 
 1. Implement service methods with business logic

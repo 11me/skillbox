@@ -3,7 +3,7 @@
 > Specialized workflow layer for Claude Code — cross-session task tracking, semantic code memory, platform engineering patterns.
 
 [![CI](https://github.com/11me/claude-skillbox/actions/workflows/ci.yaml/badge.svg)](https://github.com/11me/claude-skillbox/actions/workflows/ci.yaml)
-[![Version](https://img.shields.io/badge/version-0.18.0-blue?style=flat-square)](https://github.com/11me/claude-skillbox/releases)
+[![Version](https://img.shields.io/badge/version-0.40.0-blue?style=flat-square)](https://github.com/11me/claude-skillbox/releases)
 [![Python](https://img.shields.io/badge/python-3.12+-blue?style=flat-square&logo=python&logoColor=white)](https://python.org)
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-blueviolet?style=flat-square&logo=anthropic)](https://docs.anthropic.com/en/docs/claude-code)
@@ -88,6 +88,7 @@ Autonomous agents for specialized tasks. See [agents/_index.md](plugins/skillbox
 | [session-checkpoint](plugins/skillbox/agents/core/session-checkpoint.md) | haiku | Save progress to serena memory |
 | [code-navigator](plugins/skillbox/agents/core/code-navigator.md) | sonnet | Semantic code exploration |
 | [go-project-init](plugins/skillbox/agents/go/project-init.md) | sonnet | Scaffold Go projects with production patterns |
+| [go-test-generator](plugins/skillbox/agents/go/test-generator.md) | sonnet | Generate idiomatic Go tests |
 | [test-analyzer](plugins/skillbox/agents/tdd/test-analyzer.md) | sonnet | Analyze test coverage |
 | [tdd-coach](plugins/skillbox/agents/tdd/tdd-coach.md) | sonnet | Guide TDD workflow |
 
@@ -112,12 +113,14 @@ Autonomous agents for specialized tasks. See [agents/_index.md](plugins/skillbox
 
 | Hook | Event | Description |
 |------|-------|-------------|
-| session_context | SessionStart | Inject project context |
+| session_context | SessionStart | Inject project context (Go linter rules, GitOps layout) |
 | skill_suggester | SessionStart | Auto-suggest relevant skills |
 | git-push-guard | PreToolUse | Confirm before git push |
+| golangci-guard | PreToolUse | Protect `.golangci.yml` from modification |
 | pretool-secret-guard | PreToolUse | Block secrets in files |
 | validate-flux-manifest | PreToolUse | Validate Flux manifests (API versions, required fields) |
 | helmrelease-version-check | PostToolUse | Suggest checking HelmRelease chart versions |
+| stop-done-criteria | Stop | Quality gate: lint must run if Go files modified |
 
 ## When to Use Skillbox vs Official Plugins
 

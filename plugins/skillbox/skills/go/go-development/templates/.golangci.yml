@@ -66,6 +66,11 @@ linters:
     - wsl             # Whitespace linter
     - whitespace      # Trailing whitespace
 
+    # Testing quality
+    - tenv            # Detects using os.Setenv in tests
+    - thelper         # Detects missing t.Helper()
+    - tparallel       # Detects missing t.Parallel()
+
   exclusions:
     generated: strict
     presets:
@@ -116,11 +121,17 @@ linters:
         - name: cyclomatic
           arguments: [50]
 
-        # Naming (ID not Id)
+        # Naming (ID not Id) + forbidden package names
         - name: var-naming
           arguments:
-            - ["ID"]  # AllowList
+            - ["ID"]  # AllowList - userID, orderID, etc.
             - ["VM"]  # DenyList
+            - false   # skipPackageNameChecks
+            - ["common", "helpers", "utils", "shared", "misc", "base"]  # extraBadPackageNames
+
+        # Enforce 'any' over 'interface{}'
+        - name: use-any
+          disabled: false
 
         # Security
         - name: imports-blocklist

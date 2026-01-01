@@ -95,6 +95,13 @@ def main() -> None:
         project_type = "go"
         output_lines.append("**Project type:** Go project")
         output_lines.append("")
+        output_lines.append("**Linter enforces:**")
+        output_lines.append("- `userID` not `userId` (var-naming)")
+        output_lines.append("- `any` not `interface{}` (use-any)")
+        output_lines.append("- No `common/helpers/utils/shared/misc` packages")
+        output_lines.append("")
+        output_lines.append("→ Run `golangci-lint run` after completing Go tasks")
+        output_lines.append("")
 
     elif types["python"]:
         project_type = "python"

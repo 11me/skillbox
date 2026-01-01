@@ -369,6 +369,22 @@ make lint     # Run linter
 3. Run `make lint` before committing
 ```
 
+## Final Validation (REQUIRED)
+
+After generating all files, you MUST run:
+
+```bash
+golangci-lint run ./...
+```
+
+Fix any issues before reporting completion. **Never consider the task complete until lint passes.**
+
+Key rules enforced by linter:
+- `userID` not `userId` (var-naming)
+- `any` not `interface{}` (use-any)
+- No `common/helpers/utils/shared/misc` packages (var-naming extraBadPackageNames)
+- Error wrapping (err113, errorlint)
+
 ## Important Rules
 
 - **ALWAYS ask** which components are needed before generating
@@ -377,6 +393,7 @@ make lint     # Run linter
 - **Keep main.go minimal** — delegate to internal packages
 - **Use internal/** for private packages
 - **Replace MODULE** with actual module path
+- **ALWAYS run golangci-lint** as final step
 
 ## Related Commands
 
