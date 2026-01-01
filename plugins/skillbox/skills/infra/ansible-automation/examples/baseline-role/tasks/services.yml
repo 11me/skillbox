@@ -1,0 +1,10 @@
+---
+# Disable unnecessary services
+
+- name: Disable unnecessary services
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    enabled: false
+    state: stopped
+  loop: "{{ baseline__disabled_services }}"
+  failed_when: false

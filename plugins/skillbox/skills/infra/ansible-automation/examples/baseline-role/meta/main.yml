@@ -1,0 +1,27 @@
+---
+# Role metadata
+
+galaxy_info:
+  author: Your Name
+  description: Ubuntu server hardening baseline role
+  company: Your Company
+
+  license: MIT
+
+  min_ansible_version: "2.15"
+
+  platforms:
+    - name: Ubuntu
+      versions:
+        - jammy   # 22.04
+        - noble   # 24.04
+
+  galaxy_tags:
+    - security
+    - hardening
+    - baseline
+    - ubuntu
+    - server
+
+dependencies: []
+  # No dependencies - self-contained role

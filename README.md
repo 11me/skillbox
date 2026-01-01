@@ -3,7 +3,7 @@
 > Specialized workflow layer for Claude Code — cross-session task tracking, semantic code memory, platform engineering patterns.
 
 [![CI](https://github.com/11me/claude-skillbox/actions/workflows/ci.yaml/badge.svg)](https://github.com/11me/claude-skillbox/actions/workflows/ci.yaml)
-[![Version](https://img.shields.io/badge/version-0.47.0-blue?style=flat-square)](https://github.com/11me/claude-skillbox/releases)
+[![Version](https://img.shields.io/badge/version-0.49.0-blue?style=flat-square)](https://github.com/11me/claude-skillbox/releases)
 [![Python](https://img.shields.io/badge/python-3.12+-blue?style=flat-square&logo=python&logoColor=white)](https://python.org)
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-blueviolet?style=flat-square&logo=anthropic)](https://docs.anthropic.com/en/docs/claude-code)
@@ -53,6 +53,7 @@ claude --plugin-dir ./plugins/skillbox
 | Skill | Description |
 |-------|-------------|
 | [go-development](plugins/skillbox/skills/go/go-development/) | Production Go patterns: Database, Cache, Advisory Locks, Services, Repositories |
+| [openapi-development](plugins/skillbox/skills/go/openapi-development/) | Spec-first API development with OpenAPI 3.x and oapi-codegen |
 
 ### Platform Engineering
 
@@ -60,6 +61,12 @@ claude --plugin-dir ./plugins/skillbox
 |-------|-------------|
 | [helm-chart-developer](plugins/skillbox/skills/k8s/helm-chart-developer/) | Production Helm charts with GitOps (Flux + Kustomize + ESO) |
 | [flux-gitops-scaffold](plugins/skillbox/skills/k8s/flux-gitops-scaffold/) | Scaffold Flux GitOps projects with image automation |
+
+### Infrastructure Automation
+
+| Skill | Description |
+|-------|-------------|
+| [ansible-automation](plugins/skillbox/skills/infra/ansible-automation/) | Ansible best practices: project structure, Ubuntu hardening, CI/CD |
 
 ### Testing Excellence
 
@@ -116,6 +123,11 @@ Autonomous agents for specialized tasks. See [agents/_index.md](plugins/skillbox
 | `/go-add-repository` | Generate Go repository with interface |
 | `/go-add-model` | Generate Go model with mapper |
 | `/go-review` | Review Go project against production standards |
+| `/openapi-init` | Initialize modular OpenAPI spec structure |
+| `/openapi-add-path` | Add resource path with CRUD operations |
+| `/openapi-generate` | Generate Go code from OpenAPI spec |
+| `/ansible-scaffold` | Create Ansible project with proper structure |
+| `/ansible-validate` | Run lint and security checks on Ansible project |
 
 ## Hooks
 
@@ -142,6 +154,7 @@ Autonomous agents for specialized tasks. See [agents/_index.md](plugins/skillbox
 | Create Helm charts | `helm-chart-developer` (skillbox) |
 | Scaffold Flux GitOps projects | `flux-gitops-scaffold` (skillbox) |
 | TDD workflow enforcement | `tdd-enforcer` (skillbox) |
+| Ansible project automation | `ansible-automation` (skillbox) |
 
 ## Architecture
 
@@ -161,11 +174,14 @@ plugins/skillbox/
 │   │   ├── secrets-guardian/    # Secrets protection
 │   │   └── reliable-execution/  # Context persistence
 │   ├── go/                      # Go development
-│   │   └── go-development/      # Production patterns
+│   │   ├── go-development/      # Production patterns
+│   │   └── openapi-development/ # OpenAPI spec-first API development
 │   ├── ts/                      # TypeScript (educational)
-│   └── k8s/                     # Platform engineering
-│       ├── helm-chart-developer/
-│       └── flux-gitops-scaffold/
+│   ├── k8s/                     # Platform engineering
+│   │   ├── helm-chart-developer/
+│   │   └── flux-gitops-scaffold/
+│   └── infra/                   # Infrastructure automation
+│       └── ansible-automation/  # Ansible best practices
 ├── agents/                      # Autonomous agents
 ├── commands/                    # Slash commands
 ├── hooks/                       # Event hooks

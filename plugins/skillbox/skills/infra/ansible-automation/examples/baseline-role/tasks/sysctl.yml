@@ -1,0 +1,10 @@
+---
+# Kernel hardening via sysctl
+
+- name: Apply security sysctl settings
+  ansible.posix.sysctl:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    sysctl_file: /etc/sysctl.d/99-security.conf
+    reload: true
+  loop: "{{ baseline__sysctl_settings | dict2items }}"

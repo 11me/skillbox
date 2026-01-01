@@ -1,0 +1,25 @@
+// Unattended-Upgrade configuration
+// Managed by Ansible
+
+Unattended-Upgrade::Allowed-Origins {
+    "${distro_id}:${distro_codename}";
+    "${distro_id}:${distro_codename}-security";
+    "${distro_id}ESMApps:${distro_codename}-apps-security";
+    "${distro_id}ESM:${distro_codename}-infra-security";
+};
+
+Unattended-Upgrade::Package-Blacklist {
+    // Add packages that shouldn't be auto-upgraded
+};
+
+Unattended-Upgrade::DevRelease "false";
+Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";
+Unattended-Upgrade::Remove-Unused-Dependencies "true";
+Unattended-Upgrade::Automatic-Reboot "{{ baseline__auto_reboot | default(false) | lower }}";
+Unattended-Upgrade::Automatic-Reboot-Time "{{ baseline__reboot_time | default('02:00') }}";
+
+{% if baseline__updates_email is defined %}
+// Mail notifications
+Unattended-Upgrade::Mail "{{ baseline__updates_email }}";
+Unattended-Upgrade::MailReport "on-change";
+{% endif %}

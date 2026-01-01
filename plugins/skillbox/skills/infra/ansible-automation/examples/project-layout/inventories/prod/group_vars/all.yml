@@ -1,0 +1,43 @@
+---
+# Variables for all hosts in production environment
+
+# Environment identifier
+env: prod
+domain: example.com
+
+# Deploy user
+deploy_user: deploy
+
+# SSH configuration (stricter for production)
+baseline__ssh_port: 22
+baseline__ssh_max_auth_tries: 3
+baseline__ssh_allow_groups:
+  - ssh-users
+
+# Restrict SSH to VPN/known IPs (uncomment and configure)
+# baseline__firewall_ssh_allowed_ips:
+#   - 10.0.0.0/8
+
+# Firewall configuration (minimal)
+baseline__firewall_allowed_ports:
+  - port: 80
+    proto: tcp
+    comment: "HTTP"
+  - port: 443
+    proto: tcp
+    comment: "HTTPS"
+# No debug ports in production!
+
+# Automatic updates
+baseline__auto_updates: true
+baseline__auto_reboot: false
+baseline__reboot_time: "03:00"
+
+# fail2ban (stricter)
+baseline__fail2ban_bantime: "24h"
+baseline__fail2ban_maxretry: 3
+baseline__fail2ban_aggressive: true
+
+# Monitoring
+monitoring_enabled: true
+# prometheus_endpoint: http://prometheus.internal:9090

@@ -1,0 +1,39 @@
+---
+# Variables for all hosts in dev environment
+
+# Environment identifier
+env: dev
+domain: dev.example.com
+
+# Deploy user
+deploy_user: deploy
+
+# SSH configuration
+baseline__ssh_port: 22
+baseline__ssh_allow_groups:
+  - ssh-users
+  - sudo
+
+# Firewall configuration
+baseline__firewall_allowed_ports:
+  - port: 80
+    proto: tcp
+    comment: "HTTP"
+  - port: 443
+    proto: tcp
+    comment: "HTTPS"
+  - port: 8080
+    proto: tcp
+    comment: "Dev debug port"
+
+# Automatic updates
+baseline__auto_updates: true
+baseline__auto_reboot: false
+
+# fail2ban
+baseline__fail2ban_bantime: "1h"
+baseline__fail2ban_maxretry: 5
+
+# Monitoring (if applicable)
+# monitoring_enabled: true
+# prometheus_endpoint: http://prometheus.dev.example.com:9090

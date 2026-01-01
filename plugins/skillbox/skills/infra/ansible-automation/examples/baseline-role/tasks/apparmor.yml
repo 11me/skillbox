@@ -1,0 +1,20 @@
+---
+# AppArmor configuration tasks
+
+- name: Ensure AppArmor is installed
+  ansible.builtin.apt:
+    name:
+      - apparmor
+      - apparmor-utils
+    state: present
+
+- name: Ensure AppArmor is enabled
+  ansible.builtin.systemd:
+    name: apparmor
+    enabled: true
+    state: started
+
+- name: Check AppArmor status
+  ansible.builtin.command: aa-status
+  register: apparmor_status
+  changed_when: false

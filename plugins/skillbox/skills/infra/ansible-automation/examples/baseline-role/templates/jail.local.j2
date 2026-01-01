@@ -1,0 +1,47 @@
+# fail2ban jail configuration
+# Managed by Ansible
+
+[DEFAULT]
+# Ban duration
+bantime = {{ baseline__fail2ban_bantime | default('1h') }}
+
+# Time window for counting failures
+findtime = {{ baseline__fail2ban_findtime | default('10m') }}
+
+# Number of failures before ban
+maxretry = {{ baseline__fail2ban_maxretry | default(5) }}
+
+# Action to take
+banaction = ufw
+banaction_allports = ufw
+
+# Ignore local networks
+ignoreip = 127.0.0.1/8 ::1 {{ baseline__fail2ban_ignoreip | default('') }}
+
+{% if baseline__fail2ban_destemail is defined %}
+# Email notifications
+destemail = {{ baseline__fail2ban_destemail }}
+sender = fail2ban@{{ ansible_fqdn }}
+mta = sendmail
+action = %(action_mwl)s
+{% endif %}
+
+[sshd]
+enabled = true
+port = {{ baseline__ssh_port | default(22) }}
+filter = sshd
+logpath = /var/log/auth.log
+maxretry = {{ baseline__fail2ban_ssh_maxretry | default(3) }}
+bantime = {{ baseline__fail2ban_ssh_bantime | default('24h') }}
+findtime = {{ baseline__fail2ban_ssh_findtime | default('10m') }}
+
+{% if baseline__fail2ban_aggressive | default(false) %}
+# Recidive jail for repeat offenders
+[recidive]
+enabled = true
+logpath = /var/log/fail2ban.log
+banaction = ufw
+bantime = 1w
+findtime = 1d
+maxretry = 5
+{% endif %}

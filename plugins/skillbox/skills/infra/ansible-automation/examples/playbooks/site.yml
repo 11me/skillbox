@@ -1,0 +1,50 @@
+---
+# Main site playbook
+# Usage: ansible-playbook playbooks/site.yml -i inventories/dev
+
+- name: Apply baseline security hardening
+  hosts: all
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+      when: ansible_os_family == "Debian"
+
+  roles:
+    - role: baseline
+      tags: [baseline, security]
+
+  post_tasks:
+    - name: Display completion message
+      ansible.builtin.debug:
+        msg: "Server {{ inventory_hostname }} has been configured"
+
+
+# Additional plays for specific host groups
+
+- name: Configure web servers
+  hosts: webservers
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Placeholder for web server configuration
+      ansible.builtin.debug:
+        msg: "Configure web server tasks here"
+      tags: [webservers]
+
+
+- name: Configure database servers
+  hosts: databases
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Placeholder for database configuration
+      ansible.builtin.debug:
+        msg: "Configure database tasks here"
+      tags: [databases]

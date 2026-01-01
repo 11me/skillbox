@@ -1,0 +1,43 @@
+---
+# Main tasks file for baseline role
+# Apply in order to avoid locking yourself out
+
+# 1. First ensure access is configured
+- name: Configure users
+  ansible.builtin.import_tasks: users.yml
+  tags: [users, access]
+
+# 2. SSH hardening (keep session alive during changes)
+- name: Configure SSH
+  ansible.builtin.import_tasks: ssh.yml
+  tags: [ssh, access]
+
+# 3. Firewall (ensure SSH allowed before enabling)
+- name: Configure firewall
+  ansible.builtin.import_tasks: firewall.yml
+  tags: [firewall, network]
+
+# 4. Automatic updates
+- name: Configure updates
+  ansible.builtin.import_tasks: updates.yml
+  tags: [updates]
+
+# 5. Kernel hardening
+- name: Configure sysctl
+  ansible.builtin.import_tasks: sysctl.yml
+  tags: [sysctl, kernel]
+
+# 6. AppArmor
+- name: Configure AppArmor
+  ansible.builtin.import_tasks: apparmor.yml
+  tags: [apparmor, mac]
+
+# 7. Disable unnecessary services
+- name: Configure services
+  ansible.builtin.import_tasks: services.yml
+  tags: [services]
+
+# 8. fail2ban last (requires SSH config)
+- name: Configure fail2ban
+  ansible.builtin.import_tasks: fail2ban.yml
+  tags: [fail2ban, security]

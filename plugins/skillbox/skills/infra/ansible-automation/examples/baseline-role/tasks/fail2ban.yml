@@ -1,0 +1,21 @@
+---
+# fail2ban configuration tasks
+
+- name: Install fail2ban
+  ansible.builtin.apt:
+    name: fail2ban
+    state: present
+    update_cache: true
+
+- name: Create fail2ban jail configuration
+  ansible.builtin.template:
+    src: jail.local.j2
+    dest: /etc/fail2ban/jail.local
+    mode: '0644'
+  notify: Restart fail2ban
+
+- name: Ensure fail2ban is running
+  ansible.builtin.systemd:
+    name: fail2ban
+    enabled: true
+    state: started

@@ -1,0 +1,100 @@
+---
+# Default variables for baseline role
+# Override in group_vars or host_vars as needed
+
+# Deploy user
+baseline__deploy_user: deploy
+baseline__ssh_public_keys: []
+# - "ssh-ed25519 AAAAC3... user@host"
+
+# SSH Configuration
+baseline__ssh_port: 22
+baseline__ssh_max_auth_tries: 3
+baseline__ssh_max_sessions: 3
+baseline__ssh_allow_agent_forwarding: "no"
+baseline__ssh_allow_tcp_forwarding: "no"
+baseline__ssh_banner: "/etc/ssh/banner"
+
+# SSH access control (optional)
+# baseline__ssh_allow_users:
+#   - deploy
+baseline__ssh_allow_groups:
+  - ssh-users
+
+# Firewall
+baseline__firewall_reset: false
+baseline__firewall_logging: "on"
+baseline__firewall_rate_limit_ssh: true
+baseline__firewall_allowed_ports:
+  - port: 80
+    proto: tcp
+    comment: "HTTP"
+  - port: 443
+    proto: tcp
+    comment: "HTTPS"
+
+# Restrict SSH to specific IPs (optional)
+# baseline__firewall_ssh_allowed_ips:
+#   - 10.0.0.0/8
+
+# Automatic Updates
+baseline__auto_updates: true
+baseline__auto_reboot: false
+baseline__reboot_time: "02:00"
+# baseline__updates_email: admin@example.com
+
+# fail2ban
+baseline__fail2ban_bantime: "1h"
+baseline__fail2ban_findtime: "10m"
+baseline__fail2ban_maxretry: 5
+baseline__fail2ban_ssh_bantime: "24h"
+baseline__fail2ban_ssh_maxretry: 3
+baseline__fail2ban_aggressive: false
+# baseline__fail2ban_ignoreip: "10.0.0.0/8"
+# baseline__fail2ban_destemail: admin@example.com
+
+# Kernel hardening (sysctl)
+baseline__sysctl_settings:
+  # Network security
+  net.ipv4.conf.all.accept_redirects: 0
+  net.ipv4.conf.default.accept_redirects: 0
+  net.ipv6.conf.all.accept_redirects: 0
+  net.ipv4.conf.all.send_redirects: 0
+  net.ipv4.conf.all.accept_source_route: 0
+  net.ipv6.conf.all.accept_source_route: 0
+  net.ipv4.conf.all.log_martians: 1
+
+  # TCP hardening
+  net.ipv4.tcp_syncookies: 1
+  net.ipv4.tcp_max_syn_backlog: 2048
+  net.ipv4.tcp_synack_retries: 2
+
+  # IP spoofing protection
+  net.ipv4.conf.all.rp_filter: 1
+  net.ipv4.conf.default.rp_filter: 1
+
+  # Ignore ICMP broadcast
+  net.ipv4.icmp_echo_ignore_broadcasts: 1
+
+  # Kernel hardening
+  kernel.randomize_va_space: 2
+  kernel.kptr_restrict: 2
+  kernel.dmesg_restrict: 1
+
+  # Filesystem protection
+  fs.protected_hardlinks: 1
+  fs.protected_symlinks: 1
+  fs.suid_dumpable: 0
+
+# AppArmor
+baseline__apparmor_enforce_profiles: []
+baseline__apparmor_exceptions: []
+
+# Services to disable
+baseline__disabled_services:
+  - avahi-daemon
+  - cups
+
+# Secure /tmp mount
+baseline__secure_tmp: true
+baseline__tmp_size: "2G"

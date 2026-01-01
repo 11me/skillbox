@@ -1,0 +1,80 @@
+# SSH Server Configuration - Hardened
+# Managed by Ansible
+
+# Network
+Port {{ baseline__ssh_port | default(22) }}
+AddressFamily any
+ListenAddress 0.0.0.0
+
+# Protocol
+Protocol 2
+
+# Host Keys
+HostKey /etc/ssh/ssh_host_ed25519_key
+HostKey /etc/ssh/ssh_host_rsa_key
+
+# Ciphers and Algorithms (Strong only)
+Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
+MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512,hmac-sha2-256
+KexAlgorithms sntrup761x25519-sha512@openssh.com,curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group18-sha512,diffie-hellman-group16-sha512
+HostKeyAlgorithms ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512,rsa-sha2-256
+
+# Logging
+SyslogFacility AUTH
+LogLevel VERBOSE
+
+# Authentication
+LoginGraceTime 30
+PermitRootLogin no
+StrictModes yes
+MaxAuthTries {{ baseline__ssh_max_auth_tries | default(3) }}
+MaxSessions {{ baseline__ssh_max_sessions | default(3) }}
+MaxStartups 10:30:60
+
+PubkeyAuthentication yes
+AuthorizedKeysFile .ssh/authorized_keys
+
+# Disable password auth completely
+PasswordAuthentication no
+PermitEmptyPasswords no
+ChallengeResponseAuthentication no
+
+# Disable unused auth methods
+KerberosAuthentication no
+GSSAPIAuthentication no
+HostbasedAuthentication no
+IgnoreRhosts yes
+
+# Environment
+PermitUserEnvironment no
+
+# Disable forwarding
+AllowAgentForwarding {{ baseline__ssh_allow_agent_forwarding | default('no') }}
+AllowTcpForwarding {{ baseline__ssh_allow_tcp_forwarding | default('no') }}
+X11Forwarding no
+GatewayPorts no
+PermitTunnel no
+
+# Misc
+PrintMotd no
+PrintLastLog yes
+TCPKeepAlive yes
+ClientAliveInterval 300
+ClientAliveCountMax 2
+UseDNS no
+PermitUserRC no
+
+# Banner
+Banner {{ baseline__ssh_banner | default('/etc/ssh/banner') }}
+
+# Subsystems
+Subsystem sftp /usr/lib/openssh/sftp-server -f AUTHPRIV -l INFO
+
+{% if baseline__ssh_allow_users is defined and baseline__ssh_allow_users | length > 0 %}
+# User restrictions
+AllowUsers {{ baseline__ssh_allow_users | join(' ') }}
+{% endif %}
+
+{% if baseline__ssh_allow_groups is defined and baseline__ssh_allow_groups | length > 0 %}
+AllowGroups {{ baseline__ssh_allow_groups | join(' ') }}
+{% endif %}

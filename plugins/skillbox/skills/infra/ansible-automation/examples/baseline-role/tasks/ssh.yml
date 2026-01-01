@@ -1,0 +1,43 @@
+---
+# SSH hardening tasks
+
+- name: Generate SSH host keys if missing
+  ansible.builtin.command:
+    cmd: ssh-keygen -A
+  args:
+    creates: /etc/ssh/ssh_host_ed25519_key
+  notify: Restart sshd
+
+- name: Remove weak host keys
+  ansible.builtin.file:
+    path: "/etc/ssh/{{ item }}"
+    state: absent
+  loop:
+    - ssh_host_dsa_key
+    - ssh_host_dsa_key.pub
+    - ssh_host_ecdsa_key
+    - ssh_host_ecdsa_key.pub
+  notify: Restart sshd
+
+- name: Configure sshd
+  ansible.builtin.template:
+    src: sshd_config.j2
+    dest: /etc/ssh/sshd_config
+    owner: root
+    group: root
+    mode: '0600'
+    validate: '/usr/sbin/sshd -t -f %s'
+  notify: Restart sshd
+
+- name: Create SSH banner
+  ansible.builtin.copy:
+    content: |
+      **************************************************************************
+      *                                                                        *
+      * This system is for authorized use only.                                *
+      * All connections and activity are logged and monitored.                 *
+      * Unauthorized access is prohibited and will be prosecuted.              *
+      *                                                                        *
+      **************************************************************************
+    dest: /etc/ssh/banner
+    mode: '0644'

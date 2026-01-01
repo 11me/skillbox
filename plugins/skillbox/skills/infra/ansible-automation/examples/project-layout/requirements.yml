@@ -1,0 +1,41 @@
+---
+# Ansible Galaxy dependencies
+# Install with: ansible-galaxy install -r requirements.yml
+
+collections:
+  # Core modules and utilities
+  - name: ansible.posix
+    version: ">=1.5.0,<2.0.0"
+
+  # Community general (ufw, fail2ban, etc.)
+  - name: community.general
+    version: ">=8.0.0,<9.0.0"
+
+  # Crypto operations
+  - name: community.crypto
+    version: ">=2.0.0,<3.0.0"
+
+  # PostgreSQL support (if needed)
+  # - name: community.postgresql
+  #   version: ">=3.0.0,<4.0.0"
+
+  # Docker support (if needed)
+  # - name: community.docker
+  #   version: ">=3.8.0,<4.0.0"
+
+  # Cloud providers (uncomment as needed)
+  # - name: amazon.aws
+  #   version: ">=7.0.0,<8.0.0"
+  # - name: google.cloud
+  #   version: ">=1.3.0,<2.0.0"
+  # - name: azure.azcollection
+  #   version: ">=2.0.0,<3.0.0"
+
+  # HashiCorp Vault (for secrets)
+  # - name: community.hashi_vault
+  #   version: ">=6.0.0,<7.0.0"
+
+roles: []
+  # Galaxy roles (prefer collections when available)
+  # - name: geerlingguy.docker
+  #   version: "6.2.0"
