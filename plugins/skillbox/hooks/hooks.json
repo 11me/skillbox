@@ -43,6 +43,15 @@
     ],
     "PreToolUse": [
       {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/scripts/hooks/tmux-clear-emoji.py"
+          }
+        ]
+      },
+      {
         "matcher": "Bash",
         "hooks": [
           {
