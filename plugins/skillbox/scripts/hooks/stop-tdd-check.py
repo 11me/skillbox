@@ -13,9 +13,10 @@ import sys
 from pathlib import Path
 
 # Add lib to path
-sys.path.insert(0, str(Path(__file__).parent / "lib"))
+sys.path.insert(0, str(Path(__file__).parent))
 
-from transcript_analyzer import analyze_transcript, read_transcript  # noqa: E402
+from lib.notifier import notify  # noqa: E402
+from lib.transcript_analyzer import analyze_transcript, read_transcript  # noqa: E402
 
 
 def load_config() -> dict:
@@ -82,6 +83,7 @@ def main() -> None:
         # Determine response
         if result.is_compliant:
             if result.tests_executed:
+                notify("Claude Done", "TDD compliant - tests passed", urgency="low")
                 output = {"systemMessage": f"✅ TDD Check: {result.message}"}
             else:
                 output = {}
@@ -111,6 +113,7 @@ Run your test suite to verify changes.
 """
 
             if config["strictMode"]:
+                notify("Claude Blocked", "Tests must be run (TDD strict mode)", urgency="critical")
                 output = {
                     "decision": "block",
                     "reason": "Tests must be run after code modifications (TDD strict mode)",

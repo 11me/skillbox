@@ -3,7 +3,7 @@
 > Specialized workflow layer for Claude Code — cross-session task tracking, semantic code memory, platform engineering patterns.
 
 [![CI](https://github.com/11me/claude-skillbox/actions/workflows/ci.yaml/badge.svg)](https://github.com/11me/claude-skillbox/actions/workflows/ci.yaml)
-[![Version](https://img.shields.io/badge/version-0.50.0-blue?style=flat-square)](https://github.com/11me/claude-skillbox/releases)
+[![Version](https://img.shields.io/badge/version-0.55.0-blue?style=flat-square)](https://github.com/11me/claude-skillbox/releases)
 [![Python](https://img.shields.io/badge/python-3.12+-blue?style=flat-square&logo=python&logoColor=white)](https://python.org)
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-blueviolet?style=flat-square&logo=anthropic)](https://docs.anthropic.com/en/docs/claude-code)
@@ -13,6 +13,7 @@ Skillbox extends Claude Code with specialized workflows that complement Anthropi
 - **Workflow Orchestration** — Beads task tracking + Serena code memory + conventional commits
 - **Platform Engineering** — Production Kubernetes (Helm, Flux, GitOps)
 - **Testing Excellence** — TDD discipline and quality patterns
+- **Desktop Notifications** — notify-send alerts when Claude needs attention
 
 > **For project scaffolding:** Use Anthropic's `plugin-dev` plugin.
 
@@ -128,6 +129,7 @@ Autonomous agents for specialized tasks. See [agents/_index.md](plugins/skillbox
 | `/openapi-generate` | Generate Go code from OpenAPI spec |
 | `/ansible-scaffold` | Create Ansible project with proper structure |
 | `/ansible-validate` | Run lint and security checks on Ansible project |
+| `/notify` | Toggle desktop notifications for Claude events |
 
 ## Hooks
 
@@ -141,6 +143,8 @@ Autonomous agents for specialized tasks. See [agents/_index.md](plugins/skillbox
 | validate-flux-manifest | PreToolUse | Validate Flux manifests (API versions, required fields) |
 | helmrelease-version-check | PostToolUse | Suggest checking HelmRelease chart versions |
 | stop-done-criteria | Stop | Quality gate: lint must run if Go files modified |
+| stop-tdd-check | Stop | TDD enforcement check on session completion |
+| notification | Notification | Desktop notifications via notify-send |
 
 ## When to Use Skillbox vs Official Plugins
 

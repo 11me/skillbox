@@ -2,6 +2,8 @@
 
 import json
 
+from lib.notifier import notify
+
 
 def session_output(message: str) -> None:
     """Output message for SessionStart hooks.
@@ -30,6 +32,9 @@ def block(reason: str, event: str = "PreToolUse", context: str | None = None) ->
         event: The hook event name.
         context: Additional context/guidance for the user.
     """
+    # Send desktop notification
+    notify("Claude Blocked", reason, urgency="critical")
+
     output: dict = {
         "hookSpecificOutput": {
             "hookEventName": event,
@@ -50,6 +55,9 @@ def ask(reason: str, event: str = "PreToolUse", context: str | None = None) -> N
         event: The hook event name.
         context: Additional context/guidance for the user.
     """
+    # Send desktop notification
+    notify("Claude Needs Input", reason, urgency="normal")
+
     output: dict = {
         "hookSpecificOutput": {
             "hookEventName": event,

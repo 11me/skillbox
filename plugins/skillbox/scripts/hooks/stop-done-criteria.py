@@ -14,6 +14,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from lib.detector import detect_project_types
+from lib.notifier import notify
 from lib.response import allow, block
 
 
@@ -96,6 +97,8 @@ def main() -> None:
             ),
         )
     else:
+        # Notify user that Claude finished
+        notify("Claude Done", "Task completed", urgency="low")
         allow("Stop")
 
 
