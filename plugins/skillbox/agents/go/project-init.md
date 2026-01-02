@@ -21,6 +21,7 @@ description: |
   </commentary>
   </example>
 tools: Read, Write, Edit, Bash, Glob, TodoWrite
+skills: go-development
 model: sonnet
 color: green
 ---

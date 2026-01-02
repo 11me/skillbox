@@ -30,6 +30,7 @@ description: |
   </commentary>
   </example>
 tools: Glob, Grep, Read, Write, Edit, Bash, TodoWrite
+skills: tdd-enforcer
 model: sonnet
 color: green
 ---

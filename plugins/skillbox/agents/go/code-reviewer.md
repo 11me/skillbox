@@ -9,6 +9,7 @@ description: |
   Checks: project structure, naming conventions, patterns (database, services, errors), anti-patterns.
 model: sonnet
 tools: [Glob, Grep, Read, Bash]
+skills: go-development
 color: "#00ADD8"
 ---
 
