@@ -103,3 +103,39 @@ def detect_python_framework(cwd: Path | None = None) -> str | None:
                 continue
 
     return None
+
+
+def detect_tdd_mode(cwd: Path | None = None) -> dict[str, bool]:
+    """Detect TDD mode status.
+
+    Priority:
+    1. Explicit config in .claude/tdd-enforcer.local.md
+    2. Auto-detect by presence of test files
+
+    Returns:
+        Dictionary with 'enabled' and 'strict' keys.
+    """
+    cwd = cwd or Path.cwd()
+    result = {"enabled": False, "strict": False}
+
+    # Check explicit config
+    config_path = cwd / ".claude" / "tdd-enforcer.local.md"
+    if config_path.exists():
+        try:
+            content = config_path.read_text(errors="ignore")
+            # Simple frontmatter parsing
+            if "enabled: false" in content:
+                return result  # Explicitly disabled
+            if "enabled: true" in content:
+                result["enabled"] = True
+            if "strictMode: true" in content:
+                result["strict"] = True
+            return result
+        except (OSError, PermissionError):
+            pass
+
+    # Auto-detect by test files
+    if has_tests(cwd):
+        result["enabled"] = True
+
+    return result

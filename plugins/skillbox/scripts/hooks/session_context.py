@@ -17,7 +17,7 @@ from pathlib import Path
 # Add lib to path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from lib.detector import detect_project_types
+from lib.detector import detect_project_types, detect_tdd_mode
 from lib.response import session_output
 
 
@@ -178,7 +178,28 @@ def main() -> None:
         output_lines.append("→ Run `/init-project` for full setup, or `bd init` for beads only")
         output_lines.append("")
 
-    # 5. GitOps rules reminder
+    # 5. TDD mode detection and injection
+    tdd_status = detect_tdd_mode(cwd)
+    if tdd_status["enabled"]:
+        tdd_guidelines_path = (
+            Path(__file__).parent.parent.parent / "skills/core/tdd-enforcer/TDD-GUIDELINES.md"
+        )
+        mode_label = "STRICT" if tdd_status["strict"] else "ACTIVE"
+        output_lines.append(f"## 🧪 TDD Mode ({mode_label})")
+        output_lines.append("")
+
+        if tdd_guidelines_path.exists():
+            guidelines = tdd_guidelines_path.read_text().strip()
+            output_lines.append(guidelines)
+        else:
+            # Fallback if file not found
+            output_lines.append("**Cycle:** RED → GREEN → REFACTOR")
+            output_lines.append("1. Write failing test FIRST")
+            output_lines.append("2. Minimal implementation to pass")
+            output_lines.append("3. Refactor with tests passing")
+        output_lines.append("")
+
+    # 6. GitOps rules reminder
     if project_type in ("helm", "gitops"):
         output_lines.append("**Rules:**")
         output_lines.append("- No literal secrets in values.yaml (use ExternalSecret)")
