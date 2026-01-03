@@ -22,21 +22,22 @@ logger = logging.getLogger(__name__)
 
 def main() -> None:
     """Handle Notification event."""
-    # DEBUG: log to file to understand what happens in real hook call
-    debug_file = Path("/tmp/notification-debug.log")
-    try:
-        from lib import tmux_state
+    # Debug logging only when SKILLBOX_DEBUG is set
+    if os.environ.get("SKILLBOX_DEBUG"):
+        debug_file = Path("/tmp/notification-debug.log")
+        try:
+            from lib import tmux_state
 
-        debug_info = {
-            "XDG_RUNTIME_DIR": os.environ.get("XDG_RUNTIME_DIR"),
-            "TMUX": os.environ.get("TMUX"),
-            "state": tmux_state.load_state(),
-            "current_pane": tmux_state.get_current_pane_id(),
-            "get_window_id": tmux_state.get_window_id(),
-        }
-        debug_file.write_text(json.dumps(debug_info, indent=2))
-    except Exception as e:
-        debug_file.write_text(f"Debug error: {e}")
+            debug_info = {
+                "XDG_RUNTIME_DIR": os.environ.get("XDG_RUNTIME_DIR"),
+                "TMUX": os.environ.get("TMUX"),
+                "state": tmux_state.load_state(),
+                "current_pane": tmux_state.get_current_pane_id(),
+                "get_window_id": tmux_state.get_window_id(),
+            }
+            debug_file.write_text(json.dumps(debug_info, indent=2))
+        except Exception as e:
+            debug_file.write_text(f"Debug error: {e}")
 
     try:
         data = json.load(sys.stdin)

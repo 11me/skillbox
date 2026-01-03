@@ -3,7 +3,10 @@
 import json
 import os
 import subprocess
+import time
 from pathlib import Path
+
+from .constants import STATE_FILE_TTL_SECONDS
 
 # State file location - use XDG or fallback to /tmp
 _STATE_DIR = Path(os.environ.get("XDG_RUNTIME_DIR", "/tmp")) / "claude-skillbox"
@@ -225,3 +228,33 @@ def clear_state() -> None:
             state_file.unlink()
     except OSError:
         pass
+
+
+def cleanup_stale_states() -> int:
+    """Remove state files older than TTL.
+
+    Cleans up orphaned state files from crashed or abandoned sessions.
+    Called during SessionStart to prevent accumulation.
+
+    Returns:
+        Number of files cleaned up.
+    """
+    if not _STATE_DIR.exists():
+        return 0
+
+    cleaned = 0
+    now = time.time()
+
+    try:
+        for state_file in _STATE_DIR.glob("tmux-state*.json"):
+            try:
+                mtime = state_file.stat().st_mtime
+                if now - mtime > STATE_FILE_TTL_SECONDS:
+                    state_file.unlink()
+                    cleaned += 1
+            except OSError:
+                pass
+    except OSError:
+        pass
+
+    return cleaned

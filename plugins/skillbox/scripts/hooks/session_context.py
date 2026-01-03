@@ -19,6 +19,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from lib.detector import detect_project_types, detect_tdd_mode
 from lib.response import session_output
+from lib.tmux_state import cleanup_stale_states
 from lib.tmux_state import save_state as save_tmux_state
 
 
@@ -62,6 +63,9 @@ def main() -> None:
 
     # 0. Save tmux state for consistent targeting in notification hooks
     save_tmux_state()
+
+    # 0.5 Cleanup stale state files from orphaned sessions (>24h old)
+    cleanup_stale_states()
 
     # 1. Current date
     today = datetime.now().strftime("%Y-%m-%d")

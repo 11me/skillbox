@@ -32,7 +32,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/hooks/tmux-clear-emoji-fast.sh"
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/hooks/tmux-emoji-ops.sh clear"
           },
           {
             "type": "command",
@@ -47,7 +47,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/scripts/hooks/tmux-clear-emoji.py"
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/hooks/tmux-emoji-ops.sh clear"
           }
         ]
       },
@@ -56,7 +56,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/hooks/tmux-set-emoji-fast.sh ❓"
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/hooks/tmux-emoji-ops.sh set ❓"
           }
         ]
       },
@@ -121,7 +121,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/hooks/tmux-clear-emoji-fast.sh"
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/hooks/tmux-emoji-ops.sh clear"
           }
         ]
       },
