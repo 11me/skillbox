@@ -43,20 +43,23 @@ def main() -> None:
         notification_type = data.get("notification_type", "")
         message = data.get("message", "Claude needs attention")
 
-        title_map = {
-            "permission_prompt": "Permission Required",
-            "idle_prompt": "Claude Waiting",
-            "auth_success": "Auth Success",
-            "elicitation_dialog": "Input Required",
+        # Config: notification_type -> (title, emoji)
+        # ⏳ = needs user action, 💤 = idle/sleeping
+        notification_config = {
+            "permission_prompt": ("Permission Required", "⏳"),
+            "idle_prompt": ("Claude Waiting", "💤"),
+            "auth_success": ("Auth Success", None),
+            "elicitation_dialog": ("Input Required", "⏳"),
         }
 
-        title = title_map.get(notification_type, "Claude Notification")
-        success = notify(title, message, urgency="normal")
+        title, emoji = notification_config.get(notification_type, ("Claude Notification", None))
+        success = notify(title, message, urgency="normal", emoji=emoji)
         logger.debug(
-            "Notification %s: type=%s, title=%s",
+            "Notification %s: type=%s, title=%s, emoji=%s",
             "sent" if success else "skipped",
             notification_type,
             title,
+            emoji,
         )
 
     except json.JSONDecodeError as e:

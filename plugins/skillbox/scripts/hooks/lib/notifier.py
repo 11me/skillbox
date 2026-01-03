@@ -17,7 +17,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Emoji pattern for window name cleanup
-EMOJI_PREFIX_PATTERN = re.compile(r"^[🔴⏳✅]\s*")
+EMOJI_PREFIX_PATTERN = re.compile(r"^[🔴⏳✅💤]\s*")
 
 
 def _find_config_file() -> Path | None:
@@ -159,13 +159,15 @@ def clear_tmux_window_emoji() -> bool:
     return True  # No emoji to clear
 
 
-def notify(title: str, message: str, urgency: str = "normal") -> bool:
+def notify(title: str, message: str, urgency: str = "normal", emoji: str | None = None) -> bool:
     """Send desktop notification via notify-send.
 
     Args:
         title: Notification title
         message: Notification body
         urgency: low, normal, critical
+        emoji: Optional explicit emoji to set on tmux window.
+               If None, derives from urgency (🔴=critical, ⏳=normal, ✅=low).
 
     Returns:
         True if notification sent successfully
@@ -190,8 +192,12 @@ def notify(title: str, message: str, urgency: str = "normal") -> bool:
     expire_time = expire_map.get(urgency, 10000)
 
     # Set emoji indicator on tmux window
-    emoji_map = {"critical": "🔴", "normal": "⏳", "low": "✅"}
-    if emoji := emoji_map.get(urgency):
+    # Use explicit emoji if provided, otherwise derive from urgency
+    if emoji is None:
+        emoji_map = {"critical": "🔴", "normal": "⏳", "low": "✅"}
+        emoji = emoji_map.get(urgency)
+
+    if emoji:
         _set_tmux_window_emoji(emoji)
 
     try:
