@@ -17,7 +17,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Emoji pattern for window name cleanup
-EMOJI_PREFIX_PATTERN = re.compile(r"^[🔴⏳✅💤]\s*")
+EMOJI_PREFIX_PATTERN = re.compile(r"^[🔴⏳✅💤🔐❓]\s*")
 
 
 def _find_config_file() -> Path | None:

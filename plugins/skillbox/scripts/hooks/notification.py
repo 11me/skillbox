@@ -44,12 +44,12 @@ def main() -> None:
         message = data.get("message", "Claude needs attention")
 
         # Config: notification_type -> (title, emoji)
-        # ⏳ = needs user action, 💤 = idle/sleeping
+        # 🔐 = needs permission, ❓ = needs answer, 💤 = idle
         notification_config = {
-            "permission_prompt": ("Permission Required", "⏳"),
+            "permission_prompt": ("Permission Required", "🔐"),
             "idle_prompt": ("Claude Waiting", "💤"),
             "auth_success": ("Auth Success", None),
-            "elicitation_dialog": ("Input Required", "⏳"),
+            "elicitation_dialog": ("Input Required", "❓"),
         }
 
         title, emoji = notification_config.get(notification_type, ("Claude Notification", None))
