@@ -32,11 +32,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/scripts/hooks/prompt-guard.py"
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/hooks/tmux-clear-emoji-fast.sh"
           },
           {
             "type": "command",
-            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/scripts/hooks/tmux-clear-emoji.py"
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/scripts/hooks/prompt-guard.py"
           }
         ]
       }
