@@ -7,7 +7,18 @@ from pathlib import Path
 
 # State file location - use XDG or fallback to /tmp
 _STATE_DIR = Path(os.environ.get("XDG_RUNTIME_DIR", "/tmp")) / "claude-skillbox"
-_STATE_FILE = _STATE_DIR / "tmux-state.json"
+
+
+def _get_state_file() -> Path:
+    """Get state file path for current pane.
+
+    Uses TMUX_PANE env var to create pane-specific state file.
+    This ensures each Claude session has isolated state.
+    """
+    pane_id = os.environ.get("TMUX_PANE", "default")
+    # Sanitize: %0 -> _0 for safe filename
+    safe_pane_id = pane_id.replace("%", "_")
+    return _STATE_DIR / f"tmux-state{safe_pane_id}.json"
 
 
 def _run_tmux(args: list[str], timeout: int = 1) -> str | None:
@@ -90,20 +101,28 @@ def save_state() -> bool:
 
     try:
         _STATE_DIR.mkdir(parents=True, exist_ok=True)
-        _STATE_FILE.write_text(json.dumps(state))
+        _get_state_file().write_text(json.dumps(state))
         return True
     except OSError:
         return False
 
 
 def load_state() -> dict | None:
-    """Load saved tmux state.
+    """Load saved tmux state with validation.
 
     Returns dict with pane_id, window_id, session_name or None if not available.
+    Validates that loaded state belongs to current pane.
     """
+    state_file = _get_state_file()
     try:
-        if _STATE_FILE.exists():
-            return json.loads(_STATE_FILE.read_text())
+        if state_file.exists():
+            state = json.loads(state_file.read_text())
+            # Validate: pane_id must match current pane
+            current_pane = os.environ.get("TMUX_PANE")
+            if current_pane and state.get("pane_id") != current_pane:
+                # State from another session - ignore
+                return None
+            return state
     except (OSError, json.JSONDecodeError):
         pass
     return None
@@ -199,9 +218,10 @@ def get_context_string() -> str | None:
 
 
 def clear_state() -> None:
-    """Clear saved state file."""
+    """Clear saved state file for current pane."""
     try:
-        if _STATE_FILE.exists():
-            _STATE_FILE.unlink()
+        state_file = _get_state_file()
+        if state_file.exists():
+            state_file.unlink()
     except OSError:
         pass
