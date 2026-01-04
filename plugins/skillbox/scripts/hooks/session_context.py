@@ -148,13 +148,22 @@ def main() -> None:
         output_lines.append("   Tools: find_symbol, get_symbols_overview, write_memory")
         output_lines.append("")
 
-        # Check for recent checkpoints
+        # Check for recent checkpoints (manual and auto)
         serena_memories = cwd / ".serena" / "memories"
         if serena_memories.exists():
+            # Manual checkpoints
             checkpoints = sorted(serena_memories.glob("checkpoint-*.md"), reverse=True)
             if checkpoints:
                 latest = checkpoints[0].name
                 output_lines.append(f"**Recent checkpoint:** `read_memory('{latest}')`")
+
+            # Auto-checkpoints (from PreCompact/Stop hooks)
+            auto_checkpoints = sorted(serena_memories.glob("auto-checkpoint-*.md"), reverse=True)
+            if auto_checkpoints:
+                latest_auto = auto_checkpoints[0].name
+                output_lines.append(f"**Auto-checkpoint:** `read_memory('{latest_auto}')`")
+
+            if checkpoints or auto_checkpoints:
                 output_lines.append("")
 
     # 3. Check critical tools
