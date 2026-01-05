@@ -357,13 +357,56 @@ Depends on external-secrets controller being ready.
 
 ```
 infra/
-├── base/cluster/configs/secrets-store/
+├── dev/cluster/configs/secrets-store/
 │   ├── kustomization.yaml
-│   └── cluster-secret-store.yaml
-└── dev/cluster/configs/secrets-store/
+│   └── cluster-secret-store.yaml    # Полная конфигурация для dev
+└── prod/cluster/configs/secrets-store/
     ├── kustomization.yaml
-    └── cluster-secret-store.yaml
+    └── cluster-secret-store.yaml    # Полная конфигурация для prod
 ```
+
+### Anti-pattern: JSON patches для провайдера
+
+❌ **НЕ ДЕЛАЙТЕ ТАК:**
+
+```yaml
+# base/cluster/configs/secrets-store/cluster-secret-store.yaml — НЕПОЛНАЯ КОНФИГУРАЦИЯ
+apiVersion: external-secrets.io/v1
+kind: ClusterSecretStore
+metadata:
+  name: yandex-lockbox
+spec:
+  provider:
+    yandexlockbox:
+      auth:
+        authorizedKeySecretRef:
+          name: yc-auth
+          key: authorized-key
+      # ← НЕТ fetching.byName.folderID — конфигурация невалидна!
+```
+
+```yaml
+# dev/cluster/configs/secrets-store/kustomization.yaml — ПАТЧ
+patches:
+  - target:
+      kind: ClusterSecretStore
+      name: yandex-lockbox
+    patch: |
+      - op: add
+        path: /spec/provider/yandexlockbox/fetching
+        value:
+          byName:
+            folderID: "dev-folder-id"
+```
+
+**Почему это плохо:**
+1. **Base невалидна** — ClusterSecretStore без `folderID`/`projectID` не работает
+2. **Сложность отладки** — нужно смотреть 2 файла чтобы понять конфигурацию
+3. **JSON patches для бизнес-логики** — патчи предназначены для мелких изменений (labels, annotations), не для ключевых настроек провайдера
+
+✅ **ПРАВИЛЬНО:** Полная конфигурация на каждое окружение (примеры ниже)
+
+**Причина:** ClusterSecretStore содержит environment-specific данные (`projectID`, `region`, `folderID`), которые отличаются между окружениями. Использование патчей усложняет отладку и создаёт невалидную base конфигурацию.
 
 ### AWS Secrets Manager
 
@@ -419,6 +462,9 @@ spec:
         authorizedKeySecretRef:
           name: yc-auth
           key: authorized-key
+      fetching:
+        byName:
+          folderID: "b1g8skpblkos03malf3s"  # Обязательно для byName!
 ```
 
 ## external-dns (Controller, No CRDs)
