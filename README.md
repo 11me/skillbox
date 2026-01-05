@@ -3,7 +3,7 @@
 > Specialized workflow layer for Claude Code — cross-session task tracking, semantic code memory, platform engineering patterns.
 
 [![CI](https://github.com/11me/claude-skillbox/actions/workflows/ci.yaml/badge.svg)](https://github.com/11me/claude-skillbox/actions/workflows/ci.yaml)
-[![Version](https://img.shields.io/badge/version-0.57.0-blue?style=flat-square)](https://github.com/11me/claude-skillbox/releases)
+[![Version](https://img.shields.io/badge/version-0.58.0-blue?style=flat-square)](https://github.com/11me/claude-skillbox/releases)
 [![Python](https://img.shields.io/badge/python-3.12+-blue?style=flat-square&logo=python&logoColor=white)](https://python.org)
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-blueviolet?style=flat-square&logo=anthropic)](https://docs.anthropic.com/en/docs/claude-code)
@@ -100,6 +100,8 @@ Autonomous agents for specialized tasks. See [agents/_index.md](plugins/skillbox
 | [task-tracker](plugins/skillbox/agents/core/task-tracker.md) | haiku | Manage beads task lifecycle |
 | [session-checkpoint](plugins/skillbox/agents/core/session-checkpoint.md) | haiku | Save progress to serena memory |
 | [code-navigator](plugins/skillbox/agents/core/code-navigator.md) | sonnet | Semantic code exploration |
+| [feature-supervisor](plugins/skillbox/agents/core/feature-supervisor.md) | haiku | Orchestrate feature development with feature-dev |
+| [verification-worker](plugins/skillbox/agents/core/verification-worker.md) | sonnet | Verify features with RCA and retry |
 | [go-project-init](plugins/skillbox/agents/go/project-init.md) | sonnet | Scaffold Go projects with production patterns |
 | [go-test-generator](plugins/skillbox/agents/go/test-generator.md) | sonnet | Generate idiomatic Go tests |
 | [go-code-reviewer](plugins/skillbox/agents/go/code-reviewer.md) | sonnet | Review Go code against standards |
@@ -132,6 +134,8 @@ Autonomous agents for specialized tasks. See [agents/_index.md](plugins/skillbox
 | `/ansible-validate` | Run lint and security checks on Ansible project |
 | `/notify` | Toggle desktop notifications for Claude events |
 | `/harness-init` | Initialize long-running agent harness with feature tracking |
+| `/harness-supervisor` | Automated feature development with feature-dev agents |
+| `/harness-auto` | Toggle automatic supervisor mode (on/off/status) |
 | `/harness-status` | Show harness feature progress and verification status |
 | `/harness-verify` | Run verification for features and update status |
 | `/harness-update` | Manually update feature status |

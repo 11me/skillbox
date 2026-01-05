@@ -1,5 +1,5 @@
 {
   "name": "skillbox",
   "description": "Skills marketplace for Claude Code: Go, TypeScript, TDD enforcement, context engineering, Helm/GitOps, Ansible automation, conventional commits, autonomous agents, discovery, secrets protection, desktop notifications",
-  "version": "0.57.0"
+  "version": "0.58.0"
 }

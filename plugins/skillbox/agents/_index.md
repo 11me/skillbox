@@ -11,6 +11,8 @@ Autonomous agents for specialized tasks. Each agent has its own model, tools, an
 | [task-tracker](core/task-tracker.md) | haiku | Manage beads tasks lifecycle | "implement", "fix", "track work" |
 | [session-checkpoint](core/session-checkpoint.md) | haiku | Save progress to serena memory | "save progress", "checkpoint" |
 | [code-navigator](core/code-navigator.md) | sonnet | Semantic code navigation | "find where X is", "explore codebase" |
+| [feature-supervisor](core/feature-supervisor.md) | haiku | Orchestrate harness feature development | `/harness-supervisor`, "continue feature work" |
+| [verification-worker](core/verification-worker.md) | sonnet | Verify features with RCA and retry | Invoked by feature-supervisor |
 
 ### TDD
 
@@ -55,6 +57,8 @@ Autonomous agents for specialized tasks. Each agent has its own model, tools, an
 | Track implementation work | task-tracker |
 | Save session progress | session-checkpoint |
 | Navigate codebase semantically | code-navigator |
+| Orchestrate feature development | feature-supervisor |
+| Verify features with RCA | verification-worker |
 | Analyze test coverage | test-analyzer |
 | Guide TDD workflow | tdd-coach |
 | Generate TypeScript tests | ts/test-generator |
@@ -69,8 +73,8 @@ Autonomous agents for specialized tasks. Each agent has its own model, tools, an
 
 | Model | Agents |
 |-------|--------|
-| haiku | task-tracker, session-checkpoint |
-| sonnet | code-navigator, test-analyzer, tdd-coach, ts/*, go/*, rust/* |
+| haiku | task-tracker, session-checkpoint, feature-supervisor |
+| sonnet | code-navigator, verification-worker, test-analyzer, tdd-coach, ts/*, go/*, rust/* |
 | opus | python/test-writer |
 
 ### By Language
@@ -86,6 +90,15 @@ Autonomous agents for specialized tasks. Each agent has its own model, tools, an
 ## Agent Interactions
 
 ```
+feature-supervisor (orchestrator)
+    │
+    ├─► code-explorer (Anthropic feature-dev)
+    ├─► code-architect (Anthropic feature-dev)
+    ├─► code-reviewer (Anthropic feature-dev)
+    └─► verification-worker
+            │
+            └─► RCA + retry loop
+
 tdd-coach ←→ test-analyzer
     │           (coverage → gaps → coach)
     ↓
@@ -103,6 +116,11 @@ code-navigator
 ```
 
 ## Dependencies
+
+### Anthropic feature-dev plugin (required for)
+- feature-supervisor (delegates to code-explorer, code-architect, code-reviewer)
+
+Install: `npx claude-plugins install @anthropics/claude-code-plugins/feature-dev`
 
 ### Serena MCP (required for)
 - session-checkpoint

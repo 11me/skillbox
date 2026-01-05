@@ -7,6 +7,7 @@ suggests running /harness-init to set up feature tracking.
 This hook runs early in SessionStart to provide context before work begins.
 """
 
+import json
 import sys
 from pathlib import Path
 
@@ -21,6 +22,19 @@ from lib.bootstrap import (
 )
 from lib.features import load_features
 from lib.response import session_output
+
+
+def is_auto_supervisor_enabled(project_dir: Path) -> bool:
+    """Check if auto_supervisor mode is enabled in harness config."""
+    config_path = project_dir / ".claude" / "harness-config.json"
+    if not config_path.exists():
+        return False
+    try:
+        with open(config_path) as f:
+            config = json.load(f)
+        return config.get("auto_supervisor", False)
+    except (json.JSONDecodeError, OSError):
+        return False
 
 
 def main() -> None:
@@ -89,7 +103,27 @@ def main() -> None:
                 if len(unverified_impl) > 3:
                     output_lines.append(f"  ... and {len(unverified_impl) - 3} more")
 
+            # Auto-trigger supervisor if enabled
             output_lines.append("")
+            if verified < total:
+                if is_auto_supervisor_enabled(cwd):
+                    output_lines.append("---")
+                    output_lines.append("**AUTO-SUPERVISOR ENABLED**")
+                    output_lines.append("")
+                    output_lines.append(
+                        "IMPORTANT: Automatically invoke the `feature-supervisor` agent NOW."
+                    )
+                    output_lines.append(
+                        "Do not wait for user input. Start the supervised workflow immediately."
+                    )
+                else:
+                    output_lines.append(
+                        "**Run `/harness-supervisor`** for automated feature development"
+                    )
+                    output_lines.append("Or enable auto mode: `/harness-auto on`")
+            else:
+                output_lines.append("All features verified! Consider adding more or creating PR.")
+
             session_output("\n".join(output_lines))
 
 

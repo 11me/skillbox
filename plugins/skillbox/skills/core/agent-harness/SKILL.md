@@ -16,7 +16,9 @@ Use this skill when:
 - Want to prevent premature "victory" declarations
 - Resuming work after context reset
 
-## The Two-Agent Pattern
+## The Supervisor-Worker Pattern
+
+Based on Anthropic's Two-Agent pattern, enhanced with subagent orchestration.
 
 ```
 Session 1: INITIALIZER
@@ -25,11 +27,29 @@ Session 1: INITIALIZER
 ├── Set up verification commands
 └── Hand off to coding sessions
 
-Sessions 2+: CODING AGENT
-├── Load harness state
-├── Implement features
-├── Run verification
-└── Update feature status
+Sessions 2+: SUPERVISED DEVELOPMENT
+├── Feature Supervisor (orchestrator)
+│   ├── Load harness state
+│   ├── Select next feature
+│   ├── Delegate to feature-dev agents
+│   └── Enforce verification gate
+│
+├── Anthropic feature-dev (implementation)
+│   ├── code-explorer → Analyze codebase
+│   ├── code-architect → Design solution
+│   └── code-reviewer → Quality check
+│
+└── Verification Worker (validation)
+    ├── Run verification command
+    ├── Root Cause Analysis on failure
+    └── Retry up to 3 times
+```
+
+### Prerequisites
+
+```bash
+# Install Anthropic's official feature-dev plugin
+npx claude-plugins install @anthropics/claude-code-plugins/feature-dev
 ```
 
 ## Quick Start
@@ -46,16 +66,28 @@ Sessions 2+: CODING AGENT
 # Define features when prompted
 ```
 
-### Subsequent Sessions (Coding)
+### Subsequent Sessions (Supervised)
 
+**Automated (recommended):**
+```bash
+# Start supervised workflow
+/harness-supervisor
+
+# Supervisor handles:
+# 1. Selects next feature
+# 2. Delegates to code-explorer, code-architect, code-reviewer
+# 3. Implements feature
+# 4. Runs verification with RCA
+# 5. Retries up to 3 times on failure
+# 6. Ends session with git commit
+```
+
+**Manual (alternative):**
 ```bash
 # Check status
 /harness-status
 
-# Implement feature
-# ... write code ...
-
-# Mark as implemented
+# Implement feature manually
 /harness-update auth-login implemented
 
 # Run verification
@@ -102,9 +134,20 @@ When adding features:
 | Command | Purpose |
 |---------|---------|
 | `/harness-init` | Initialize harness, create features |
+| `/harness-supervisor` | **Automated workflow** — orchestrates feature-dev + verification |
 | `/harness-status` | Show feature progress |
 | `/harness-verify <id>` | Run verification, update status |
 | `/harness-update <id> <status>` | Manual status update |
+
+## Agents
+
+| Agent | Model | Role |
+|-------|-------|------|
+| `feature-supervisor` | haiku | Orchestrates workflow, one feature per session |
+| `verification-worker` | sonnet | Runs tests, RCA, retry logic |
+| `code-explorer` | (feature-dev) | Analyzes codebase |
+| `code-architect` | (feature-dev) | Designs solution |
+| `code-reviewer` | (feature-dev) | Reviews quality |
 
 ## Integration with Existing Tools
 
@@ -210,4 +253,5 @@ When adding features:
 
 ## Version History
 
+- 1.1.0 — Add Supervisor-Worker pattern with feature-dev integration
 - 1.0.0 — Initial release (based on Anthropic article)
