@@ -35,6 +35,36 @@ bd show <id>          # Show task details
 bd comments add <id> "note"  # Add progress note
 ```
 
+### CRITICAL: Priority Format
+
+**ALWAYS use numeric format:**
+- `-p 0` or `-p P0` = Critical (drop everything)
+- `-p 1` or `-p P1` = High (do next)
+- `-p 2` or `-p P2` = Medium (default, this sprint)
+- `-p 3` or `-p P3` = Low (backlog)
+- `-p 4` or `-p P4` = Someday/maybe
+
+**NEVER use word priorities:**
+```bash
+# WRONG - will fail!
+bd create --title "Fix bug" --priority high
+bd create --title "Fix bug" -p critical
+
+# CORRECT
+bd create --title "Fix bug" -p 1
+bd create --title "Fix bug" -p P1
+```
+
+### Status Values
+
+Valid status values for `--status`:
+- `open` - Not started
+- `in_progress` - Currently working (use underscore!)
+- `blocked` - Waiting on something
+- `closed` - Completed
+
+**Note:** Use underscore `in_progress`, NOT hyphen `in-progress`.
+
 ## Your Workflow
 
 ### 1. Check Existing Tasks

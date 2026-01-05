@@ -69,6 +69,10 @@
         "hooks": [
           {
             "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/scripts/hooks/pretool-beads-validator.py"
+          },
+          {
+            "type": "command",
             "command": "python3 ${CLAUDE_PLUGIN_ROOT}/scripts/hooks/git-push-guard.py"
           },
           {
@@ -80,6 +84,10 @@
       {
         "matcher": "Write|Edit",
         "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/scripts/hooks/pretool-beads-guard.py"
+          },
           {
             "type": "command",
             "command": "python3 ${CLAUDE_PLUGIN_ROOT}/scripts/hooks/pretool-secret-guard.py"
