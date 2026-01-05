@@ -1,6 +1,6 @@
 ---
 description: Initialize long-running agent harness with bootstrap and feature tracking
-allowed-tools: Bash, Read, Write, mcp__plugin_serena_serena__write_memory
+allowed-tools: Bash, Read, mcp__plugin_serena_serena__write_memory
 argument-hint: [--skip-setup|--features-only]
 ---
 
@@ -65,29 +65,33 @@ pnpm run build
 uv sync
 ```
 
-### Step 3: Create Harness State
-
-Write `.claude/harness.json`:
-```json
-{
-  "version": "1.0.0",
-  "created": "2026-01-05T10:00:00",
-  "project_type": "go",
-  "initialized": true,
-  "sessions": [
-    {"id": 1, "started": "...", "type": "initializer"}
-  ]
-}
-```
-
-### Step 4: Define Features
+### Step 3: Define Features
 
 Ask user for features to track. For each feature:
 
 1. Generate unique ID from description (e.g., "User login" → "auth-login")
 2. Determine verification command (project-specific test pattern)
-3. Auto-create beads task if available
-4. Add to features.json
+
+### Step 4: Create Files via Script
+
+Instead of using Write tool (blocked by guard hook), call initialization script:
+
+```bash
+python3 ${CLAUDE_PLUGIN_ROOT}/scripts/hooks/harness_init.py \
+  --project-dir "$(pwd)" \
+  --features '[
+    {"id": "auth-login", "description": "User login with JWT"},
+    {"id": "user-profile", "description": "User profile editing"}
+  ]'
+```
+
+Use `--no-beads` flag to skip automatic beads task creation.
+
+The script:
+- Creates `.claude/harness.json` with session tracking
+- Creates `.claude/features.json` with initial pending statuses
+- Auto-links beads tasks if available (unless --no-beads)
+- Uses direct Python I/O to bypass the PreToolUse guard hook
 
 ### Step 5: Generate init-session.sh
 
