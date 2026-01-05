@@ -23,6 +23,22 @@ from lib.tmux_state import cleanup_stale_states
 from lib.tmux_state import save_state as save_tmux_state
 
 
+def get_serena_project_name(cwd: Path) -> str:
+    """Get Serena project name from config or directory name."""
+    config_path = cwd / ".serena" / "config.yaml"
+    if config_path.exists():
+        try:
+            import yaml
+
+            config = yaml.safe_load(config_path.read_text())
+            if config and "project_name" in config:
+                return config["project_name"]
+        except Exception:
+            pass
+    # Fallback to directory name
+    return cwd.name
+
+
 def check_command_exists(cmd: str) -> bool:
     """Check if a command exists in PATH."""
     try:
@@ -144,8 +160,20 @@ def main() -> None:
     if types["serena"]:
         if not project_type:
             project_type = "serena"
+
+        # Get project name for activation
+        project_name = get_serena_project_name(cwd)
+
         output_lines.append("**Serena enabled** — semantic navigation available")
         output_lines.append("   Tools: find_symbol, get_symbols_overview, write_memory")
+        output_lines.append("")
+
+        # Auto-activation instruction
+        output_lines.append("**⚡ Serena Auto-Activate:**")
+        output_lines.append(
+            f'   → Call `mcp__plugin_serena_serena__activate_project` with project="{project_name}"'
+        )
+        output_lines.append("   This is REQUIRED before using semantic tools.")
         output_lines.append("")
 
         # Check for recent checkpoints (manual and auto)
