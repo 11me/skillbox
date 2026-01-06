@@ -132,7 +132,11 @@ def main() -> None:
     if error:
         # Beads command failed - block with error details
         block(
-            reason=f"Cannot verify beads task status: {error}",
+            reason=(
+                f"Cannot verify beads task status: {error}. "
+                "Fix beads or create task: "
+                "bd create --title 'desc' -p 2 && bd update ID --status in_progress"
+            ),
             event="PreToolUse",
             context=(
                 "**The beads command failed.** Fix the issue or create a task manually:\n\n"
@@ -149,9 +153,13 @@ def main() -> None:
             ),
         )
     else:
-        # No error, just no active task
+        # No error, just no active task - include command in reason so Claude sees it
         block(
-            reason="No active beads task",
+            reason=(
+                "No active beads task. "
+                "Run: bd create --title 'desc' -p 2 "
+                "&& bd update <ID> --status in_progress"
+            ),
             event="PreToolUse",
             context=(
                 "Workflow mode is active. Create or start a task before modifying code:\n\n"

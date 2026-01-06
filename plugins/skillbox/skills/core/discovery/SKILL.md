@@ -1,6 +1,6 @@
 ---
 name: discovery
-description: This skill should be used when the user asks about "discovery", "self-questioning", "SP-CoT", "novel insights", "systematic exploration", "hypothesis generation", "Socratic method", "deep research", or needs guidance on AI-powered discovery through systematic self-questioning.
+description: Use when the user asks about "discovery", "self-questioning", "SP-CoT", "novel insights", "systematic exploration", "hypothesis generation", "Socratic method", "deep research", or needs guidance on AI-powered discovery through systematic self-questioning.
 allowed-tools: [Read, Grep, Glob, WebSearch, WebFetch]
 version: 2.0.0
 ---
