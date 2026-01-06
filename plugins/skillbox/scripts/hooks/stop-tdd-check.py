@@ -115,7 +115,7 @@ Run your test suite to verify changes.
             if config["strictMode"]:
                 notify("Claude Blocked", "Tests must be run (TDD strict mode)", urgency="critical")
                 output = {
-                    "decision": "block",
+                    "decision": "deny",
                     "reason": "Tests must be run after code modifications (TDD strict mode)",
                     "systemMessage": warning_msg,
                 }

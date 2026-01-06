@@ -38,7 +38,7 @@ def block(reason: str, event: str = "PreToolUse", context: str | None = None) ->
     output: dict = {
         "hookSpecificOutput": {
             "hookEventName": event,
-            "permissionDecision": "block",
+            "permissionDecision": "deny",
             "permissionDecisionReason": reason,
         }
     }

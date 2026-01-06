@@ -127,7 +127,7 @@ When you find a significant insight, output: $COMPLETION_SIGNAL"
 # Output JSON to continue loop (block exit, re-inject prompt)
 cat << EOF
 {
-  "decision": "block",
+  "decision": "deny",
   "reason": "$RESEARCH_QUESTION",
   "systemMessage": "$SYSTEM_MESSAGE"
 }
