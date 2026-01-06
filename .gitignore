@@ -10,3 +10,9 @@ __pycache__/
 
 # OS
 .DS_Store
+
+# Local workflow state
+.beads/
+.serena/
+AGENTS.md
+@AGENTS.md
