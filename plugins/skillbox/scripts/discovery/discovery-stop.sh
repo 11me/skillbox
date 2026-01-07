@@ -110,6 +110,33 @@ if grep -q "This is iteration" "$STATE_FILE"; then
     mv "$TEMP_FILE" "$STATE_FILE"
 fi
 
+# Extract and append question from current iteration to question_chain
+# Questions are typically marked as "### Question:" in findings
+if [[ -f "$FINDINGS_FILE" ]]; then
+    # Get the last question from findings (format: "### Question: ..." or "**Question:** ...")
+    CURRENT_QUESTION=$(grep -E "^### Question:|^\*\*Question:?\*\*" "$FINDINGS_FILE" | tail -1 | sed 's/^### Question: *//' | sed 's/^\*\*Question:?\*\* *//' || true)
+
+    if [[ -n "$CURRENT_QUESTION" ]]; then
+        # Update question_chain in YAML frontmatter (append to array)
+        # Since we don't have yq, we'll add a markdown section instead
+        if ! grep -q "## Question History" "$STATE_FILE"; then
+            # Add Question History section before "## Current Iteration"
+            TEMP_FILE="${STATE_FILE}.tmp.$$"
+            sed '/## Current Iteration/i\
+## Question History\
+\
+' "$STATE_FILE" > "$TEMP_FILE"
+            mv "$TEMP_FILE" "$STATE_FILE"
+        fi
+
+        # Append question to history
+        TEMP_FILE="${STATE_FILE}.tmp.$$"
+        sed "/## Question History/a\\
+$ITERATION. $CURRENT_QUESTION" "$STATE_FILE" > "$TEMP_FILE"
+        mv "$TEMP_FILE" "$STATE_FILE"
+    fi
+fi
+
 # Extract research question from state file (everything after the frontmatter)
 RESEARCH_QUESTION=$(awk '/^---$/{p++} p==2{if(!/^---$/)print}' "$STATE_FILE" | grep -A1 "## Research Question" | tail -1 || true)
 
@@ -127,7 +154,7 @@ When you find a significant insight, output: $COMPLETION_SIGNAL"
 # Output JSON to continue loop (block exit, re-inject prompt)
 cat << EOF
 {
-  "decision": "deny",
+  "decision": "block",
   "reason": "$RESEARCH_QUESTION",
   "systemMessage": "$SYSTEM_MESSAGE"
 }

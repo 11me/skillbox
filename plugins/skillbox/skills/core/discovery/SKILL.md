@@ -114,7 +114,18 @@ findings: []
 completion_signal: "<discovered>INSIGHT_COMPLETE</discovered>"
 ---
 [Original research question]
+
+## Question History
+1. First question explored
+2. Second question explored
+...
 ```
+
+**Question tracking:** To have your questions logged automatically, format them in findings as:
+```markdown
+### Question: Your question here?
+```
+The Stop hook extracts these and adds them to Question History.
 
 ## Anti-Patterns
 
