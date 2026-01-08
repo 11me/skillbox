@@ -1,0 +1,8 @@
+{
+  "name": "infra",
+  "description": "Infrastructure automation: Ansible practices, Ubuntu server hardening, SSH security",
+  "version": "1.0.0",
+  "author": {
+    "name": "11me"
+  }
+}

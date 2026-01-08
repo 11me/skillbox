@@ -1,18 +1,82 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "11me-skillbox",
-  "description": "Specialized workflow layer for Claude Code",
+  "description": "Specialized workflow plugins for Claude Code",
   "owner": {
     "name": "11me"
   },
   "plugins": [
     {
-      "name": "skillbox",
-      "source": "./plugins/skillbox",
-      "description": "Specialized workflows: beads task tracking, serena code navigation, Helm/Flux GitOps, TDD enforcement, Go/TypeScript patterns, Ansible automation",
+      "name": "core",
+      "source": "./plugins/core",
+      "description": "Core workflow tools: beads task tracking, serena code navigation, conventional commits, discovery, context engineering",
       "category": "development",
       "homepage": "https://github.com/11me/claude-skillbox",
-      "keywords": ["workflow", "gitops", "go", "tdd", "kubernetes", "helm", "flux", "ansible", "typescript"]
+      "keywords": ["workflow", "beads", "serena", "commits", "discovery"]
+    },
+    {
+      "name": "go-dev",
+      "source": "./plugins/go-dev",
+      "description": "Go development toolkit: project structure, services, repositories, handlers, OpenAPI code generation",
+      "category": "development",
+      "homepage": "https://github.com/11me/claude-skillbox",
+      "keywords": ["go", "golang", "openapi", "oapi-codegen"]
+    },
+    {
+      "name": "k8s",
+      "source": "./plugins/k8s",
+      "description": "Kubernetes toolkit: Helm chart development, Flux GitOps scaffolding and refactoring",
+      "category": "development",
+      "homepage": "https://github.com/11me/claude-skillbox",
+      "keywords": ["kubernetes", "helm", "flux", "gitops", "k8s"]
+    },
+    {
+      "name": "ts-dev",
+      "source": "./plugins/ts-dev",
+      "description": "TypeScript development: conventions, database patterns (Drizzle), project setup, testing (Vitest), type patterns",
+      "category": "development",
+      "homepage": "https://github.com/11me/claude-skillbox",
+      "keywords": ["typescript", "vitest", "drizzle", "hono", "trpc"]
+    },
+    {
+      "name": "tdd",
+      "source": "./plugins/tdd",
+      "description": "Test-Driven Development: TDD workflow enforcement, test analysis, coaching for Go, TypeScript, Python, Rust",
+      "category": "development",
+      "homepage": "https://github.com/11me/claude-skillbox",
+      "keywords": ["tdd", "testing", "red-green-refactor"]
+    },
+    {
+      "name": "infra",
+      "source": "./plugins/infra",
+      "description": "Infrastructure automation: Ansible practices, Ubuntu server hardening, SSH security",
+      "category": "development",
+      "homepage": "https://github.com/11me/claude-skillbox",
+      "keywords": ["ansible", "infrastructure", "hardening", "ssh"]
+    },
+    {
+      "name": "harness",
+      "source": "./plugins/harness",
+      "description": "Long-running agent harness: multi-session features, verification tracking, feature supervisor",
+      "category": "development",
+      "homepage": "https://github.com/11me/claude-skillbox",
+      "keywords": ["harness", "multi-session", "verification", "features"]
+    },
+    {
+      "name": "python-dev",
+      "source": "./plugins/python-dev",
+      "description": "Python development: test generation with pytest, fixtures, mocking, async patterns",
+      "category": "development",
+      "homepage": "https://github.com/11me/claude-skillbox",
+      "keywords": ["python", "pytest", "testing"]
+    },
+    {
+      "name": "rust-dev",
+      "source": "./plugins/rust-dev",
+      "description": "Rust development: test generation, unit tests, integration tests",
+      "category": "development",
+      "homepage": "https://github.com/11me/claude-skillbox",
+      "keywords": ["rust", "testing", "cargo"]
     }
   ]
 }

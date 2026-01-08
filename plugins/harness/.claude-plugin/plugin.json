@@ -1,0 +1,8 @@
+{
+  "name": "harness",
+  "description": "Long-running agent harness: multi-session features, verification tracking, feature supervisor",
+  "version": "1.0.0",
+  "author": {
+    "name": "11me"
+  }
+}

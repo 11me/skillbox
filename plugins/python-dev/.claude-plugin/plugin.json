@@ -1,0 +1,8 @@
+{
+  "name": "python-dev",
+  "description": "Python development: test generation with pytest, fixtures, mocking, async patterns",
+  "version": "1.0.0",
+  "author": {
+    "name": "11me"
+  }
+}

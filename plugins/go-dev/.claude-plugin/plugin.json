@@ -1,0 +1,8 @@
+{
+  "name": "go-dev",
+  "description": "Go development toolkit: project structure, services, repositories, handlers, OpenAPI code generation",
+  "version": "1.0.0",
+  "author": {
+    "name": "11me"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "name": "ts-dev",
+  "description": "TypeScript development: conventions, database patterns (Drizzle), project setup, testing (Vitest), type patterns",
+  "version": "1.0.0",
+  "author": {
+    "name": "11me"
+  }
+}

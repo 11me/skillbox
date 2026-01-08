@@ -1,0 +1,8 @@
+{
+  "name": "k8s",
+  "description": "Kubernetes toolkit: Helm chart development, Flux GitOps scaffolding and refactoring",
+  "version": "1.0.0",
+  "author": {
+    "name": "11me"
+  }
+}
