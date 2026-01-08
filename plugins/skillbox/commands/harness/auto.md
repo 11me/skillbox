@@ -1,7 +1,11 @@
 ---
-name: harness-auto
+name: auto
 description: Toggle automatic supervisor mode for harness
-allowed-tools: [Bash, Read, Write]
+argument-hint: "[on|off]"
+allowed-tools:
+  - Bash
+  - Read
+  - Write
 ---
 
 # /harness-auto

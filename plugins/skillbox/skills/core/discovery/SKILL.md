@@ -1,7 +1,14 @@
 ---
 name: discovery
 description: Use when the user asks about "discovery", "self-questioning", "SP-CoT", "novel insights", "systematic exploration", "hypothesis generation", "Socratic method", "deep research", or needs guidance on AI-powered discovery through systematic self-questioning.
-allowed-tools: [Read, Grep, Glob, WebSearch, WebFetch]
+context: fork
+agent: discovery-explorer
+allowed-tools:
+  - Read
+  - Grep
+  - Glob
+  - WebSearch
+  - WebFetch
 ---
 
 # Self-Questioning Discovery System

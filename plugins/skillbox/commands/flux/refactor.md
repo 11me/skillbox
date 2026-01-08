@@ -1,7 +1,14 @@
 ---
-name: flux-refactor
+name: refactor
 description: Refactor existing Flux GitOps repository to standard structure
-allowed-tools: [Read, Write, Edit, Glob, Grep, Bash, AskUserQuestion]
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Glob
+  - Grep
+  - Bash
+  - AskUserQuestion
 ---
 
 # Refactor Flux GitOps Repository

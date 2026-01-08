@@ -1,6 +1,7 @@
 ---
-name: go-review
+name: review
 description: Review Go project against production standards from go-development skill
+argument-hint: "[path]"
 ---
 
 # /go-review

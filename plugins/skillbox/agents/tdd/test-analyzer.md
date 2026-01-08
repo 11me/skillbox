@@ -20,8 +20,16 @@ description: |
   Quality review request, analyze test patterns.
   </commentary>
   </example>
-tools: Glob, Grep, Read, Bash, TodoWrite
+tools:
+  - Glob
+  - Grep
+  - Read
+  - Bash
+  - TodoWrite
 skills: tdd-enforcer
+disallowedTools:
+  - Write
+  - Edit
 model: sonnet
 color: yellow
 ---

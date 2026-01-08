@@ -66,6 +66,15 @@
         "properties": {
           "hooks": {
             "$ref": "#/definitions/hookArray"
+          },
+          "once": {
+            "type": "boolean",
+            "description": "Execute this hook group only once per session"
+          },
+          "timeout": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Timeout in milliseconds for this hook group"
           }
         },
         "additionalProperties": false
@@ -84,6 +93,15 @@
           },
           "hooks": {
             "$ref": "#/definitions/hookArray"
+          },
+          "once": {
+            "type": "boolean",
+            "description": "Execute this hook group only once per session"
+          },
+          "timeout": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Timeout in milliseconds for this hook group"
           }
         },
         "additionalProperties": false
@@ -101,6 +119,15 @@
           },
           "hooks": {
             "$ref": "#/definitions/hookArray"
+          },
+          "once": {
+            "type": "boolean",
+            "description": "Execute this hook group only once per session"
+          },
+          "timeout": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Timeout in milliseconds for this hook group"
           }
         },
         "additionalProperties": false

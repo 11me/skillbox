@@ -1,7 +1,11 @@
 ---
 name: agent-harness
 description: Long-running agent patterns for multi-session work. Use when working on features that span multiple sessions, need verification tracking, or want to prevent premature task completion. Integrates with beads, serena, and existing checkpoint system.
-allowed-tools: [Read, Write, Bash]
+context: fork
+allowed-tools:
+  - Read
+  - Write
+  - Bash
 ---
 
 # Long-Running Agent Harness

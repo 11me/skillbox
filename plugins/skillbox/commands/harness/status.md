@@ -1,7 +1,9 @@
 ---
-name: harness-status
+name: status
 description: Show harness feature progress and verification status
-allowed-tools: [Read, Bash]
+allowed-tools:
+  - Read
+  - Bash
 ---
 
 # /harness-status

@@ -1,6 +1,7 @@
 ---
-name: helm-validate
+name: validate
 description: Validate Helm chart with all required checks
+argument-hint: "[chart-path]"
 ---
 
 # /helm-validate

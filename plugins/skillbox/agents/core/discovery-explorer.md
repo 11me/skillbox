@@ -1,7 +1,18 @@
 ---
 name: discovery-explorer
 description: "Deep exploration agent for complex problems requiring novel solutions. Uses systematic self-questioning, cross-domain analogies, and assumption challenging to find non-obvious insights."
-tools: [Glob, Grep, Read, WebSearch, WebFetch, TodoWrite]
+tools:
+  - Glob
+  - Grep
+  - Read
+  - WebSearch
+  - WebFetch
+  - TodoWrite
+skills: discovery
+disallowedTools:
+  - Write
+  - Edit
+model: sonnet
 color: "#7C3AED"
 ---
 

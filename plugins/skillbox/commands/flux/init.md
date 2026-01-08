@@ -1,7 +1,14 @@
 ---
-name: flux-init
+name: init
 description: Initialize a new Flux GitOps project with multi-environment structure
-allowed-tools: [Read, Write, Glob, Grep, AskUserQuestion, mcp__plugin_context7_context7__resolve-library-id, mcp__plugin_context7_context7__query-docs]
+argument-hint: "[project-name]"
+allowed-tools:
+  - Read
+  - Write
+  - Glob
+  - Grep
+  - AskUserQuestion
+  - mcp__plugin_context7_context7__*
 ---
 
 # Initialize Flux GitOps Project

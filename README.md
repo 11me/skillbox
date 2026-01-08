@@ -3,7 +3,7 @@
 > Specialized workflow layer for Claude Code — cross-session task tracking, semantic code memory, platform engineering patterns.
 
 [![CI](https://github.com/11me/claude-skillbox/actions/workflows/ci.yaml/badge.svg)](https://github.com/11me/claude-skillbox/actions/workflows/ci.yaml)
-[![Version](https://img.shields.io/badge/version-0.58.0-blue?style=flat-square)](https://github.com/11me/claude-skillbox/releases)
+[![Version](https://img.shields.io/badge/version-0.67.0-blue?style=flat-square)](https://github.com/11me/claude-skillbox/releases)
 [![Python](https://img.shields.io/badge/python-3.12+-blue?style=flat-square&logo=python&logoColor=white)](https://python.org)
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-blueviolet?style=flat-square&logo=anthropic)](https://docs.anthropic.com/en/docs/claude-code)
@@ -111,37 +111,79 @@ Autonomous agents for specialized tasks. See [agents/_index.md](plugins/skillbox
 
 ## Commands
 
+Commands are organized by namespace. Use `/namespace:command` format (e.g., `/go:add-service`).
+
+### Core (`/core:*`)
+
 | Command | Description |
 |---------|-------------|
-| `/init-workflow` | Initialize workflow tools (beads + serena + CLAUDE.md) |
-| `/checkpoint` | Save session progress to serena memory |
-| `/commit` | Create conventional commit message |
-| `/discover` | Self-questioning discovery for novel problem-solving |
-| `/discover-loop` | Iterative discovery with Ralph pattern (Stop hook continuation) |
-| `/cancel-discover-loop` | Cancel active discovery loop |
-| `/secrets-check` | Scan project for secrets and credentials |
-| `/helm-scaffold` | Scaffold GitOps structure for app |
-| `/helm-validate` | Validate Helm chart |
-| `/helm-checkpoint` | Save current Helm work state |
-| `/flux-init` | Initialize Flux GitOps project |
-| `/flux-add-infra` | Add infrastructure component to GitOps |
-| `/flux-add-app` | Add application with image automation |
-| `/go-add-service` | Generate Go service with factory method |
-| `/go-add-repository` | Generate Go repository with interface |
-| `/go-add-model` | Generate Go model with mapper |
-| `/go-review` | Review Go project against production standards |
-| `/openapi-init` | Initialize modular OpenAPI spec structure |
-| `/openapi-add-path` | Add resource path with CRUD operations |
-| `/openapi-generate` | Generate Go code from OpenAPI spec |
-| `/ansible-scaffold` | Create Ansible project with proper structure |
-| `/ansible-validate` | Run lint and security checks on Ansible project |
-| `/notify` | Toggle desktop notifications for Claude events |
-| `/harness-init` | Initialize long-running agent harness with feature tracking |
-| `/harness-supervisor` | Automated feature development with feature-dev agents |
-| `/harness-auto` | Toggle automatic supervisor mode (on/off/status) |
-| `/harness-status` | Show harness feature progress and verification status |
-| `/harness-verify` | Run verification for features and update status |
-| `/harness-update` | Manually update feature status |
+| `/core:commit` | Create conventional commit message |
+| `/core:checkpoint` | Save session progress to serena memory |
+| `/core:discover` | Self-questioning discovery for problem-solving |
+| `/core:loop` | Iterative discovery with Ralph pattern |
+| `/core:cancel-loop` | Cancel active discovery loop |
+| `/core:init` | Initialize workflow tools (beads + serena) |
+| `/core:notify` | Toggle desktop notifications |
+| `/core:secrets` | Scan project for secrets |
+| `/core:scaffold` | Scaffold a new skill |
+
+### Harness (`/harness:*`)
+
+| Command | Description |
+|---------|-------------|
+| `/harness:init` | Initialize agent harness with feature tracking |
+| `/harness:supervisor` | Automated feature development |
+| `/harness:status` | Show feature progress |
+| `/harness:verify` | Run verification for features |
+| `/harness:update` | Manually update feature status |
+| `/harness:auto` | Toggle automatic supervisor mode |
+
+### Go (`/go:*`)
+
+| Command | Description |
+|---------|-------------|
+| `/go:add-service` | Generate Go service with factory method |
+| `/go:add-repository` | Generate Go repository with interface |
+| `/go:add-model` | Generate Go model with mapper |
+| `/go:review` | Review Go project against production standards |
+
+### OpenAPI (`/openapi:*`)
+
+| Command | Description |
+|---------|-------------|
+| `/openapi:init` | Initialize modular OpenAPI spec structure |
+| `/openapi:add-path` | Add resource path with CRUD operations |
+| `/openapi:generate` | Generate Go code from OpenAPI spec |
+
+### Helm (`/helm:*`)
+
+| Command | Description |
+|---------|-------------|
+| `/helm:scaffold` | Scaffold GitOps structure for app |
+| `/helm:validate` | Validate Helm chart |
+| `/helm:checkpoint` | Save current Helm work state |
+
+### Flux (`/flux:*`)
+
+| Command | Description |
+|---------|-------------|
+| `/flux:init` | Initialize Flux GitOps project |
+| `/flux:add-app` | Add application with image automation |
+| `/flux:add-infra` | Add infrastructure component |
+| `/flux:refactor` | Refactor existing GitOps repository |
+
+### Ansible (`/ansible:*`)
+
+| Command | Description |
+|---------|-------------|
+| `/ansible:scaffold` | Create Ansible project with proper structure |
+| `/ansible:validate` | Run lint and security checks |
+
+### TDD (`/tdd:*`)
+
+| Command | Description |
+|---------|-------------|
+| `/tdd:tdd` | Toggle TDD mode or start TDD workflow |
 
 ## Hooks
 
@@ -189,22 +231,33 @@ plugins/skillbox/
 │   │   ├── context-engineering/
 │   │   ├── tdd-enforcer/
 │   │   ├── skill-patterns/
-│   │   ├── production-flow/     # Full development workflow
-│   │   ├── discovery/           # Self-questioning + Ralph pattern loop
-│   │   ├── secrets-guardian/    # Secrets protection
-│   │   ├── reliable-execution/  # Context persistence
+│   │   ├── production-flow/
+│   │   ├── discovery/           # Self-questioning + Ralph pattern
+│   │   ├── secrets-guardian/
+│   │   ├── reliable-execution/
 │   │   └── agent-harness/       # Long-running agent patterns
 │   ├── go/                      # Go development
-│   │   ├── go-development/      # Production patterns
-│   │   └── openapi-development/ # OpenAPI spec-first API development
+│   │   ├── go-development/
+│   │   └── openapi-development/
 │   ├── ts/                      # TypeScript (educational)
 │   ├── k8s/                     # Platform engineering
 │   │   ├── helm-chart-developer/
 │   │   └── flux-gitops-scaffold/
 │   └── infra/                   # Infrastructure automation
-│       └── ansible-automation/  # Ansible best practices
+│       └── ansible-automation/
 ├── agents/                      # Autonomous agents
-├── commands/                    # Slash commands
+│   ├── core/                    # Core agents
+│   ├── go/                      # Go agents
+│   └── tdd/                     # TDD agents
+├── commands/                    # Slash commands (namespaced)
+│   ├── core/                    # /core:* commands
+│   ├── harness/                 # /harness:* commands
+│   ├── go/                      # /go:* commands
+│   ├── openapi/                 # /openapi:* commands
+│   ├── helm/                    # /helm:* commands
+│   ├── flux/                    # /flux:* commands
+│   ├── ansible/                 # /ansible:* commands
+│   └── tdd/                     # /tdd:* commands
 ├── hooks/                       # Event hooks
 └── scripts/                     # Python implementations
 ```

@@ -1,7 +1,13 @@
 ---
-name: ansible-scaffold
+name: scaffold
 description: Create new Ansible project with proper structure and optional baseline role
-allowed-tools: [Read, Write, Glob, AskUserQuestion, Bash]
+argument-hint: "<project-name>"
+allowed-tools:
+  - Read
+  - Write
+  - Glob
+  - AskUserQuestion
+  - Bash
 ---
 
 # /ansible-scaffold

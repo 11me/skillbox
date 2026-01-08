@@ -1,7 +1,14 @@
 ---
-name: flux-add-app
+name: add-app
 description: Add application to GitOps project with image automation
-allowed-tools: [Read, Write, Edit, Glob, Grep, AskUserQuestion]
+argument-hint: "<app-name> [namespace]"
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Glob
+  - Grep
+  - AskUserQuestion
 ---
 
 # Add Application to GitOps

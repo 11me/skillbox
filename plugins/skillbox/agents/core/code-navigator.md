@@ -6,6 +6,10 @@ tools:
   - mcp__plugin_serena_serena__*
   - Read
   - Glob
+skills: serena-navigation
+disallowedTools:
+  - Write
+  - Edit
 color: "#2196F3"
 ---
 

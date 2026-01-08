@@ -1,6 +1,7 @@
 ---
 name: discover
 description: Self-questioning discovery for novel problem-solving
+argument-hint: "<problem> [--depth quick|deep]"
 ---
 
 # Self-Questioning Discovery

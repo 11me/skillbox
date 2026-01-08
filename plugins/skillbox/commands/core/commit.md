@@ -1,6 +1,7 @@
 ---
 name: commit
 description: Create a git commit with a properly formatted Conventional Commits message
+argument-hint: "[--emoji] [--amend] [hint]"
 ---
 
 # /commit

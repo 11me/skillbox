@@ -1,5 +1,5 @@
 ---
-name: openapi-generate
+name: generate
 description: Generate Go code from OpenAPI specification using oapi-codegen
 ---
 

@@ -8,8 +8,15 @@ description: |
 
   Checks: project structure, naming conventions, patterns (database, services, errors), anti-patterns.
 model: sonnet
-tools: [Glob, Grep, Read, Bash]
+tools:
+  - Glob
+  - Grep
+  - Read
+  - Bash
 skills: go-development
+disallowedTools:
+  - Write
+  - Edit
 color: "#00ADD8"
 ---
 

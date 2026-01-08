@@ -1,6 +1,13 @@
 ---
 name: tdd-enforcer
 description: Test-Driven Development workflow patterns for Go, TypeScript, Python, and Rust. Use when writing tests first, following Red-Green-Refactor, or enforcing TDD discipline.
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
+  - Write
+  - Edit
+  - Bash
 ---
 
 # Test-Driven Development Workflow

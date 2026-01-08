@@ -9,7 +9,9 @@ tools:
   - Glob
   - Edit
   - TodoWrite
-skills: agent-harness
+skills:
+  - agent-harness
+  - tdd-enforcer
 color: "#4CAF50"
 ---
 

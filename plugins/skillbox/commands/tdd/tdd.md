@@ -1,6 +1,7 @@
 ---
 name: tdd
 description: Toggle TDD mode or start TDD workflow for a feature
+argument-hint: "[on|off|status] [feature]"
 ---
 
 # TDD Mode Management

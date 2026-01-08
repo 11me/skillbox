@@ -1,6 +1,7 @@
 ---
 name: checkpoint
 description: Save session progress to serena memory
+argument-hint: "[name]"
 ---
 
 # /checkpoint
