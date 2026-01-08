@@ -1,3 +1,8 @@
+---
+name: commit
+description: Create a git commit with a properly formatted Conventional Commits message
+---
+
 # /commit
 
 Create a git commit with a properly formatted Conventional Commits message.

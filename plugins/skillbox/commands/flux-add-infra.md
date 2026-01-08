@@ -1,11 +1,7 @@
 ---
 name: flux-add-infra
 description: Add infrastructure component (cert-manager, ingress-nginx, external-secrets, etc.) to GitOps project
-arguments:
-  - name: component
-    description: "Component name: cert-manager, ingress-nginx, external-secrets, external-dns, prometheus, metrics-server"
-    required: true
-allowed-tools: Read, Write, Edit, Glob, Grep, mcp__plugin_context7_context7__resolve-library-id, mcp__plugin_context7_context7__get-library-docs
+allowed-tools: [Read, Write, Edit, Glob, Grep, mcp__plugin_context7_context7__resolve-library-id, mcp__plugin_context7_context7__query-docs]
 ---
 
 # Add Infrastructure Component

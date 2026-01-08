@@ -1,8 +1,6 @@
 ---
 name: tdd-enforcer
 description: Test-Driven Development workflow patterns for Go, TypeScript, Python, and Rust. Use when writing tests first, following Red-Green-Refactor, or enforcing TDD discipline.
-globs: ["**/*_test.go", "**/*.test.ts", "**/*.spec.ts", "**/test_*.py", "**/*_test.py"]
-version: 1.0.0
 ---
 
 # Test-Driven Development Workflow

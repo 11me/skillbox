@@ -1,9 +1,7 @@
 ---
 name: ts-project-setup
 description: TypeScript project structure and modern tooling with pnpm, Biome, Vite, tsup, and monorepo patterns. Use when scaffolding TS projects, configuring build tools, or organizing monorepos.
-globs: ["**/tsconfig*.json", "**/package.json", "**/turbo.json", "**/pnpm-workspace.yaml", "**/biome.json", "**/vite.config.*", "**/tsup.config.*"]
-allowed-tools: Read, Grep, Glob, Write, Edit, Bash
-version: 1.0.0
+allowed-tools: [Read, Grep, Glob, Write, Edit, Bash]
 ---
 
 # TypeScript Project Setup

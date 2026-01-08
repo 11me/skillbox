@@ -1,9 +1,7 @@
 ---
 name: ts-testing-patterns
 description: Modern TypeScript testing with Vitest. Use when writing tests, mocking, setting up test coverage, or configuring Vitest.
-globs: ["**/*.test.ts", "**/*.spec.ts", "**/vitest.config.*"]
-allowed-tools: Read, Grep, Glob, Write, Edit, Bash
-version: 1.0.0
+allowed-tools: [Read, Grep, Glob, Write, Edit, Bash]
 ---
 
 # TypeScript Testing Patterns

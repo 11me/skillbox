@@ -1,22 +1,6 @@
 ---
 name: ansible-automation
-description: |
-  This skill should be used when the user asks to "create an Ansible project",
-  "scaffold Ansible roles", "harden Ubuntu server", "configure SSH security",
-  "set up server baseline", "write Ansible playbook", "create inventory",
-  "manage server configuration", or mentions Ansible, server provisioning,
-  infrastructure automation, or Ubuntu security hardening.
-triggers:
-  - ansible.cfg
-  - requirements.yml
-  - /ansible
-globs:
-  - "**/playbooks/**/*.yml"
-  - "**/roles/**/tasks/*.yml"
-  - "**/inventory/**"
-  - "**/group_vars/**"
-  - "**/host_vars/**"
-version: 1.0.0
+description: Production-grade Ansible practices for infrastructure automation and Ubuntu server hardening. Use when creating Ansible projects, scaffolding roles, hardening Ubuntu servers, configuring SSH security, writing playbooks, managing server configuration, or invoking /ansible commands.
 ---
 
 # Ansible Automation

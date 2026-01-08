@@ -1,5 +1,6 @@
 ---
-description: "Scan project for secrets and credentials"
+name: secrets-check
+description: Scan project for secrets and credentials
 ---
 
 # Secrets Check

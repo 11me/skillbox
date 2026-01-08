@@ -1,8 +1,7 @@
 ---
 name: conventional-commit
 description: Generate beautiful git commit messages following Conventional Commits spec. Use when writing commits, creating commit messages, or when user mentions git commit, conventional commits, or commit message.
-allowed-tools: Read, Grep, Glob, Bash
-version: 1.0.0
+allowed-tools: [Read, Grep, Glob, Bash]
 ---
 
 # Conventional Commit

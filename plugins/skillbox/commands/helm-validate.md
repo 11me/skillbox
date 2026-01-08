@@ -1,3 +1,8 @@
+---
+name: helm-validate
+description: Validate Helm chart with all required checks
+---
+
 # /helm-validate
 
 Validate Helm chart with all required checks.

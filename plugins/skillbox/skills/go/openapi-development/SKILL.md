@@ -1,18 +1,6 @@
 ---
 name: openapi-development
-description: |
-  Spec-first API development with OpenAPI 3.x and oapi-codegen.
-  Covers modular spec structure, code generation, and integration with go-development patterns.
-  Use when: creating REST APIs, generating Go server/client code, managing OpenAPI specs.
-triggers:
-  - openapi.yaml
-  - "api/v1/**"
-  - "*.gen.go"
-  - oapi-codegen.yaml
-  - /openapi
-  - "generate OpenAPI"
-  - "create API spec"
-version: 1.0.0
+description: Spec-first API development with OpenAPI 3.x and oapi-codegen. Use when creating REST APIs, generating Go server/client code, managing OpenAPI specs, or invoking /openapi commands. Covers modular spec structure, code generation, and integration with go-development patterns.
 ---
 
 # OpenAPI Development

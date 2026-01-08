@@ -1,9 +1,7 @@
 ---
 name: ts-conventions
 description: TypeScript conventions, type-safe APIs (Hono, tRPC, Zod), and best practices. Use when reviewing TypeScript code, building APIs, checking conventions, or writing TypeScript.
-globs: ["**/*.ts", "**/*.tsx", "**/src/api/**", "**/routes/**"]
-allowed-tools: Read, Grep, Glob, Write, Edit
-version: 1.1.0
+allowed-tools: [Read, Grep, Glob, Write, Edit]
 ---
 
 # TypeScript Conventions

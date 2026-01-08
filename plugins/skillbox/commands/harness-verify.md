@@ -1,7 +1,7 @@
 ---
+name: harness-verify
 description: Run verification for features and update status
-allowed-tools: Bash, Read, Write
-argument-hint: <feature-id>|--all|--implemented
+allowed-tools: [Bash, Read, Write]
 ---
 
 # /harness-verify

@@ -1,7 +1,6 @@
 ---
+name: checkpoint
 description: Save session progress to serena memory
-allowed-tools: mcp__plugin_serena_serena__*, Bash(bd:*), Bash(date:*), Bash(git:*)
-argument-hint: [restore|<custom-name>]
 ---
 
 # /checkpoint

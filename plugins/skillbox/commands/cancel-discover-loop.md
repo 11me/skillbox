@@ -1,5 +1,6 @@
 ---
-description: "Cancel active discovery loop"
+name: cancel-discover-loop
+description: Cancel active discovery loop
 ---
 
 # Cancel Discovery Loop

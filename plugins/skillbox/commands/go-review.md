@@ -1,4 +1,5 @@
 ---
+name: go-review
 description: Review Go project against production standards from go-development skill
 ---
 

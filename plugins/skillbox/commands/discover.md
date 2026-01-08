@@ -1,6 +1,6 @@
 ---
-description: "Self-questioning discovery for novel problem-solving"
-argument: "problem"
+name: discover
+description: Self-questioning discovery for novel problem-solving
 ---
 
 # Self-Questioning Discovery

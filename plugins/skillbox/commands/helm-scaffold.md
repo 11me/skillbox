@@ -1,3 +1,8 @@
+---
+name: helm-scaffold
+description: Scaffold complete GitOps structure for a new application
+---
+
 # /helm-scaffold
 
 Scaffold complete GitOps structure for a new application.

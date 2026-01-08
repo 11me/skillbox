@@ -1,10 +1,6 @@
 ---
 name: notify
 description: Toggle desktop notifications for Claude Code events
-arguments:
-  - name: action
-    description: "on, off, or status (default: status)"
-    required: false
 ---
 
 # Desktop Notifications Toggle

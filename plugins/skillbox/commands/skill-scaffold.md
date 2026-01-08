@@ -1,4 +1,5 @@
 ---
+name: skill-scaffold
 description: Scaffold a new Agent Skill directory with SKILL.md template
 ---
 

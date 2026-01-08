@@ -1,4 +1,5 @@
 ---
+name: openapi-add-path
 description: Add a new resource path with CRUD operations to OpenAPI spec
 ---
 

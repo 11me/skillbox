@@ -1,4 +1,5 @@
 ---
+name: init-workflow
 description: Initialize workflow tools for existing project (beads + serena + CLAUDE.md)
 ---
 

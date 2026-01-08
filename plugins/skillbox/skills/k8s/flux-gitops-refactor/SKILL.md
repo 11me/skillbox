@@ -1,15 +1,7 @@
 ---
 name: flux-gitops-refactor
-description: >
-  This skill should be used when the user asks to "refactor Flux project",
-  "convert GitOps structure", "upgrade Flux layout", "transform flux structure",
-  "refactor to standard GitOps", "analyze Flux project for refactoring",
-  "restructure my gitops repo", or mentions "flux refactoring" or "gitops restructuring".
-  Provides semi-automatic refactoring from any Flux structure to the standard
-  flux-gitops-scaffold pattern.
-globs: ["**/clusters/**/*.yaml", "**/apps/**/*.yaml", "**/infra/**/*.yaml"]
-allowed-tools: Read, Write, Edit, Glob, Grep, Bash
-version: 1.0.0
+description: Refactor existing Flux GitOps repositories to standardized structure. Use when refactoring Flux projects, converting GitOps structure, upgrading Flux layout, restructuring gitops repos, or analyzing Flux projects for refactoring.
+allowed-tools: [Read, Write, Edit, Glob, Grep, Bash]
 ---
 
 # Flux GitOps Refactor

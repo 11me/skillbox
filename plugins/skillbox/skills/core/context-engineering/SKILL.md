@@ -1,8 +1,7 @@
 ---
 name: context-engineering
 description: Manage AI agent context windows effectively. Use when dealing with context overflow, token limits, context budget, progressive loading, or optimizing long sessions.
-allowed-tools: Read, Grep, Glob
-version: 1.0.0
+allowed-tools: [Read, Grep, Glob]
 ---
 
 # Context Engineering — Maximizing AI Agent Effectiveness

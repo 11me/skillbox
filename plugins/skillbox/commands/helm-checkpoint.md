@@ -1,3 +1,8 @@
+---
+name: helm-checkpoint
+description: Create a checkpoint summary of current Helm chart work
+---
+
 # /helm-checkpoint
 
 Create a checkpoint summary of current Helm chart work.

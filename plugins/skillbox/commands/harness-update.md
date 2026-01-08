@@ -1,7 +1,7 @@
 ---
+name: harness-update
 description: Manually update feature status in harness
-allowed-tools: Read, Write
-argument-hint: <feature-id> <status>
+allowed-tools: [Read, Write]
 ---
 
 # /harness-update

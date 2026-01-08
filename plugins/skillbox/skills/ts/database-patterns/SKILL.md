@@ -1,9 +1,7 @@
 ---
 name: ts-database-patterns
 description: Type-safe database access with Drizzle ORM. Use when working with databases, defining schemas, writing queries, or setting up migrations.
-globs: ["**/drizzle.config.*", "**/schema.ts", "**/db/**"]
-allowed-tools: Read, Grep, Glob, Write, Edit
-version: 1.0.0
+allowed-tools: [Read, Grep, Glob, Write, Edit]
 ---
 
 # TypeScript Database Patterns

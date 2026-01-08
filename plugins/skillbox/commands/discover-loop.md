@@ -1,6 +1,6 @@
 ---
-description: "Iterative discovery loop for deep research (Ralph pattern)"
-argument: "research_question"
+name: discover-loop
+description: Iterative discovery loop for deep research (Ralph pattern)
 ---
 
 # Discovery Loop

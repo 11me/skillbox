@@ -1,9 +1,7 @@
 ---
 name: beads-workflow
 description: Task tracking with beads CLI (bd). Use when managing tasks, tracking progress, creating issues, or when user mentions "task", "issue", "todo", "beads", "bd", "next task", "create task", "close task".
-globs: ["**/.beads/**", "**/beads.db"]
-allowed-tools: Bash, Read, Grep, Glob
-version: 1.0.0
+allowed-tools: [Bash, Read, Grep, Glob]
 ---
 
 # Beads Workflow

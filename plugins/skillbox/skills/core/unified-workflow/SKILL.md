@@ -1,9 +1,7 @@
 ---
 name: unified-workflow
 description: Complete development workflow from task to commit. Use when starting features, tracking work, managing sessions, or shipping code. Combines task tracking, code memory, and reliable execution.
-globs: ["**/.beads/**", "**/.serena/**", "**/CLAUDE.md"]
-allowed-tools: Read, Write, Bash, Grep, Glob
-version: 1.0.0
+allowed-tools: [Read, Write, Bash, Grep, Glob]
 ---
 
 # Unified Development Workflow

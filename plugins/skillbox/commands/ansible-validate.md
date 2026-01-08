@@ -1,7 +1,7 @@
 ---
 name: ansible-validate
 description: Run lint and security checks on Ansible project
-allowed-tools: Read, Glob, Grep, Bash
+allowed-tools: [Read, Glob, Grep, Bash]
 ---
 
 # /ansible-validate

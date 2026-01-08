@@ -1,7 +1,7 @@
 ---
+name: harness-init
 description: Initialize long-running agent harness with bootstrap and feature tracking
-allowed-tools: Bash, Read, mcp__plugin_serena_serena__write_memory
-argument-hint: [--skip-setup|--features-only]
+allowed-tools: [Bash, Read, mcp__plugin_serena_serena__write_memory]
 ---
 
 # /harness-init

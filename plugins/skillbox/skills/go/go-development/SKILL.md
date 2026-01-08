@@ -1,19 +1,6 @@
 ---
 name: go-development
-description: |
-  Primary Go development guide. Trigger when:
-  - Working with Go projects (go.mod detected)
-  - User asks about Go patterns, architecture
-  - `/go` command invoked
-  - Creating/scaffolding Go services
-
-  Covers: Entry Point, Config, Database, Cache, Services, Repositories, Errors, Logging, Testing, Money,
-  HTTP Handlers, Middleware, Validation, Pagination, Health Checks, Workers, Tracing,
-  Naming, Concurrency, Pitfalls, Performance.
-triggers:
-  - go.mod
-  - "*.go"
-  - /go
+description: Primary Go development guide. Use when working with Go projects (go.mod, *.go files), asking about Go patterns, architecture, services, repositories, or invoking /go commands. Covers Entry Point, Config, Database, Cache, Services, Repositories, Errors, Logging, Testing, HTTP Handlers, Middleware, Validation, and more.
 ---
 
 # Go Development Guide

@@ -1,10 +1,6 @@
 ---
 name: tdd
 description: Toggle TDD mode or start TDD workflow for a feature
-arguments:
-  - name: action
-    description: "on, off, strict, or feature name to implement"
-    required: false
 ---
 
 # TDD Mode Management

@@ -1,4 +1,5 @@
 ---
+name: openapi-init
 description: Initialize OpenAPI spec structure for a Go project
 ---
 
