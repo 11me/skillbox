@@ -1,7 +1,7 @@
 {
   "name": "rust-dev",
-  "description": "Rust development: test generation, unit tests, integration tests",
-  "version": "1.0.0",
+  "description": "Rust development: testing patterns, rstest, mockall, proptest",
+  "version": "1.1.0",
   "author": {
     "name": "11me"
   }
