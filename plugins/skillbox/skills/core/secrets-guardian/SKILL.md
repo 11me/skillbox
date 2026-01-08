@@ -1,6 +1,6 @@
 ---
 name: secrets-guardian
-description: Use when the user asks about "secrets protection", "pre-commit hooks", "gitleaks", "scan secrets", "secret detection", "credential leaks", or needs to set up repository protection from accidental secret commits.
+description: This skill should be used when the user asks about "secrets protection", "pre-commit hooks", "gitleaks", "scan secrets", "secret detection", "credential leaks", or needs to set up repository protection from accidental secret commits.
 ---
 
 # Secrets Guardian

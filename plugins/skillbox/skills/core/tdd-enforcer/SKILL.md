@@ -1,6 +1,6 @@
 ---
 name: tdd-enforcer
-description: Test-Driven Development workflow patterns for Go, TypeScript, Python, and Rust. Use when writing tests first, following Red-Green-Refactor, or enforcing TDD discipline.
+description: This skill should be used when the user asks to "write tests first", "follow TDD", "Red-Green-Refactor", or mentions "test-driven development", "TDD workflow", "TDD discipline".
 allowed-tools:
   - Read
   - Glob

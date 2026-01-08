@@ -1,6 +1,6 @@
 ---
 name: discovery
-description: Use when the user asks about "discovery", "self-questioning", "SP-CoT", "novel insights", "systematic exploration", "hypothesis generation", "Socratic method", "deep research", or needs guidance on AI-powered discovery through systematic self-questioning.
+description: This skill should be used when the user asks about "discovery", "self-questioning", "SP-CoT", "novel insights", "systematic exploration", "hypothesis generation", "Socratic method", "deep research", or needs guidance on AI-powered discovery.
 context: fork
 agent: discovery-explorer
 allowed-tools:

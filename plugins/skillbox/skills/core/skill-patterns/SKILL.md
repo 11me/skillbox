@@ -1,6 +1,6 @@
 ---
 name: skill-patterns
-description: Quality patterns for robust Claude Code skills. Use when improving existing skills, adding validation workflows, defining safety guardrails, or documenting skill contracts. Provides Do/Verify/Repair, Guardrails, Inputs/Outputs, Prerequisites, and Scope patterns.
+description: This skill should be used when the user asks to "improve skill quality", "add validation workflow", "define guardrails", or mentions "skill patterns", "Do/Verify/Repair", "skill contracts", "robust skills".
 ---
 
 # Skill Patterns Reference

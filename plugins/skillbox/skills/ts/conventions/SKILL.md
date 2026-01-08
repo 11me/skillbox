@@ -1,6 +1,6 @@
 ---
 name: ts-conventions
-description: TypeScript conventions, type-safe APIs (Hono, tRPC, Zod), and best practices. Use when reviewing TypeScript code, building APIs, checking conventions, or writing TypeScript.
+description: This skill should be used when the user asks about "TypeScript conventions", "type-safe APIs", "Hono", "tRPC", "Zod", or mentions "TypeScript best practices", "TS code review".
 allowed-tools: [Read, Grep, Glob, Write, Edit]
 ---
 

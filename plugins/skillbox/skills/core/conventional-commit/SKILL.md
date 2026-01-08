@@ -1,6 +1,6 @@
 ---
 name: conventional-commit
-description: Generate beautiful git commit messages following Conventional Commits spec. Use when writing commits, creating commit messages, or when user mentions git commit, conventional commits, or commit message.
+description: This skill should be used when the user asks to "write commit message", "create commit", "format commit", or mentions "git commit", "conventional commits", "commit message", "gitmoji".
 allowed-tools: [Read, Grep, Glob, Bash]
 ---
 

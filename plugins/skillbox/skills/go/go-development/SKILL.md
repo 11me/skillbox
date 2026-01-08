@@ -1,6 +1,6 @@
 ---
 name: go-development
-description: Primary Go development guide. Use when working with Go projects (go.mod, *.go files), asking about Go patterns, architecture, services, repositories, or invoking /go commands. Covers Entry Point, Config, Database, Cache, Services, Repositories, Errors, Logging, Testing, HTTP Handlers, Middleware, Validation, and more.
+description: This skill should be used when the user is working with Go projects (go.mod, *.go files), asking about "Go patterns", "Go architecture", "services", "repositories", or mentions "Go development", "Go project", "Go handlers", "Go testing".
 ---
 
 # Go Development Guide

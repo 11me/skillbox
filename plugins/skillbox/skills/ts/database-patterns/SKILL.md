@@ -1,6 +1,6 @@
 ---
 name: ts-database-patterns
-description: Type-safe database access with Drizzle ORM. Use when working with databases, defining schemas, writing queries, or setting up migrations.
+description: This skill should be used when the user asks about "Drizzle ORM", "TypeScript database", "type-safe queries", or mentions "database schema", "migrations", "Drizzle".
 allowed-tools: [Read, Grep, Glob, Write, Edit]
 ---
 

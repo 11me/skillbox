@@ -1,6 +1,6 @@
 ---
 name: ts-type-patterns
-description: Advanced TypeScript type patterns for type-safe applications. Use when working with generics, utility types, type guards, conditional types, or template literals.
+description: This skill should be used when the user asks about "TypeScript generics", "utility types", "type guards", "conditional types", or mentions "template literals", "advanced TypeScript types".
 allowed-tools: [Read, Grep, Glob]
 ---
 

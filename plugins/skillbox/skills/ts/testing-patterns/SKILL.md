@@ -1,6 +1,6 @@
 ---
 name: ts-testing-patterns
-description: Modern TypeScript testing with Vitest. Use when writing tests, mocking, setting up test coverage, or configuring Vitest.
+description: This skill should be used when the user asks about "Vitest", "TypeScript testing", "test coverage", "mocking", or mentions "Vitest configuration", "TypeScript tests".
 allowed-tools: [Read, Grep, Glob, Write, Edit, Bash]
 ---
 

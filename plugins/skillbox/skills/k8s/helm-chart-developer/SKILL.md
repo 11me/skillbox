@@ -1,6 +1,6 @@
 ---
 name: helm-chart-developer
-description: Build/refactor production Helm charts and GitOps deploy via Flux HelmRelease + Kustomize overlays. Includes External Secrets Operator patterns (ExternalSecret per app/env + ClusterSecretStore) and optional chart-managed ExternalSecret templates. Use when authoring Helm charts, converting raw manifests to Helm, designing values/schema, or debugging helm template/lint/dry-run issues.
+description: This skill should be used when the user asks to "create Helm chart", "author Helm chart", "convert manifests to Helm", "design values schema", or mentions "Helm", "HelmRelease", "helm template", "helm lint", "External Secrets Operator".
 allowed-tools: [Read, Grep, Glob, Write, Edit, Bash]
 ---
 

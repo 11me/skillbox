@@ -1,6 +1,6 @@
 ---
 name: ansible-automation
-description: Production-grade Ansible practices for infrastructure automation and Ubuntu server hardening. Use when creating Ansible projects, scaffolding roles, hardening Ubuntu servers, configuring SSH security, writing playbooks, managing server configuration, or invoking /ansible commands.
+description: This skill should be used when the user asks to "create Ansible project", "scaffold Ansible role", "harden Ubuntu server", "write playbook", or mentions "Ansible automation", "SSH hardening", "server configuration".
 ---
 
 # Ansible Automation

@@ -1,6 +1,6 @@
 ---
 name: unified-workflow
-description: Complete development workflow from task to commit. Use when starting features, tracking work, managing sessions, or shipping code. Combines task tracking, code memory, and reliable execution.
+description: This skill should be used when the user asks to "start feature", "implement task", "ship code", or wants a complete workflow combining task tracking, code memory, and session management.
 allowed-tools: [Read, Write, Bash, Grep, Glob]
 ---
 

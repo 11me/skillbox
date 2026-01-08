@@ -1,6 +1,6 @@
 ---
 name: beads-workflow
-description: Task tracking with beads CLI (bd). Use when managing tasks, tracking progress, creating issues, or when user mentions "task", "issue", "todo", "beads", "bd", "next task", "create task", "close task".
+description: This skill should be used when the user asks to "track tasks", "create issue", "list tasks", "close task", "show ready tasks", or mentions "beads", "bd", "task tracking", "todo", "next task".
 allowed-tools: [Bash, Read, Grep, Glob]
 ---
 

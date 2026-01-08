@@ -1,6 +1,6 @@
 ---
 name: openapi-development
-description: Spec-first API development with OpenAPI 3.x and oapi-codegen. Use when creating REST APIs, generating Go server/client code, managing OpenAPI specs, or invoking /openapi commands. Covers modular spec structure, code generation, and integration with go-development patterns.
+description: This skill should be used when the user asks about "OpenAPI", "spec-first API", "oapi-codegen", "REST API generation", or mentions "OpenAPI spec", "Go API code generation", "swagger".
 ---
 
 # OpenAPI Development

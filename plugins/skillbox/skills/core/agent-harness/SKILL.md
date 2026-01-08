@@ -1,6 +1,6 @@
 ---
 name: agent-harness
-description: Long-running agent patterns for multi-session work. Use when working on features that span multiple sessions, need verification tracking, or want to prevent premature task completion. Integrates with beads, serena, and existing checkpoint system.
+description: This skill should be used when the user asks about "multi-session features", "verification tracking", "long-running agents", or mentions "harness", "feature supervisor", "prevent premature completion".
 context: fork
 allowed-tools:
   - Read

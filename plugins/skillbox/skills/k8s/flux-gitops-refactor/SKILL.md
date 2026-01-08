@@ -1,6 +1,6 @@
 ---
 name: flux-gitops-refactor
-description: Refactor existing Flux GitOps repositories to standardized structure. Use when refactoring Flux projects, converting GitOps structure, upgrading Flux layout, restructuring gitops repos, or analyzing Flux projects for refactoring.
+description: This skill should be used when the user asks to "refactor Flux project", "convert GitOps structure", "upgrade Flux layout", or mentions "restructure gitops", "Flux refactoring", "standardize GitOps".
 allowed-tools: [Read, Write, Edit, Glob, Grep, Bash]
 ---
 

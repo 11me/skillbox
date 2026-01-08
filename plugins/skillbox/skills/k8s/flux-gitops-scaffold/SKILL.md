@@ -1,6 +1,6 @@
 ---
 name: flux-gitops-scaffold
-description: Scaffold Flux GitOps projects with multi-environment support. Use when creating GitOps projects, scaffolding Flux projects, setting up GitOps repositories, adding Flux applications, configuring image automation, adding infrastructure components, or setting up Flux with Kustomize.
+description: This skill should be used when the user asks to "scaffold Flux project", "create GitOps repo", "set up Flux", "add Flux application", or mentions "Flux GitOps", "GitOps scaffold", "image automation", "Kustomize overlays".
 allowed-tools: [Read, Write, Edit, Glob, Grep, Bash]
 ---
 

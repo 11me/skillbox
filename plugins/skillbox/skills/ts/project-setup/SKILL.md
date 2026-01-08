@@ -1,6 +1,6 @@
 ---
 name: ts-project-setup
-description: TypeScript project structure and modern tooling with pnpm, Biome, Vite, tsup, and monorepo patterns. Use when scaffolding TS projects, configuring build tools, or organizing monorepos.
+description: This skill should be used when the user asks to "scaffold TypeScript project", "configure pnpm", "set up Biome", "configure Vite", or mentions "tsup", "monorepo", "TypeScript project setup".
 allowed-tools: [Read, Grep, Glob, Write, Edit, Bash]
 ---
 

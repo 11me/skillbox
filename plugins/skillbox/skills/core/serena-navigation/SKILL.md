@@ -1,6 +1,6 @@
 ---
 name: serena-navigation
-description: Semantic code navigation with Serena MCP. Use when working with serena, semantic code navigation, find symbol, code exploration, symbol search, find references, or serena memory persistence.
+description: This skill should be used when the user asks to "find symbol", "explore codebase", "find references", "navigate code", or mentions "serena", "semantic navigation", "code exploration", "symbol search", "serena memory".
 allowed-tools: [Read, Grep, Glob]
 ---
 

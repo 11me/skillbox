@@ -1,20 +1,18 @@
 {
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "11me-skillbox",
-  "owner": { "name": "11me" },
-  "metadata": {
-    "description": "Personal skills marketplace for Claude Code",
-    "pluginRoot": "./plugins"
+  "description": "Specialized workflow layer for Claude Code",
+  "owner": {
+    "name": "11me"
   },
   "plugins": [
     {
       "name": "skillbox",
       "source": "./plugins/skillbox",
-      "description": "Core skills: skill-creator, conventional-commit, beads-workflow"
-    },
-    {
-      "name": "skillbox-k8s",
-      "source": "./plugins/skillbox/skills/k8s",
-      "description": "Kubernetes, Helm, Flux GitOps patterns"
+      "description": "Specialized workflows: beads task tracking, serena code navigation, Helm/Flux GitOps, TDD enforcement, Go/TypeScript patterns, Ansible automation",
+      "category": "development",
+      "homepage": "https://github.com/11me/claude-skillbox",
+      "keywords": ["workflow", "gitops", "go", "tdd", "kubernetes", "helm", "flux", "ansible", "typescript"]
     }
   ]
 }

@@ -1,6 +1,6 @@
 ---
 name: context-engineering
-description: Manage AI agent context windows effectively. Use when dealing with context overflow, token limits, context budget, progressive loading, or optimizing long sessions.
+description: This skill should be used when the user asks about "context overflow", "token limits", "context budget", or mentions "progressive loading", "optimizing sessions", "context management".
 allowed-tools: [Read, Grep, Glob]
 ---
 
