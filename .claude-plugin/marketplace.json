@@ -7,12 +7,36 @@
   },
   "plugins": [
     {
-      "name": "core",
-      "source": "./plugins/core",
-      "description": "Core workflow tools: beads task tracking, serena code navigation, conventional commits, discovery, context engineering",
+      "name": "workflow",
+      "source": "./plugins/workflow",
+      "description": "Personal workflow tools: beads task tracking, serena code navigation, conventional commits, discovery, context engineering",
       "category": "development",
       "homepage": "https://github.com/11me/claude-skillbox",
       "keywords": ["workflow", "beads", "serena", "commits", "discovery"]
+    },
+    {
+      "name": "flux",
+      "source": "./plugins/flux",
+      "description": "Flux GitOps toolkit: project scaffolding, repository refactoring, multi-environment setup",
+      "category": "development",
+      "homepage": "https://github.com/11me/claude-skillbox",
+      "keywords": ["flux", "gitops", "kubernetes", "kustomize"]
+    },
+    {
+      "name": "helm",
+      "source": "./plugins/helm",
+      "description": "Helm chart development toolkit: production-ready charts, External Secrets integration, GitOps patterns",
+      "category": "development",
+      "homepage": "https://github.com/11me/claude-skillbox",
+      "keywords": ["helm", "kubernetes", "charts", "gitops"]
+    },
+    {
+      "name": "ansible",
+      "source": "./plugins/ansible",
+      "description": "Ansible automation toolkit: server provisioning, Ubuntu hardening, SSH security, playbook development",
+      "category": "development",
+      "homepage": "https://github.com/11me/claude-skillbox",
+      "keywords": ["ansible", "infrastructure", "hardening", "ssh"]
     },
     {
       "name": "go-dev",
@@ -21,14 +45,6 @@
       "category": "development",
       "homepage": "https://github.com/11me/claude-skillbox",
       "keywords": ["go", "golang", "openapi", "oapi-codegen"]
-    },
-    {
-      "name": "k8s",
-      "source": "./plugins/k8s",
-      "description": "Kubernetes toolkit: Helm chart development, Flux GitOps scaffolding and refactoring",
-      "category": "development",
-      "homepage": "https://github.com/11me/claude-skillbox",
-      "keywords": ["kubernetes", "helm", "flux", "gitops", "k8s"]
     },
     {
       "name": "ts-dev",
@@ -45,14 +61,6 @@
       "category": "development",
       "homepage": "https://github.com/11me/claude-skillbox",
       "keywords": ["tdd", "testing", "red-green-refactor"]
-    },
-    {
-      "name": "infra",
-      "source": "./plugins/infra",
-      "description": "Infrastructure automation: Ansible practices, Ubuntu server hardening, SSH security",
-      "category": "development",
-      "homepage": "https://github.com/11me/claude-skillbox",
-      "keywords": ["ansible", "infrastructure", "hardening", "ssh"]
     },
     {
       "name": "harness",
