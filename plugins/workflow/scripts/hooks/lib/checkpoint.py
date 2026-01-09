@@ -118,12 +118,41 @@ def _is_likely_file_path(s: str) -> bool:
     return True
 
 
+def _cleanup_old_empty_checkpoints(memories_dir: Path, keep_recent_hours: int = 2) -> None:
+    """Remove old empty auto-checkpoint files.
+
+    Args:
+        memories_dir: Path to memories directory.
+        keep_recent_hours: Keep checkpoints created within this many hours.
+    """
+    import time
+
+    now = time.time()
+    cutoff = now - (keep_recent_hours * 3600)
+
+    for checkpoint in memories_dir.glob("auto-checkpoint-*.md"):
+        try:
+            # Skip recent files
+            if checkpoint.stat().st_mtime > cutoff:
+                continue
+
+            # Check if empty (template not filled)
+            content = checkpoint.read_text()
+            if "(Add summary here)" in content and "(Add next steps here)" in content:
+                checkpoint.unlink()
+        except OSError:
+            continue
+
+
 def write_auto_checkpoint(
     checkpoint_type: str,
     modified_files: list[tuple[str, str]],
     beads_task: dict | None,
 ) -> Path:
     """Write auto-checkpoint to serena memories.
+
+    Uses 10-minute granularity to avoid creating too many checkpoints.
+    Cleans up old empty checkpoints automatically.
 
     Args:
         checkpoint_type: "PreCompact" or "SessionEnd"
@@ -136,8 +165,20 @@ def write_auto_checkpoint(
     memories_dir = Path.cwd() / ".serena" / "memories"
     memories_dir.mkdir(parents=True, exist_ok=True)
 
-    timestamp = datetime.now().strftime("%Y-%m-%d-%H%M")
+    # Cleanup old empty checkpoints
+    _cleanup_old_empty_checkpoints(memories_dir)
+
+    # Use 10-minute granularity (floor to nearest 10 min)
+    now = datetime.now()
+    minute_bucket = (now.minute // 10) * 10
+    timestamp = now.strftime(f"%Y-%m-%d-%H{minute_bucket:02d}")
     filename = f"auto-checkpoint-{timestamp}.md"
+
+    # If checkpoint already exists for this bucket, update it instead
+    checkpoint_path = memories_dir / filename
+    if checkpoint_path.exists():
+        # Return existing path - hook will prompt to update it
+        return checkpoint_path
 
     # Build content
     lines = [
