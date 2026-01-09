@@ -6,31 +6,41 @@
 1. SessionStart hook — reminds about Context7 for k8s projects
 2. PreToolUse hook — checks versions in HelmRelease files
 
-## Using Context7 for Latest Versions (REQUIRED)
+## Getting Chart Versions
 
-**Mandatory workflow** — fetch latest versions via Context7 before scaffolding:
+**Recommended workflow** — verify versions before scaffolding:
 
-### Step 1: Resolve Library ID
+### Option 1: Context7 (Documentation)
 
 ```
 Tool: resolve-library-id
 Parameter: libraryName="cert-manager"
-```
 
-### Step 2: Query Documentation for Version
-
-```
 Tool: query-docs
 Parameters:
-  libraryId: "/jetstack/cert-manager"
-  topic: "helm chart installation version"
+  libraryId: "/cert-manager/website"
+  topic: "helm chart install version"
 ```
+
+**Note:** Context7 returns documentation examples which may contain older versions.
+Use as reference but verify current release.
+
+### Option 2: Helm Repo (Authoritative)
+
+```bash
+helm repo add jetstack https://charts.jetstack.io
+helm search repo jetstack/cert-manager --versions | head -5
+```
+
+### Option 3: GitHub Releases
+
+Check the project's GitHub releases page for latest stable version.
 
 ## Component Library IDs
 
 | Component | Library Name | Context7 ID |
 |-----------|--------------|-------------|
-| cert-manager | cert-manager | /jetstack/cert-manager |
+| cert-manager | cert-manager | /cert-manager/website |
 | ingress-nginx | ingress-nginx | /kubernetes/ingress-nginx |
 | external-secrets | external-secrets | /external-secrets/external-secrets |
 | external-dns | external-dns | /kubernetes-sigs/external-dns |
