@@ -16,7 +16,11 @@ from response import ask
 
 
 def main() -> None:
-    data = json.load(sys.stdin)
+    try:
+        data = json.load(sys.stdin)
+    except json.JSONDecodeError:
+        return  # Allow silently on invalid input
+
     tool_input = data.get("tool_input", {})
 
     # Only check Write/Edit to yaml files
