@@ -88,7 +88,10 @@ def detect_flux(cwd: Path | None = None, max_depth: int = 3) -> bool:
 
 
 def has_tests(cwd: Path | None = None) -> bool:
-    """Check if project has tests."""
+    """Check if project has tests.
+
+    Note: Keep in sync with tdd/scripts/hooks/session_context.py:has_tests()
+    """
     cwd = cwd or Path.cwd()
 
     # Check test directories
@@ -96,10 +99,17 @@ def has_tests(cwd: Path | None = None) -> bool:
         if (cwd / test_dir).is_dir():
             return True
 
-    # Check test file patterns
-    patterns = ["*_test.go", "*_test.py", "*.test.ts", "*.spec.ts", "test_*.py"]
+    # Use recursive glob to find test files in subdirectories
+    patterns = [
+        "**/*_test.go",
+        "**/*_test.py",
+        "**/*.test.ts",
+        "**/*.spec.ts",
+        "**/test_*.py",
+    ]
     for pattern in patterns:
-        if list(cwd.glob(pattern)):
+        # Use next() with default to short-circuit on first match
+        if next(cwd.glob(pattern), None) is not None:
             return True
 
     return False

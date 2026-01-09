@@ -11,14 +11,25 @@ from pathlib import Path
 
 
 def has_tests(cwd: Path) -> bool:
-    """Check if project has tests."""
+    """Check if project has tests.
+
+    Note: Keep in sync with workflow/scripts/hooks/lib/detector.py:has_tests()
+    """
     for test_dir in ["tests", "test", "__tests__", "spec"]:
         if (cwd / test_dir).is_dir():
             return True
 
-    patterns = ["*_test.go", "*_test.py", "*.test.ts", "*.spec.ts", "test_*.py"]
+    # Use recursive glob to find test files in subdirectories
+    patterns = [
+        "**/*_test.go",
+        "**/*_test.py",
+        "**/*.test.ts",
+        "**/*.spec.ts",
+        "**/test_*.py",
+    ]
     for pattern in patterns:
-        if list(cwd.glob(pattern)):
+        # Use next() with default to short-circuit on first match
+        if next(cwd.glob(pattern), None) is not None:
             return True
 
     return False
