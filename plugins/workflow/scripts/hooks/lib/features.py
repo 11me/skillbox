@@ -258,8 +258,8 @@ def _create_beads_task(description: str) -> str | None:
         if result.returncode != 0:
             return None
 
-        # Parse task ID from output (e.g., "Created: skills-abc123")
-        match = re.search(r"(?:Created|created):\s*(\S+)", result.stdout)
+        # Parse task ID from output (e.g., "Created issue: claude-skillbox-abc")
+        match = re.search(r"(?:Created|created)\s+issue:\s*(\S+)", result.stdout)
         if match:
             return match.group(1)
 
