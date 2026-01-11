@@ -1,0 +1,71 @@
+# Docker Compose for local development
+# Usage: docker-compose up -d
+
+services:
+  app:
+    build:
+      context: .
+      args:
+        SERVICE_VERSION: dev
+    ports:
+      - "8080:8080"
+    environment:
+      - LOG_LEVEL=debug
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME={{APP_NAME}}
+      - DB_USER={{APP_NAME}}
+      - DB_PASSWORD=secret
+      - DB_SSL_MODE=disable
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: {{APP_NAME}}
+      POSTGRES_USER: {{APP_NAME}}
+      POSTGRES_PASSWORD: secret
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U {{APP_NAME}}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Optional: Redis for caching/sessions
+  # redis:
+  #   image: redis:alpine
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - redis_data:/data
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "ping"]
+  #     interval: 5s
+  #     timeout: 5s
+  #     retries: 5
+
+  # Optional: Migrations runner
+  migrate:
+    image: golang:alpine
+    working_dir: /app
+    volumes:
+      - .:/app
+    command: >
+      sh -c "go install github.com/pressly/goose/v3/cmd/goose@latest &&
+             goose -dir migrations postgres 'postgres://{{APP_NAME}}:secret@postgres:5432/{{APP_NAME}}?sslmode=disable' up"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    profiles:
+      - tools
+
+volumes:
+  postgres_data:
+  # redis_data:

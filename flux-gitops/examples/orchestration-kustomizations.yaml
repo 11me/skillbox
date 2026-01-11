@@ -1,0 +1,97 @@
+# clusters/{env}/kustomization.yaml - Aggregator for all Flux Kustomizations
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - 00-crds.yaml
+  - 01-controllers.yaml
+  - 02-cluster-configs.yaml
+  - 03-services.yaml
+  - 99-apps.yaml
+---
+# clusters/{env}/00-crds.yaml - Vendored CRDs (applied first)
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: crds
+  namespace: flux-system
+spec:
+  interval: 1h
+  prune: false                      # CRITICAL: Never delete CRDs
+  path: ./infra/crds
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  wait: true                        # Wait for CRDs to be established
+---
+# clusters/{env}/01-controllers.yaml
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: controllers
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: crds
+  interval: 15m
+  path: ./infra/dev/cluster/controllers
+  prune: true
+  wait: true                        # Wait for pods ready
+  timeout: 10m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+---
+# clusters/{env}/02-cluster-configs.yaml
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cluster-configs
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: controllers             # ClusterIssuer needs cert-manager
+  interval: 15m
+  path: ./infra/dev/cluster/configs
+  prune: true
+  wait: true
+  timeout: 5m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+---
+# clusters/{env}/03-services.yaml
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: services
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: cluster-configs         # May need ClusterSecretStore
+  interval: 15m
+  path: ./infra/dev/services
+  prune: true
+  wait: true
+  timeout: 10m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+---
+# clusters/{env}/99-apps.yaml
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: apps
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: services
+    - name: cluster-configs
+  interval: 15m
+  path: ./apps/dev
+  prune: true
+  wait: true
+  timeout: 10m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system

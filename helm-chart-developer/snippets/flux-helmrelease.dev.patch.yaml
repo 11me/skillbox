@@ -1,0 +1,12 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: app-name
+spec:
+  targetNamespace: dev
+  valuesFrom:
+    - kind: ConfigMap
+      name: app-name-values
+  values:
+    image:
+      tag: dev-abc123 # {"$imagepolicy": "flux-system:app-name-dev:tag"}

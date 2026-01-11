@@ -1,0 +1,7 @@
+gitops/
+├── charts/app/              # Universal Helm chart
+├── apps/
+│   ├── base/                # Base HelmRelease
+│   ├── dev/                 # Dev overlay: values + patches + ExternalSecret
+│   └── prod/                # Prod overlay: values + patches + ExternalSecret
+└── infra/                   # external-secrets-operator, cert-manager, etc.

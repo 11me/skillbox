@@ -1,0 +1,19 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+
+# Local workflow state
+.beads/
+.serena/
+.gitattributes
+AGENTS.md
+@AGENTS.md

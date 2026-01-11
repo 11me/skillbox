@@ -1,0 +1,158 @@
+# golangci-lint v2 configuration
+# Docs: https://golangci-lint.run/usage/configuration/
+# Install: curl -sSfL https://golangci-lint.run/install.sh | sh -s -- -b $(go env GOPATH)/bin v2.7.1
+
+version: "2"
+
+run:
+  timeout: 5m
+  relative-path-mode: gomod
+  modules-download-mode: readonly
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+
+# Formatters (separate from linters in v2)
+formatters:
+  enable:
+    - gofumpt       # Stricter gofmt
+    - goimports     # Import ordering
+    # - gci         # Enable if you need import section grouping
+  exclusions:
+    generated: strict
+
+linters:
+  default: none   # No default linters (explicit enable only)
+
+  enable:
+    # Core correctness
+    - govet
+    - staticcheck
+    # typecheck is built-in in v2, cannot be enabled/disabled
+    - errcheck
+    - unused
+
+    # Bugs / resources / context
+    - bodyclose       # HTTP response body not closed
+    - sqlclosecheck   # SQL rows/stmt close
+    - noctx           # Context in HTTP requests
+    - contextcheck    # Context propagation
+    - containedctx    # Context in structs (anti-pattern)
+    - errorlint       # Error wrapping issues
+    - nilerr          # Returning nil instead of error
+
+    # Security / error style
+    - gosec           # Security issues
+    - err113          # Error wrapping (was goerr113 in v1)
+    - errname         # Error naming conventions
+
+    # Maintainability / perf hygiene
+    - unparam         # Unused parameters
+    - wastedassign    # Wasted assignments
+    - ineffassign     # Ineffective assignments
+
+    # AI-style quality
+    - dupword         # Duplicate words in comments
+    - misspell        # Spelling mistakes
+
+    # Anti-cheat (prevents //nolint abuse)
+    - nolintlint
+
+    # Comprehensive linter
+    - revive
+
+    # Style
+    - wsl             # Whitespace linter
+    - whitespace      # Trailing whitespace
+
+    # Testing quality
+    - tenv            # Detects using os.Setenv in tests
+    - thelper         # Detects missing t.Helper()
+    - tparallel       # Detects missing t.Parallel()
+
+  exclusions:
+    generated: strict
+    presets:
+      - std-error-handling
+      - common-false-positives
+
+    rules:
+      # Test files - relax rules
+      - path: "_test\\.go"
+        linters:
+          - err113
+          - gosec
+          - containedctx
+
+      # Main function - allow init patterns
+      - path: "(^|/)main\\.go$"
+        linters:
+          - revive
+
+      # Generated code
+      - path: "zz_generated"
+        linters:
+          - all
+
+  settings:
+    # Anti-cheat: require explanation for //nolint
+    nolintlint:
+      allow-unused: true
+      require-specific: true      # Must specify linter: //nolint:gosec
+      require-explanation: true   # Must explain: //nolint:gosec // reason
+
+    revive:
+      severity: error
+      enable-all-rules: true
+      confidence: 0.8
+      rules:
+        # Limits
+        - name: argument-limit
+          arguments: [4]
+        - name: function-result-limit
+          arguments: [3]
+        - name: function-length
+          arguments: [80, 0]
+        - name: line-length-limit
+          arguments: [150]
+        - name: cognitive-complexity
+          arguments: [50]
+        - name: cyclomatic
+          arguments: [50]
+
+        # Naming (ID not Id) + forbidden package names
+        - name: var-naming
+          arguments:
+            - ["ID"]  # AllowList - userID, orderID, etc.
+            - ["VM"]  # DenyList
+            - false   # skipPackageNameChecks
+            - ["common", "helpers", "utils", "shared", "misc", "base"]  # extraBadPackageNames
+
+        # Enforce 'any' over 'interface{}'
+        - name: use-any
+          disabled: false
+
+        # Security
+        - name: imports-blocklist
+          arguments:
+            - "crypto/md5"
+            - "crypto/sha1"
+
+        # Disabled - too strict
+        - name: add-constant
+          disabled: true
+        - name: file-header
+          disabled: true
+        - name: max-public-structs
+          disabled: true
+
+        # Disabled - performance issues
+        - name: context-keys-type
+          disabled: true
+        - name: time-equal
+          disabled: true
+        - name: time-naming
+          disabled: true
+        - name: modifies-value-receiver
+          disabled: true

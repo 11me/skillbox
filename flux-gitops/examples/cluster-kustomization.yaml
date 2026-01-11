@@ -1,0 +1,40 @@
+# Example: Flux Kustomization with dependencies
+# File: clusters/dev/99-apps-dev.yaml
+
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: apps-dev
+  namespace: flux-system
+spec:
+  # Dependencies - wait for these to be ready
+  dependsOn:
+    - name: ingress-nginx
+    - name: secrets-store
+
+  # Reconciliation interval
+  interval: 15m
+
+  # Timeout for apply operations
+  timeout: 10m
+
+  # Path to kustomization directory
+  path: ./apps/dev
+
+  # Enable pruning (delete removed resources)
+  prune: true
+
+  # Source reference
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+
+  # Wait for all resources to be ready
+  wait: true
+
+  # Health checks (optional, for specific resources)
+  healthChecks:
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: my-app
+      namespace: dev

@@ -1,0 +1,27 @@
+# Example: Environment-specific HelmRelease patch
+# File: apps/dev/my-app/patches.yaml
+
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: my-app
+spec:
+  # Override target namespace for this environment
+  targetNamespace: dev
+
+  # Environment-specific values (merged with valuesFrom)
+  values:
+    # Image with automation marker
+    image:
+      tag: dev-abc1234-12345678 # {"$imagepolicy": "flux-system:my-app-dev:tag"}
+
+    # Environment-specific replicas
+    replicaCount: 1
+
+    # Dev-specific resources
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        memory: 128Mi

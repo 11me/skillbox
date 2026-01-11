@@ -1,0 +1,36 @@
+# infra/crds/kustomization.yaml
+# Aggregator for all vendored CRDs
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - cert-manager
+  - external-secrets
+---
+# infra/crds/cert-manager/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - crds.yaml
+---
+# infra/crds/external-secrets/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - crds.yaml
+---
+# How to vendor CRDs:
+#
+# CRITICAL: Use Context7 to get CURRENT versions before vendoring!
+#   1. resolve-library-id: libraryName="{component}"
+#   2. get-library-docs: topic="installation"
+#   3. Extract version from docs
+#
+# cert-manager:
+# curl -sL https://github.com/cert-manager/cert-manager/releases/download/{VERSION}/cert-manager.crds.yaml \
+#   > infra/crds/cert-manager/crds.yaml
+#
+# external-secrets:
+# curl -sL https://raw.githubusercontent.com/external-secrets/external-secrets/{VERSION}/deploy/crds/bundle.yaml \
+#   > infra/crds/external-secrets/crds.yaml
+#
+# CRITICAL: Vendor CRDs instead of using nested Flux Kustomizations to avoid race conditions

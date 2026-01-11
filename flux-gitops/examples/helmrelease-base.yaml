@@ -1,0 +1,47 @@
+# Example: Base HelmRelease for application
+# File: apps/base/my-app/helm.yaml
+
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: my-app
+  namespace: flux-system
+spec:
+  # Reconciliation interval
+  interval: 30m
+
+  # Target namespace for deployed resources
+  targetNamespace: dev
+
+  # Chart reference (local chart in repo)
+  chart:
+    spec:
+      chart: ./charts/app
+      sourceRef:
+        kind: GitRepository
+        name: flux-system
+        namespace: flux-system
+      reconcileStrategy: Revision
+
+  # Installation options
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+
+  # Upgrade options
+  upgrade:
+    remediation:
+      retries: 3
+      remediateLastFailure: true
+    cleanupOnFail: true
+
+  # Rollback options
+  rollback:
+    cleanupOnFail: true
+
+  # Values from ConfigMap (created by Kustomize)
+  valuesFrom:
+    - kind: ConfigMap
+      name: my-app-values
+      valuesKey: values.yaml

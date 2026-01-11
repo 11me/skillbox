@@ -1,0 +1,66 @@
+# Example: Image automation for AWS ECR
+# File: apps/dev/image-automation.yaml
+
+---
+# Scan ECR for new tags
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImageRepository
+metadata:
+  name: my-app-dev
+  namespace: flux-system
+spec:
+  image: 123456789012.dkr.ecr.us-east-1.amazonaws.com/my-app
+  interval: 1m
+  provider: aws
+
+---
+# Select latest dev tag by run_id
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImagePolicy
+metadata:
+  name: my-app-dev
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: my-app-dev
+  filterTags:
+    # Pattern: dev-{git_sha}-{run_id}
+    pattern: '^dev-[0-9a-fA-F]{7,40}-(?P<run>[0-9]+)$'
+    extract: '$run'
+  policy:
+    numerical:
+      order: asc  # Higher number = newer
+
+---
+# Auto-commit new tag to patches.yaml
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImageUpdateAutomation
+metadata:
+  name: my-app-auto-dev
+  namespace: flux-system
+spec:
+  interval: 5m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  git:
+    checkout:
+      ref:
+        branch: main
+    commit:
+      author:
+        name: fluxbot
+        email: fluxbot@example.com
+      messageTemplate: |
+        chore: automated image update
+
+        Automation: {{ .AutomationObject }}
+
+        {{ range .Changed.Changes -}}
+        - {{ .OldValue }} -> {{ .NewValue }}
+        {{ end -}}
+    push:
+      branch: main
+  update:
+    strategy: Setters
+    path: ./apps/dev

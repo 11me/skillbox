@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: dev
+resources:
+  - ../../base/app-name
+  - secrets/app-name.external.yaml
+
+patches:
+  - path: patches.yaml
+
+configMapGenerator:
+  - name: app-name-values
+    files:
+      - values.yaml=values.yaml
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+configurations:
+  - kustomizeconfig.yaml

@@ -1,0 +1,82 @@
+# Example: Image automation for GitHub Container Registry
+# File: apps/dev/image-automation.yaml
+
+---
+# Scan GHCR for new tags (requires auth secret)
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImageRepository
+metadata:
+  name: my-app-dev
+  namespace: flux-system
+spec:
+  image: ghcr.io/my-org/my-app
+  interval: 1m
+  secretRef:
+    name: ghcr-auth  # ImagePullSecret with PAT
+
+---
+# Select latest dev tag by run_id
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImagePolicy
+metadata:
+  name: my-app-dev
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: my-app-dev
+  filterTags:
+    # Pattern: dev-{git_sha}-{run_id}
+    pattern: '^dev-[0-9a-fA-F]{7,40}-(?P<run>[0-9]+)$'
+    extract: '$run'
+  policy:
+    numerical:
+      order: asc
+
+---
+# Auto-commit new tag
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImageUpdateAutomation
+metadata:
+  name: my-app-auto-dev
+  namespace: flux-system
+spec:
+  interval: 5m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  git:
+    checkout:
+      ref:
+        branch: main
+    commit:
+      author:
+        name: fluxbot
+        email: fluxbot@example.com
+      messageTemplate: |
+        chore: automated image update
+
+        Automation: {{ .AutomationObject }}
+    push:
+      branch: main
+  update:
+    strategy: Setters
+    path: ./apps/dev
+
+---
+# Auth secret for GHCR (create via ExternalSecret or manually)
+# This is just a reference - actual secret should be in secrets/
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ghcr-auth
+  namespace: flux-system
+type: kubernetes.io/dockerconfigjson
+stringData:
+  .dockerconfigjson: |
+    {
+      "auths": {
+        "ghcr.io": {
+          "auth": "BASE64_ENCODED_USERNAME_PAT"
+        }
+      }
+    }
